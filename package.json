@@ -1,0 +1,29 @@
+{
+  "name": "pokeclicker-companion-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node start.js",
+    "build": "browserify scripts/main.js -o bundle.js",
+    "watch": "watchify scripts/main.js -o bundle.js",
+    "update": "git submodule update --init && git submodule update --remote && node update.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CypherX/pokeclicker-companion-test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CypherX/pokeclicker-companion-test/issues"
+  },
+  "homepage": "https://github.com/CypherX/pokeclicker-companion-test#readme",
+  "devDependencies": {
+    "browserify": "^17.0.0",
+    "five-server": "^0.1.9",
+    "watchify": "^4.0.0"
+  }
+}
