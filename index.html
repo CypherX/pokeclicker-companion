@@ -7,8 +7,8 @@
 
         <script src="./pokeclicker/docs/libs/jquery.min.js"></script>
         <script src="./pokeclicker/docs/libs/knockout-latest.js"></script>
-        <script src="./pokeclicker/docs/scripts/modules.min.js?v=0.10.11"></script>
-        <script src="./pokeclicker/docs/scripts/script.min.js?v=0.10.11"></script>
+        <script src="./pokeclicker/docs/scripts/modules.min.js?v=0.10.12"></script>
+        <script src="./pokeclicker/docs/scripts/script.min.js?v=0.10.12"></script>
         <script type="text/javascript" src="./scripts/bootstrap.min.js"></script>
 
         <style type="text/css">
@@ -49,8 +49,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer text-muted text-center pt-1 pb-1 small">
-                            <p class="mx-0 my-1">Data is from <knockout data-bind="text: `v${Companion.package.version}`"></knockout>. Selecting a save file from an earlier version may result in incorrect statistics.</p>
+                        <div class="card-footer text-muted text-center p-1 small">
+                            <p class="mx-0 my-1">Data is from <knockout data-bind="text: `v${Companion.package.version}`"></knockout>. Save files from other versions may result in incorrect statistics.</p>
                         </div>
                     </div>
                 </div>
@@ -58,12 +58,13 @@
 
             <div class="row justify-content-center">
                 <div class="col-12 col-lg-10 col-md-12 col-sm-12 col-xs-12">
-                    <div class="card mt-5 mb-5 mx-auto" id="saveInfoCard" data-bind="visible: true/*Companion.isSaveLoaded()*/">
+                    <div class="card mt-5 mb-5 mx-auto" id="saveInfoCard" data-bind="visible: Companion.isSaveLoaded()">
                         <div class="card-header p-0">
                             <ul class="nav nav-pills nav-justified" role="tablist" id="mainTabs">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="missing-pokemon-tab" data-bs-toggle="pill" data-bs-target="#missing-pokemon" type="button" role="tab" aria-controls="missing-pokemon" aria-selected="true">
+                                    <button class="nav-link active" id="missing-pokemon-tab" data-bs-toggle="pill" data-bs-target="#missing-pokemon" type="button" role="tab" aria-controls="missing-pokemon" aria-selected="true">
                                         Missing Pokémon
+                                        <span data-bind="text: Companion.getTotalMissingPokemonCount() > 0 ? `(${Companion.getTotalMissingPokemonCount().toLocaleString()})` : ''"></span>
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
@@ -72,7 +73,7 @@
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="dungeon-stats-tab" data-bs-toggle="pill" data-bs-target="#dungeon-stats" type="button" role="tab" aria-controls="dungeon-stats" aria-selected="false">
+                                    <button class="nav-link" id="dungeon-stats-tab" data-bs-toggle="pill" data-bs-target="#dungeon-stats" type="button" role="tab" aria-controls="dungeon-stats" aria-selected="false">
                                         Other Statistics
                                     </button>
                                 </li>
@@ -81,29 +82,42 @@
                         
                         <div class="card-body">
                             <div class="tab-content">
-                                <div class="tab-pane" id="missing-pokemon" role="tabpanel" aria-labelledby="missing-pokemon-tab">
-                                    <p class="d-none text-center text-warning fs-5 mb-0" id="missing-none">None! You've caught 'em all!</p>
-                                    <div id="missing-table-container">
-                                        <p class="text-center text-muted pb-3 d-none" id="requiredPokemonNotice" style="border-bottom: 1px solid #888;">
-                                            <small>
-                                                The below tables will show ALL forms for any missing Pokémon but you only need to capture one to fulfill the Pokédex requirement.<br />
-                                                The numbers displayed for each region do not include alternate forms.
-                                            </small>
-                                        </p>
-                                        <div id="placeholder-table" class="d-none">
-                                            <h5 class="card-title text-warning">Region</h5>
-                                            <table class="table table-bordered table-striped table-hover" style="font-size: 0.9rem;">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="text-center" style="width: 0;">#</th>
-                                                        <th>Name</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody></tbody>
-                                            </table>
-                                        </div>
-                                        <div id="missing-tables"></div>
+                                <div class="tab-pane active" id="missing-pokemon" role="tabpanel" aria-labelledby="missing-pokemon-tab">
+                                    <!-- ko with: Companion.getMissingPokemon() -->
+                                    <div data-bind="visible: !$data.length">
+                                        <p class="text-center text-warning fs-5 mb-0">None! You've caught 'em all!</p>
                                     </div>
+                                    <div data-bind="visible: $data.length">
+                                        <p class="text-center text-muted pb-3 small" style="border-bottom: 1px solid #888;" data-bind="visible: Companion.showRequiredOnly">
+                                            The below tables will show ALL forms for any missing Pokémon but you only need to capture one to fulfill the Pokédex requirement.<br />
+                                            The numbers displayed for each region do not include alternate forms.
+                                        </p>
+                                        <div data-bind="foreach: $data">
+                                            <div class="card border-0">
+                                                <div class="card-header px-2">
+                                                    <h5 class="region-name text-warning mb-0"
+                                                        data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`">Region</h5>
+                                                </div>
+                                                <div class="card-body p-0">
+                                                    <table class="table table-bordered table-striped table-hover" style="font-size: 0.9rem;">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="text-center" style="width: 0;">#</th>
+                                                                <th>Name</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody data-bind="foreach: $data.pokemon">
+                                                            <tr>
+                                                                <td class="text-center" data-bind="text: $data.id"></td>
+                                                                <td data-bind="text: $data.name"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /ko -->
                                 </div>
 
                                 <div class="tab-pane" id="pokemon-stats" role="tabpanel" aria-labelledby="pokemon-stats-tab">
@@ -118,7 +132,8 @@
                                                 <option value="none">No Filter</option>
                                                 <option value="not-shiny">Not Shiny</option>
                                                 <option value="not-resistant">Not Resistant</option>
-                                                <option value="not-resistant-evable">Not Resistant & Can Get EVs</option>
+                                                <option value="not-resistant-not-friend-safari">Not Resistant & Not Friend Safari</option>
+                                                <option value="not-resistant-friend-safari">Not Resistant & Friend Safari Only</option>
                                                 <option value="resistant">Resistant</option>
                                             </select>
                                         </div>
@@ -126,48 +141,50 @@
                                     <div class="ms-1 mb-2">
                                         <knockout class="small" data-bind="text: `Showing ${Companion.getPokemonStatsTableCount()} Pokémon`"></knockout>
                                     </div>
-                                    <table id="pokemonStatsTable" class="table table-bordered table-striped table-hover" style="font-size: 0.9rem;">
-                                        <thead>
-                                            <tr class="fw-normal">
-                                                <th class="text-center sortable" style="width: 0;">#</th>
-                                                <th class="sortable">Name</th>
-                                                <th class="text-center sortable" style="width: 5%;">Obtained</th>
-                                                <th class="text-center sortable" style="width: 5%;">Hatched</th>
-                                                <th class="text-center sortable" style="width: 5%; white-space: nowrap;">&#10024; Obtained</th>
-                                                <th class="text-center sortable" style="width: 5%; white-space: nowrap;">&#10024; Hatched</th>
-                                                <th class="text-center sortable" style="width: 5%;">Defeated</th>
-                                                <th class="text-center sortable" style="width: 5%;">EVs</th>
-                                                <th class="text-center sortable" style="width: 5%; white-space: nowrap;">EV Bonus</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody data-bind="foreach: Object.values(Companion.partyList()).sort((a, b) => a.id - b.id)">
-                                            <tr data-bind="hidden: Companion.hideFromPokemonStatsTable($data)()">
-                                                <td class="text-center" data-bind="text: $data.id"></td>
-                                                <td>
-                                                    <span data-bind="text: $data.name"></span>
-                                                    <!-- ko if: Companion.isEventDiscordClientPokemon($data.name) -->
-                                                    <sup class="text-muted" title="Event/Discord/Client">E</sup>
-                                                    <!-- /ko -->
-                                                    <span class="float-end">
-                                                        <img width="18px" data-bind="attr: { src: Companion.getPokeballImage($data) }" />
-                                                        <!-- ko if: $data.pokerus -->
-                                                        <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data) }" />
+                                    <div class="table-responsive">
+                                        <table id="pokemonStatsTable" class="table table-bordered table-striped table-hover" style="font-size: 0.9rem;">
+                                            <thead>
+                                                <tr class="fw-normal">
+                                                    <th class="text-center sortable" style="width: 0;">#</th>
+                                                    <th class="sortable">Name</th>
+                                                    <th class="text-center sortable" style="width: 5%;">Obtained</th>
+                                                    <th class="text-center sortable" style="width: 5%;">Hatched</th>
+                                                    <th class="text-center sortable" style="width: 5%; white-space: nowrap;">&#10024; Obtained</th>
+                                                    <th class="text-center sortable" style="width: 5%; white-space: nowrap;">&#10024; Hatched</th>
+                                                    <th class="text-center sortable" style="width: 5%;">Defeated</th>
+                                                    <th class="text-center sortable" style="width: 5%;">EVs</th>
+                                                    <th class="text-center sortable" style="width: 5%; white-space: nowrap;">EV Bonus</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody data-bind="foreach: Object.values(Companion.partyList()).sort((a, b) => a.id - b.id)">
+                                                <tr data-bind="hidden: Companion.hideFromPokemonStatsTable($data)()">
+                                                    <td class="text-center" data-bind="text: $data.id"></td>
+                                                    <td>
+                                                        <span data-bind="text: $data.name"></span>
+                                                        <!-- ko if: Companion.isEventDiscordClientPokemon($data.name) -->
+                                                        <sup class="text-muted" title="Event/Discord/Client">E</sup>
                                                         <!-- /ko -->
-                                                    </span>
-                                                </td>
-                                                <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.pokemonCaptured[$data.id] || 0).toLocaleString()"></td>
-                                                <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.pokemonHatched[$data.id] || 0).toLocaleString()"></td>
-                                                <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.shinyPokemonCaptured[$data.id] || 0).toLocaleString()"></td>
-                                                <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.shinyPokemonHatched[$data.id] || 0).toLocaleString()"></td>
-                                                <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.pokemonDefeated[$data.id] || 0).toLocaleString()"></td>
-                                                <td class="text-center" data-bind="text: $data.evs().toLocaleString()"></td>
-                                                <td class="text-center" data-bind="text: `x${$data.calculateEVAttackBonus().toLocaleString()}`"></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                                        <span class="float-end">
+                                                            <img width="18px" data-bind="attr: { src: Companion.getPokeballImage($data) }" />
+                                                            <!-- ko if: $data.pokerus -->
+                                                            <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data) }" />
+                                                            <!-- /ko -->
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.pokemonCaptured[$data.id] || 0).toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.pokemonHatched[$data.id] || 0).toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.shinyPokemonCaptured[$data.id] || 0).toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.shinyPokemonHatched[$data.id] || 0).toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.pokemonDefeated[$data.id] || 0).toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: $data.evs().toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: `x${$data.calculateEVAttackBonus().toLocaleString()}`"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
 
-                                <div class="tab-pane active" id="dungeon-stats" role="tabpanel" aria-labelledby="dungeon-stats-tab">
+                                <div class="tab-pane" id="dungeon-stats" role="tabpanel" aria-labelledby="dungeon-stats-tab">
                                     <ul class="nav nav-tabs" role="tablist">
                                         <li class="nav-item" role="presentation">
                                             <button class="nav-link active" id="dungeon-clears-tab" data-bs-toggle="pill" data-bs-target="#dungeon-clears" type="button" role="tab" aria-controls="dungeon-clears" aria-selected="true">
@@ -189,7 +206,7 @@
                                     <div class="card-body">
                                         <div class="tab-content">
                                             <div class="tab-pane active" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
-                                                <!-- ko foreach: Companion.getDungeonList() -->
+                                                <!-- ko foreach: Companion.getDungeonData() -->
                                                 <div class="card border-0" data-bind="hidden: Companion.hideOtherStatSection($data)">
                                                     <div class="card-header px-2">
                                                         <h5 class="region-name text-warning mb-0" data-bind="text: $data.name ?? GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></h5>
@@ -204,10 +221,10 @@
                                                             <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `dungeon-clears-collapse-${$index()}` }">
                                                                 <!-- ko foreach: Companion.arrayToWhatever($data.dungeons) -->
                                                                 <tr class="dungeon-clears-row">
-                                                                    <td class="align-middle" data-bind="text: $data[0]"></td>
-                                                                    <td class="text-center align-middle" data-bind="text: Companion.getDungeonClearCount($data[0]).toLocaleString()"></td>
-                                                                    <td class="align-middle" style="border-left-width: 3px;" data-bind="text: $data[1] ?? ''"></td>
-                                                                    <td class="text-center align-middle" data-bind="text: $data[1] ? Companion.getDungeonClearCount($data[1]).toLocaleString() : ''"></td>
+                                                                    <td class="align-middle" data-bind="text: $data[0].name"></td>
+                                                                    <td class="text-center align-middle" data-bind="text: $data[0].clears.toLocaleString()"></td>
+                                                                    <td class="align-middle" style="border-left-width: 3px;" data-bind="text: $data[1]?.name ?? ''"></td>
+                                                                    <td class="text-center align-middle" data-bind="text: $data[1] ? $data[1].clears.toLocaleString() : ''"></td>
                                                                 </tr>
                                                                 <!-- /ko -->
                                                             </tbody>
@@ -219,7 +236,7 @@
         
         
                                             <div class="tab-pane" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
-                                                <!-- ko foreach: Companion.getGymList() -->
+                                                <!-- ko foreach: Companion.getGymData() -->
                                                 <div class="card border-0" data-bind="hidden: Companion.hideOtherStatSection($data)">
                                                     <div class="card-header px-2">
                                                         <h5 class="region-name text-warning mb-0" data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></h5>
@@ -234,10 +251,10 @@
                                                             <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `gyms-clears-collapse-${$index()}` }">
                                                                 <!-- ko foreach: Companion.arrayToWhatever($data.gyms) -->
                                                                 <tr class="dungeon-clears-row">
-                                                                    <td class="align-middle" data-bind="text: GymList[$data[0]].displayName || $data[0]"></td>
-                                                                    <td class="text-center align-middle" data-bind="text: Companion.getGymClearCount($data[0]).toLocaleString()"></td>
-                                                                    <td class="align-middle" style="border-left-width: 3px;" data-bind="text: $data[1] ? GymList[$data[1]].displayName || $data[1] : ''"></td>
-                                                                    <td class="text-center align-middle" data-bind="text: $data[1] ? Companion.getGymClearCount($data[1]).toLocaleString() : ''"></td>
+                                                                    <td class="align-middle" data-bind="text: GymList[$data[0].name].displayName || $data[0].name"></td>
+                                                                    <td class="text-center align-middle" data-bind="text: $data[0].clears.toLocaleString()"></td>
+                                                                    <td class="align-middle" style="border-left-width: 3px;" data-bind="text: $data[1] ? GymList[$data[1].name].displayName || $data[1].name : ''"></td>
+                                                                    <td class="text-center align-middle" data-bind="text: $data[1] ? $data[1].clears.toLocaleString() : ''"></td>
                                                                 </tr>
                                                                 <!-- /ko -->
                                                             </tbody>
@@ -248,7 +265,7 @@
                                             </div>
 
                                             <div class="tab-pane" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
-                                                <!-- ko foreach: Companion.getRouteList() -->
+                                                <!-- ko foreach: Companion.getRouteData() -->
                                                 <div class="card border-0" data-bind="hidden: Companion.hideOtherStatSection($data)">
                                                     <div class="card-header px-2">
                                                         <h5 class="region-name text-warning mb-0" data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></h5>
@@ -264,9 +281,9 @@
                                                                 <!-- ko foreach: Companion.arrayToWhatever($data.routes) -->
                                                                 <tr class="dungeon-clears-row">
                                                                     <td class="align-middle" data-bind="text: $data[0].routeName"></td>
-                                                                    <td class="text-center align-middle" data-bind="text: Companion.getRouteDefeatCount($data[0].region, $data[0].number).toLocaleString()"></td>
+                                                                    <td class="text-center align-middle" data-bind="text: $data[0].defeats.toLocaleString()"></td>
                                                                     <td class="align-middle" style="border-left-width: 3px;" data-bind="text: $data[1] ? $data[1].routeName : ''"></td>
-                                                                    <td class="text-center align-middle" data-bind="text: $data[1] ? Companion.getRouteDefeatCount($data[1].region, $data[1].number).toLocaleString() : ''"></td>
+                                                                    <td class="text-center align-middle" data-bind="text: $data[1] ? $data[1].defeats.toLocaleString() : ''"></td>
                                                                 </tr>
                                                                 <!-- /ko -->
                                                             </tbody>

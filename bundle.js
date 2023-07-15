@@ -150,6 +150,112 @@ const isSaveLoaded = ko.pureComputed(() => {
     return saveData() !== undefined;
 });
 
+const getMissingPokemon = ko.pureComputed(() => {
+    if (!isSaveLoaded()) {
+        return [];
+    }
+
+    const caughtPokemon = partyList();
+    const missingPokemon = {
+        ...GameHelper.enumNumbers(GameConstants.Region)
+            .filter(r => r !== GameConstants.Region.none && r <= GameConstants.MAX_AVAILABLE_REGION)
+            .map(r => {
+                return {
+                    region: r,
+                    regionName: GameConstants.camelCaseToString(GameConstants.Region[r]),
+                    pokemon: []
+                };
+            })
+    };
+
+    missingPokemon[-2] = {
+        region: -2,
+        regionName: 'Event / Discord / Client',
+        pokemon: []
+    };
+
+    getObtainablePokemonList().forEach(p => {
+        if (caughtPokemon[p.id]) {
+            return;
+        }
+
+        const nativeRegion = getPokemonNativeRegion(p.name);
+        if (!showAllRegions() && nativeRegion > player.highestRegion()) {
+            return;
+        }
+
+        if (showRequiredOnly()) {
+            if (nativeRegion == -2) {
+                return;
+            }
+
+            //const gameRegion = PokemonHelper.calcNativeRegion(p.name);
+            const formCaught = saveData().save.party.caughtPokemon.some(c => Math.floor(c.id) == Math.floor(p.id));
+            if (formCaught) {
+                return;
+            }
+        }
+
+        missingPokemon[nativeRegion].pokemon.push(p);
+    });
+
+    return Object.values(missingPokemon).filter(r => r.pokemon.length);
+});
+
+const getMissingRegionPokemonCount = (region) => {
+    return ko.pureComputed(() => {
+        const data = getMissingPokemon().find(r => r.region == region);
+        if (!data) {
+            return 0;
+        }
+
+        return showRequiredOnly() ? (new Set(data.pokemon.map(p => Math.floor(p.id)))).size : data.pokemon.length;
+    });
+};
+
+const getTotalMissingPokemonCount = ko.pureComputed(() => {
+    return getMissingPokemon().reduce((count, r) => {
+        return count + getMissingRegionPokemonCount(r.region)();
+    }, 0);
+});
+
+const getPokemonNativeRegion = (pokemonName) => {
+    return Companion.data.pokemonRegionOverride[pokemonName] || PokemonHelper.calcNativeRegion(pokemonName);
+};
+
+const getObtainablePokemonList = () => {
+    const unobtainableList = Companion.data.UnobtainablePokemon.filter(p => typeof p === 'string');
+    const unobtainableListRegex = Companion.data.UnobtainablePokemon.filter(p => typeof p === 'object').map(p => new RegExp(p));
+
+    const pokemon = pokemonList.filter(p => {
+        if (p.id < 1) {
+            return false;
+        }
+
+        if (PokemonHelper.calcNativeRegion(p.name) > GameConstants.MAX_AVAILABLE_REGION) {
+            return false;
+        }
+
+        if (unobtainableList.includes(p.name) || unobtainableListRegex.some(r => r.test(p.name))) {
+            return false;
+        }
+
+        return true;
+    });
+
+    return pokemon;
+};
+
+const getObtainablePokemonListByRegion = ko.pureComputed(() => {
+    const data = {};
+    getObtainablePokemonList().forEach(p => {
+        const nativeRegion = getPokemonNativeRegion(p.name);
+        data[nativeRegion] = data[nativeRegion] || [];
+        data[nativeRegion].push(p.name);
+    });
+    return data;
+});
+
 const hideFromPokemonStatsTable = (partyPokemon) => {
     return ko.pureComputed(() => {
         const searchVal = pokemonStatTableSearch();
@@ -161,7 +267,10 @@ const hideFromPokemonStatsTable = (partyPokemon) => {
         }
 
         const filterVal = pokemonStatTableFilter();
+
         if (filterVal) {
+            const isResistant = partyPokemon.pokerus === GameConstants.Pokerus.Resistant;
+            const isFriendSafari = Companion.data.friendSafariPokemon.includes(partyPokemon.name);
             switch (filterVal) {
                 case 'not-shiny':
                     if (partyPokemon.shiny) {
@@ -169,15 +278,22 @@ const hideFromPokemonStatsTable = (partyPokemon) => {
                     }
                     break;
                 case 'not-resistant':
-                    if (partyPokemon.pokerus === GameConstants.Pokerus.Resistant) {
+                    if (isResistant) {
                         return true;
                     }
                     break;
-                case 'not-resistant-evable':
-
+                case 'not-resistant-not-friend-safari':
+                    if (isResistant || isFriendSafari) {
+                        return true;
+                    }
+                    break;
+                case 'not-resistant-friend-safari':
+                    if (isResistant || !isFriendSafari) {
+                        return true;
+                    }
                     break;
                 case 'resistant':
-                    if (partyPokemon.pokerus !== GameConstants.Pokerus.Resistant) {
+                    if (!isResistant) {
                         return true;
                     }
                     break;
@@ -204,7 +320,7 @@ const getPokerusImage = (partyPokemon) => {
     return `/pokeclicker/docs/assets/images/breeding/pokerus/${GameConstants.Pokerus[partyPokemon.pokerus]}.png`;
 };
 
-const getDungeonList = () => {
+const getDungeonData = ko.pureComputed(() => {
     const dungeonList = [];
     const dungeonOverrides = Companion.data.DungeonListOverride.map(d => d.dungeons).flat();
 
@@ -216,11 +332,19 @@ const getDungeonList = () => {
     });
 
     Companion.data.DungeonListOverride.forEach((rd) => dungeonList.push({...rd}));
+
+    dungeonList.forEach(d => {
+        d.dungeons = d.dungeons.map(dungeon => ({
+            name: dungeon,
+            clears: isSaveLoaded() ? getDungeonClearCount(dungeon) : 0
+        }));
+    });
+    
     return dungeonList.sort((a, b) => a.region - b.region);
-};
+});
 
 const getDungeonClearCount = (dungeon) => {
-    if (!saveData()) {
+    if (!isSaveLoaded()) {
         return 0;
     }
 
@@ -228,7 +352,7 @@ const getDungeonClearCount = (dungeon) => {
     return saveData().save.statistics.dungeonsCleared[dungeonIndex] || 0;
 };
 
-const getGymList = () => {
+const getGymData = ko.pureComputed(() => {
     const gymList = [];
 
     GameConstants.RegionGyms.forEach((gyms, region) => {
@@ -247,8 +371,16 @@ const getGymList = () => {
     });
 
     Companion.data.GymListOverride.forEach((g) => gymList.push({...g}));
+
+    gymList.forEach(g => {
+        g.gyms = g.gyms.map(gym => ({
+            name: gym,
+            clears: isSaveLoaded() ? getGymClearCount(gym) : 0
+        }));
+    });
+
     return gymList.sort((a, b) => a.region - b.region);
-};
+});
 
 const getGymClearCount = (gym) => {
     if (!saveData()) {
@@ -259,9 +391,9 @@ const getGymClearCount = (gym) => {
     return saveData().save.statistics.gymsDefeated[gymIndex] || 0;
 };
 
-const getRouteList = () => {
+const getRouteData = ko.pureComputed(() => {
     const routeList = [];
-    const overrides = Companion.data.RouteListOverride;
+    const routeOverrides = Companion.data.RouteListOverride;
 
     GameHelper.enumNumbers(GameConstants.Region).forEach(region => {
         if (region > GameConstants.MAX_AVAILABLE_REGION || region < 0) {
@@ -270,7 +402,7 @@ const getRouteList = () => {
 
         const regionRoutes = Routes.regionRoutes.filter(r => r.region == region);
         const routes = SubRegions.list[region].length == 1 ? regionRoutes
-            : regionRoutes.filter(r => !overrides.some(o => o.region === r.region && o.subRegion === r.subRegion));
+            : regionRoutes.filter(r => !routeOverrides.some(o => o.region === r.region && o.subRegion === r.subRegion));
 
         routeList.push({
             region: region,
@@ -279,18 +411,20 @@ const getRouteList = () => {
         });
     });
 
-    overrides.forEach((r) => routeList.push({...r}));
+    routeOverrides.forEach((r) => routeList.push({...r}));
 
     routeList.forEach(r => {
         const regionName = GameConstants.camelCaseToString(GameConstants.Region[r.region]);
         r.routes.forEach(route => {
             route.routeName = route.routeName.replace(regionName, '').trim();
+            route.defeats = isSaveLoaded() ? getRouteDefeatCount(route.region, route.number) : 0;
         });
     });
 
-    return routeList.sort((a, b) => (a.displayRegion || a.region) - (b.displayRegion || b.region)
+    return routeList.sort((a, b) =>
+        (a.displayRegion || a.region) - (b.displayRegion || b.region)
         || (a.displaySubRegion || a.subRegion) - (b.displaySubRegion || b.subRegion));
-};
+});
 
 const getRouteDefeatCount = (region, routeNumber) => {
     if (!saveData()) {
@@ -356,6 +490,11 @@ module.exports = {
 
     loadFile,
     isSaveLoaded,
+
+    getMissingPokemon,
+    getTotalMissingPokemonCount,
+    getMissingRegionPokemonCount,
+
     partyList,
     hideFromPokemonStatsTable,
     getPokemonStatsTableCount,
@@ -365,21 +504,51 @@ module.exports = {
     getPokeballImage,
     getPokerusImage,
 
-    getDungeonList,
-    getDungeonClearCount,
-    getGymList,
-    getGymClearCount,
-    getRouteList,
-    getRouteDefeatCount,
+    getDungeonData,
+    getGymData,
+    getRouteData,
     hideOtherStatSection,
 
     arrayToWhatever,
     //isTabActive,
 };
 
-
-
 },{}],3:[function(require,module,exports){
+const UnobtainablePokemon = [
+    'Mega Mewtwo X',
+    'Mega Mewtwo Y',
+    'Mega Medicham',
+    'Mega Altaria',
+    'Mega Banette',
+    'Arceus (Fire)',
+    'Arceus (Water)',
+    'Arceus (Electric)',
+    'Arceus (Grass)',
+    'Arceus (Ice)',
+    'Arceus (Fighting)',
+    'Arceus (Poison)',
+    'Arceus (Ground)',
+    'Arceus (Flying)',
+    'Arceus (Psychic)',
+    'Arceus (Bug)',
+    'Arceus (Rock)',
+    'Arceus (Ghost)',
+    'Arceus (Dragon)',
+    'Arceus (Dark)',
+    'Arceus (Steel)',
+    'Arceus (Fairy)',
+    'Eternamax Eternatus',
+    'Dugtrio (Punk)',
+    'Weepinbell (Fancy)',
+    'Gengar (Punk)',
+    'Onix (Rocker)',
+    'Tangela (Pom-pom)',
+    'Goldeen (Diva)',
+    'XD001',
+    'Furfrou (Heart)',
+    /Gigantamax .+/
+];
+
 const EventDiscordClientPokemon = [
     'Bulbasaur (Clone)',
     'Spooky Bulbasaur',
@@ -416,6 +585,37 @@ const EventDiscordClientPokemon = [
     'Rotom (Discord)',
     'Vivillon (Fancy)',
 ];
+
+const pokemonRegionOverride = {
+
+    // Magikarp
+    ...Object.fromEntries(
+        pokemonList.filter(p => Math.floor(p.id) == 129 && p.id > 129).map(p => [p.name, GameConstants.Region.alola])
+    ),
+    'Magikarp (Feebas)': GameConstants.Region.hoenn,
+
+    // Pikachu
+    ...Object.fromEntries(
+        pokemonList.filter(p => Math.floor(p.id) == 25 && p.id > 25).map(p => [p.name, GameConstants.Region.alola])
+    ),
+    'Pinkan Pikachu': GameConstants.Region.kanto,
+    'Detective Pikachu': GameConstants.Region.kanto,
+    'Pikachu (World Cap)': GameConstants.Region.galar,
+
+    // Mega and Primal
+    ...Object.fromEntries(
+        pokemonList.filter(p => p.name.startsWith('Mega ') || p.name.startsWith('Primal '))
+            .map(p => [p.name, GameConstants.Region.kalos])
+    ),
+
+    'Hoppip (Chimecho)': GameConstants.Region.hoenn,
+    'Meltan': GameConstants.Region.alola,
+    'Melmetal': GameConstants.Region.alola,
+    'Magearna (Original Color)': GameConstants.Region.galar,
+
+    // Event / Discord / Client
+    ...Object.fromEntries(EventDiscordClientPokemon.map(p => [p, -2]))
+}
 
 const DungeonListOverride = [
     {
@@ -507,11 +707,146 @@ const RouteListOverride = [
     }
 ];
 
+const friendSafariPokemon = [
+    'Ivysaur',
+    'Ivysaur (Clone)',
+    'Spooky Ivysaur',
+    'Ivysaur (Rose)',
+    'Venusaur',
+    'Venusaur (Clone)',
+    'Spooky Venusaur',
+    'Venusaur (Rose)',
+    'Charmeleon',
+    'Charmeleon (Clone)',
+    'Charizard',
+    'Charizard (Clone)',
+    'Wartortle',
+    'Wartortle (Clone)',
+    'Blastoise',
+    'Blastoise (Clone)',
+    'Pinkan Pidgeotto',
+    'Pikachu (Partner Cap)',
+    'Surfing Pikachu',
+    'Pinkan Pikachu',
+    'Alolan Muk',
+    'Magikarp Skelly',
+    'Magikarp Calico (White, Orange)',
+    'Magikarp Pink Dapples',
+    'Magikarp Grey Diamonds',
+    'Magikarp Purple Bubbles',
+    'Magikarp Purple Patches',
+    'Magikarp Brown Tiger',
+    'Magikarp Orange Forehead',
+    'Magikarp Black Mask',
+    'Magikarp Saucy Blue',
+    'Bayleef',
+    'Meganium',
+    'Quilava',
+    'Typhlosion',
+    'Croconaw',
+    'Feraligatr',
+    'Spiky-eared Pichu',
+    'Spooky Togepi',
+    'Surprise Togepi',
+    'Jumpluff',
+    'Forretress',
+    'Flowering Celebi',
+    'Grovyle',
+    'Sceptile',
+    'Combusken',
+    'Blaziken',
+    'Marshtomp',
+    'Swampert',
+    'Cradily',
+    'Meta Groudon',
+    'Grotle',
+    'Torterra',
+    'Monferno',
+    'Infernape',
+    'Prinplup',
+    'Empoleon',
+    'Staraptor',
+    'Cranidos',
+    'Rampardos',
+    'Shieldon',
+    'Bastiodon',
+    'Burmy (Sand)',
+    'Burmy (Trash)',
+    'Wormadam (Plant)',
+    'Wormadam (Sand)',
+    'Wormadam (Trash)',
+    'Mothim',
+    'Cherrim (Overcast)',
+    'Cherrim (Sunshine)',
+    'Handout Happiny',
+    'Elf Munchlax',
+    'Probopass',
+    'Rotom (Discord)',
+    'Giratina (Origin)',
+    'Phione',
+    'Servine',
+    'Serperior',
+    'Pignite',
+    'Emboar',
+    'Dewott',
+    'Samurott',
+    'Blitzle',
+    'Darmanitan',
+    'Cofagrigus',
+    'Archeops',
+    'Fraxure',
+    'Quilladin',
+    'Chesnaught',
+    'Braixen',
+    'Delphox',
+    'Frogadier',
+    'Greninja',
+    'Ash-Greninja',
+    'Floette (Eternal)',
+    'Gogoat',
+    'Aegislash (Blade)',
+    'Goodra',
+    'Dartrix',
+    'Decidueye',
+    'Torracat',
+    'Incineroar',
+    'Brionne',
+    'Primarina',
+    'Crabominable',
+    'Lycanroc (Dusk)',
+    'Magearna (Original Color)',
+    'Naganadel',
+    'Melmetal',
+    'Thwackey',
+    'Rillaboom',
+    'Raboot',
+    'Cinderace',
+    'Drizzile',
+    'Inteleon',
+    'Toxtricity (Amped)',
+    'Toxtricity (Low Key)',
+    'Cursola',
+    'Sirfetch\'d',
+    'Runerigus',
+    'Zacian (Crowned Sword)',
+    'Zamazenta (Crowned Shield)',
+    'Eternatus',
+    'Kubfu',
+    'Urshifu (Single Strike)',
+    'Urshifu (Rapid Strike)',
+];
+
 module.exports = {
+    UnobtainablePokemon,
     EventDiscordClientPokemon,
+
+    pokemonRegionOverride,
+
     DungeonListOverride,
     GymListOverride,
     RouteListOverride,
+
+    friendSafariPokemon,
 }
 },{}],4:[function(require,module,exports){
 player = new Player();
@@ -547,7 +882,9 @@ App.game = new Game(
   new BattleCafeSaveObject(),
   new DreamOrbController()
 );
-
+App.game.farming.initialize();
+App.game.breeding.initialize();
+QuestLineHelper.loadQuestLines();
 
 },{}],5:[function(require,module,exports){
 const package = require('../pokeclicker/package.json');

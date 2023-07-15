@@ -31,4 +31,6 @@ App.game = new Game(
   new BattleCafeSaveObject(),
   new DreamOrbController()
 );
-
+App.game.farming.initialize();
+App.game.breeding.initialize();
+QuestLineHelper.loadQuestLines();
