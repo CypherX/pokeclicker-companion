@@ -77,6 +77,11 @@
                                         Other Statistics
                                     </button>
                                 </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="forecasts-tab" data-bs-toggle="pill" data-bs-target="#forecasts" type="button" role="tab" aria-controls="forecasts" aria-selected="false">
+                                        Friend Safari
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                         
@@ -124,7 +129,7 @@
                                     <div class="d-flex flex-row mb-1">
                                         <div class="me-1">
                                             <input class="form-control" type="text" placeholder="Search for # or Name" id="pokemonStatTableSearch"
-                                                autocomplete="off" style="width: 300px;" data-bind="textInput: Companion.pokemonStatTableSearch">
+                                                autocomplete="off" style="width: 250px;" data-bind="textInput: Companion.pokemonStatTableSearch">
                                         </div>
                                         <div>
                                             <select class="form-select" id="pokemonStatTableFilter" style="width: 250px;" autocomplete="off"
@@ -156,7 +161,7 @@
                                                     <th class="text-center sortable" style="width: 5%; white-space: nowrap;">EV Bonus</th>
                                                 </tr>
                                             </thead>
-                                            <tbody data-bind="foreach: Object.values(Companion.partyList()).sort((a, b) => a.id - b.id)">
+                                            <tbody data-bind="foreach: Companion.getSortedPartyList()">
                                                 <tr data-bind="hidden: Companion.hideFromPokemonStatsTable($data)()">
                                                     <td class="text-center" data-bind="text: $data.id"></td>
                                                     <td>
@@ -171,11 +176,11 @@
                                                             <!-- /ko -->
                                                         </span>
                                                     </td>
-                                                    <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.pokemonCaptured[$data.id] || 0).toLocaleString()"></td>
-                                                    <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.pokemonHatched[$data.id] || 0).toLocaleString()"></td>
-                                                    <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.shinyPokemonCaptured[$data.id] || 0).toLocaleString()"></td>
-                                                    <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.shinyPokemonHatched[$data.id] || 0).toLocaleString()"></td>
-                                                    <td class="text-center" data-bind="text: (Companion.saveData().save.statistics.pokemonDefeated[$data.id] || 0).toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: $data.statistics.totalObtained.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: $data.statistics.totalHatched.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: $data.statistics.totalShinyObtained.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: $data.statistics.totalShinyHatched.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: $data.statistics.totalDefeated.toLocaleString()"></td>
                                                     <td class="text-center" data-bind="text: $data.evs().toLocaleString()"></td>
                                                     <td class="text-center" data-bind="text: `x${$data.calculateEVAttackBonus().toLocaleString()}`"></td>
                                                 </tr>
@@ -294,6 +299,30 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+
+                                <div class="tab-pane" id="forecasts" role="tabpanel" aria-labelledby="forecasts-tab">
+                                    <p class="text-center">
+                                        There are currently <span data-bind="text: Companion.data.friendSafariPokemon.length">0</span> Pokémon in the Friend Safari rotation.
+                                        The rotation takes <span data-bind="text: Math.ceil(Companion.data.friendSafariPokemon.length / 5)">0</span> days to complete.
+                                    </p>
+                                    <table class="table table-bordered table-striped table-hover table-sm" style="font-size: 0.9rem;">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center">Date</th>
+                                                <th class="text-center" colspan="5">Pokemon</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody data-bind="foreach: Companion.getFriendSafariForecast()">
+                                            <tr>
+                                                <td class="text-center" data-bind="text: $data.date.toLocaleDateString()"></td>
+                                                <!--<td data-bind="text: $data.pokemon.join(', ')"></td>-->
+                                                <!-- ko foreach: $data.pokemon -->
+                                                <td class="text-center" data-bind="text: $data"></td>
+                                                <!-- /ko -->
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>

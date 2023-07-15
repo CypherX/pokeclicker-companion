@@ -1,7 +1,7 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 module.exports={
   "name": "pokeclicker",
-  "version": "0.10.12",
+  "version": "0.10.13",
   "description": "PokéClicker repository",
   "main": "index.js",
   "scripts": {
@@ -117,9 +117,27 @@ const partyList = ko.pureComputed(() => {
     }
 
     const party = saveData().save.party.caughtPokemon;
+    const statistics = saveData().save.statistics;
+
     return party.reduce((_map, p) => {
+
+        /*
+         * See if not generating partyPokemon is significantly faster
+        */
+
+
+
         const partyPokemon = PokemonFactory.generatePartyPokemon(p.id);
         partyPokemon.fromJSON(p);
+
+        partyPokemon.statistics = {
+            totalObtained: statistics.pokemonCaptured[p.id] || 0,
+            totalHatched: statistics.pokemonHatched[p.id] || 0,
+            totalShinyObtained: statistics.shinyPokemonCaptured[p.id] || 0,
+            totalShinyHatched: statistics.shinyPokemonHatched[p.id] || 0,
+            totalDefeated: statistics.pokemonDefeated[p.id] || 0,
+        };
+
         _map[p.id] = partyPokemon;
         return _map;
     }, {});
@@ -148,6 +166,15 @@ fr.addEventListener('load', loadSaveData);
 
 const isSaveLoaded = ko.pureComputed(() => {
     return saveData() !== undefined;
+});
+
+const getSortedPartyList = ko.pureComputed(() => {
+    if (!saveData()) {
+        return [];
+    }
+
+    //const party = [...Object.values(partyList())];
+    return Object.values(partyList()).sort((a, b) => a.id - b.id);
 });
 
 const getMissingPokemon = ko.pureComputed(() => {
@@ -452,6 +479,35 @@ const hideOtherStatSection = (data) => {
     return false;
 };
 
+const getFriendSafariForecast = ko.pureComputed(() => {
+    if (!saveData()) {
+        return [];
+    }
+
+    const trainerId = saveData().player.trainerId || '000000';
+    SeededRand.seed(+trainerId);
+    const shuffledPokemon = new Array(5).fill(SeededRand.shuffleArray(Companion.data.friendSafariPokemon)).flat();
+
+    const batchCount = Math.ceil(shuffledPokemon.length / 5);
+    const date = new Date();
+    let startIndex = (Math.floor((date.getTime() - date.getTimezoneOffset() * 60 * 1000) / (24 * 60 * 60 * 1000)) % batchCount) * 5;
+
+    const data = [];
+    for (let i = 0; i < Math.ceil(Companion.data.friendSafariPokemon.length / 5); i++) {
+        data.push({
+            date: new Date(date),
+            pokemon: shuffledPokemon.slice(startIndex, startIndex + 5)
+        });
+        startIndex += 5;
+        if (startIndex >= shuffledPokemon.length) {
+            startIndex = 0;
+        }
+        date.setDate(date.getDate() + 1);
+    }
+
+    return data;
+});
+
 $(document).ready(() => {
     const container = document.getElementById('container');
     ko.applyBindings({}, container);
@@ -496,6 +552,8 @@ module.exports = {
     getMissingRegionPokemonCount,
 
     partyList,
+    getSortedPartyList,
+
     hideFromPokemonStatsTable,
     getPokemonStatsTableCount,
     pokemonStatTableSearch,
@@ -508,6 +566,8 @@ module.exports = {
     getGymData,
     getRouteData,
     hideOtherStatSection,
+
+    getFriendSafariForecast,
 
     arrayToWhatever,
     //isTabActive,
@@ -778,6 +838,7 @@ const friendSafariPokemon = [
     'Mothim',
     'Cherrim (Overcast)',
     'Cherrim (Sunshine)',
+    'Mismagius (Illusion)',
     'Handout Happiny',
     'Elf Munchlax',
     'Probopass',

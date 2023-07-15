@@ -262,6 +262,7 @@ const friendSafariPokemon = [
     'Mothim',
     'Cherrim (Overcast)',
     'Cherrim (Sunshine)',
+    'Mismagius (Illusion)',
     'Handout Happiny',
     'Elf Munchlax',
     'Probopass',
