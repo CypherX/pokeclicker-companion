@@ -700,7 +700,7 @@ const RouteListOverride = [
     },
     {
         region: 6,
-        subRegion: 1,
+        subRegion: 4,
         name: 'Magikarp Jump',
         routes: Routes.regionRoutes.filter(r => r.region == GameConstants.Region.alola
             && r.subRegion == GameConstants.AlolaSubRegions.MagikarpJump)
