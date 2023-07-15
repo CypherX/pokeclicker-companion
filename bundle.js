@@ -313,11 +313,11 @@ const isEventDiscordClientPokemon = (pokemonName) => {
 };
 
 const getPokeballImage = (partyPokemon) => {
-    return `/pokeclicker/docs/assets/images/pokeball/Pokeball${partyPokemon.shiny ? '-shiny' : ''}.svg`;
+    return `./pokeclicker/docs/assets/images/pokeball/Pokeball${partyPokemon.shiny ? '-shiny' : ''}.svg`;
 };
 
 const getPokerusImage = (partyPokemon) => {
-    return `/pokeclicker/docs/assets/images/breeding/pokerus/${GameConstants.Pokerus[partyPokemon.pokerus]}.png`;
+    return `./pokeclicker/docs/assets/images/breeding/pokerus/${GameConstants.Pokerus[partyPokemon.pokerus]}.png`;
 };
 
 const getDungeonData = ko.pureComputed(() => {
