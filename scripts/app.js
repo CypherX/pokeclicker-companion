@@ -29,9 +29,8 @@ const partyList = ko.pureComputed(() => {
 
 const pokemonStatTableSearch = ko.observable('');
 const pokemonStatTableFilter = ko.observable('none');
-
-//const pokemonStatTableSort = ko.observable('name');
-//const pokemonStatTableSortDir = ko.observable('desc');
+const pokemonStatTableSort = ko.observable('id');
+const pokemonStatTableSortDir = ko.observable(false);
 
 const loadFile = (file) => {
     fr.readAsText(file);
@@ -76,8 +75,9 @@ const getSortedPartyList = ko.pureComputed(() => {
         return [];
     }
 
-    //const party = [...Object.values(partyList())];
-    return Object.values(partyList()).sort((a, b) => a.id - b.id);
+    const sortOption = pokemonStatTableSort();
+    const sortDirection = pokemonStatTableSortDir();
+    return Object.values(partyList()).sort(compareBy(sortOption, sortDirection));
 });
 
 const getMissingPokemon = ko.pureComputed(() => {
@@ -224,6 +224,11 @@ const hideFromPokemonStatsTable = (partyPokemon) => {
                     break;
                 case 'resistant':
                     if (!isResistant) {
+                        return true;
+                    }
+                    break;
+                case 'infected':
+                    if (partyPokemon.pokerus != GameConstants.Pokerus.Infected) {
                         return true;
                     }
                     break;
@@ -444,6 +449,16 @@ $(document).ready(() => {
         activeTab(event.target.dataset.bsTarget.substring(1));
         console.log(event.target.dataset.bsTarget.substring(1));
     });*/
+
+    $('#pokemonStatsTable > thead th.sortable').click((e) => {
+        const sort = e.target.dataset.sort;
+        if (pokemonStatTableSort() == sort) {
+            pokemonStatTableSortDir(!pokemonStatTableSortDir());
+        } else {
+            pokemonStatTableSort(sort);
+            pokemonStatTableSortDir(true);
+        }
+    });
 });
 
 const arrayToWhatever = (array) => {
@@ -453,6 +468,51 @@ const arrayToWhatever = (array) => {
     }
     return newArray;
 };
+
+function compareBy(sortOption, direction) {
+    return function (a, b) {
+        let res, dir = direction ? -1 : 1;
+
+        const aValue = getSortValue(sortOption, a);
+        const bValue = getSortValue(sortOption, b);
+        
+        if (aValue == bValue) {
+            return a.id - b.id;
+        } else if (aValue < bValue) {
+            res = -1;
+        } else if (aValue > bValue) {
+            res = 1;
+        } else {
+            res = 0;
+        }
+
+        return res * dir;
+    }
+}
+
+function getSortValue(sortOption, partyPokemon) {
+    switch (sortOption) {
+        case 'name':
+            return partyPokemon.name;
+        case 'obtained':
+            return partyPokemon.statistics.totalObtained;
+        case 'hatched':
+            return partyPokemon.statistics.totalHatched;
+        case 'shiny-obtained':
+            return partyPokemon.statistics.totalShinyObtained;
+        case 'shiny-hatched':
+            return partyPokemon.statistics.totalShinyHatched;
+        case 'defeated':
+            return partyPokemon.statistics.totalDefeated;
+        case 'evs':
+            return partyPokemon.evs();
+        case 'ev-bonus':
+            return partyPokemon.calculateEVAttackBonus();
+        case 'id':
+        default:
+            return partyPokemon.id;
+    }
+}
 
 /*const activeTab = ko.observable('dungeon-stats');
 const isTabActive = (id) => {

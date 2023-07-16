@@ -140,25 +140,27 @@
                                                 <option value="not-resistant-not-friend-safari">Not Resistant & Not Friend Safari</option>
                                                 <option value="not-resistant-friend-safari">Not Resistant & Friend Safari Only</option>
                                                 <option value="resistant">Resistant</option>
+                                                <option value="infected">Infected</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="ms-1 mb-2">
                                         <knockout class="small" data-bind="text: `Showing ${Companion.getPokemonStatsTableCount()} Pokémon`"></knockout>
+                                        <span class="float-end small">* Click a column header to sort</span>
                                     </div>
                                     <div class="table-responsive">
                                         <table id="pokemonStatsTable" class="table table-bordered table-striped table-hover" style="font-size: 0.9rem;">
                                             <thead>
                                                 <tr class="fw-normal">
-                                                    <th class="text-center sortable" style="width: 0;">#</th>
-                                                    <th class="sortable">Name</th>
-                                                    <th class="text-center sortable" style="width: 5%;">Obtained</th>
-                                                    <th class="text-center sortable" style="width: 5%;">Hatched</th>
-                                                    <th class="text-center sortable" style="width: 5%; white-space: nowrap;">&#10024; Obtained</th>
-                                                    <th class="text-center sortable" style="width: 5%; white-space: nowrap;">&#10024; Hatched</th>
-                                                    <th class="text-center sortable" style="width: 5%;">Defeated</th>
-                                                    <th class="text-center sortable" style="width: 5%;">EVs</th>
-                                                    <th class="text-center sortable" style="width: 5%; white-space: nowrap;">EV Bonus</th>
+                                                    <th class="text-center sortable" data-sort="id" style="width: 0;">#</th>
+                                                    <th class="sortable" data-sort="name">Name</th>
+                                                    <th class="text-center sortable" data-sort="obtained" style="width: 5%;">Obtained</th>
+                                                    <th class="text-center sortable" data-sort="hatdched" style="width: 5%;">Hatched</th>
+                                                    <th class="text-center sortable" data-sort="shiny-obtained" style="width: 5%; white-space: nowrap;">&#10024; Obtained</th>
+                                                    <th class="text-center sortable" data-sort="shiny-hatched" style="width: 5%; white-space: nowrap;">&#10024; Hatched</th>
+                                                    <th class="text-center sortable" data-sort="defeated" style="width: 5%;">Defeated</th>
+                                                    <th class="text-center sortable" data-sort="evs" style="width: 5%;">EVs</th>
+                                                    <th class="text-center sortable" data-sort="ev-bonus" style="width: 5%; white-space: nowrap;">EV Bonus</th>
                                                 </tr>
                                             </thead>
                                             <tbody data-bind="foreach: Companion.getSortedPartyList()">
