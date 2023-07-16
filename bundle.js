@@ -163,7 +163,7 @@ const loadSaveData = () => {
             } else if (hour < 12) {
                 alert('Good morning, Bailey! Did you sleep well?');
             } else if (hour < 18) {
-                alert('Good afternoon, Bailey! We missing you. Enjoy your stay.');
+                alert('Good afternoon, Bailey! We missed you. Enjoy your stay.');
             } else if (hour < 22) {
                 alert('Good evening, Bailey. How was your day? ');
             } else {
