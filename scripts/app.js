@@ -223,12 +223,22 @@ const isEventDiscordClientPokemon = (pokemonName) => {
     return Companion.data.EventDiscordClientPokemon.includes(pokemonName);
 };
 
-const getPokeballImage = (partyPokemon) => {
-    return `./pokeclicker/docs/assets/images/pokeball/Pokeball${partyPokemon.shiny ? '-shiny' : ''}.svg`;
+const getCaughtPokeballImage = (pokemonName) => {
+    const partyPokemon = partyList()[PokemonHelper.getPokemonByName(pokemonName).id];
+    if (partyPokemon) {
+        return `./pokeclicker/docs/assets/images/pokeball/Pokeball${partyPokemon.shiny ? '-shiny' : ''}.svg`;
+    } else {
+        return '';
+    }
 };
 
-const getPokerusImage = (partyPokemon) => {
-    return `./pokeclicker/docs/assets/images/breeding/pokerus/${GameConstants.Pokerus[partyPokemon.pokerus]}.png`;
+const getPokerusImage = (pokemonName) => {
+    const partyPokemon = partyList()[PokemonHelper.getPokemonByName(pokemonName).id];
+    if (partyPokemon) {
+        return `./pokeclicker/docs/assets/images/breeding/pokerus/${GameConstants.Pokerus[partyPokemon.pokerus]}.png`;
+    } else {
+        return '';
+    }
 };
 
 const getDungeonData = ko.pureComputed(() => {
@@ -443,7 +453,7 @@ module.exports = {
     pokemonStatTableSearch,
     pokemonStatTableFilter,
     isEventDiscordClientPokemon,
-    getPokeballImage,
+    getCaughtPokeballImage,
     getPokerusImage,
 
     getDungeonData,

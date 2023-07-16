@@ -170,9 +170,9 @@
                                                         <sup class="text-muted" title="Event/Discord/Client">E</sup>
                                                         <!-- /ko -->
                                                         <span class="float-end">
-                                                            <img width="18px" data-bind="attr: { src: Companion.getPokeballImage($data) }" />
+                                                            <img width="18px" data-bind="attr: { src: Companion.getCaughtPokeballImage($data.name) }" />
                                                             <!-- ko if: $data.pokerus -->
-                                                            <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data) }" />
+                                                            <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data.name) }" />
                                                             <!-- /ko -->
                                                         </span>
                                                     </td>
@@ -315,10 +315,12 @@
                                         </thead>
                                         <tbody data-bind="foreach: Companion.getFriendSafariForecast()">
                                             <tr>
-                                                <td class="text-center" data-bind="text: $data.date.toLocaleDateString()"></td>
-                                                <!--<td data-bind="text: $data.pokemon.join(', ')"></td>-->
+                                                <td class="text-center align-middle" data-bind="text: $data.date.toLocaleDateString()"></td>
                                                 <!-- ko foreach: $data.pokemon -->
-                                                <td class="text-center" data-bind="text: $data"></td>
+                                                <td class="text-center align-middle">
+                                                    <div data-bind="text: $data"></div>
+                                                    <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data) }" />
+                                                </td>
                                                 <!-- /ko -->
                                             </tr>
                                         </tbody>
