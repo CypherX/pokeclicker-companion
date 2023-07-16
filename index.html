@@ -319,7 +319,9 @@
                                                 <!-- ko foreach: $data.pokemon -->
                                                 <td class="text-center align-middle">
                                                     <div data-bind="text: $data"></div>
+                                                    <!-- ko if: Companion.hasPokerus($data) -->
                                                     <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data) }" />
+                                                    <!-- /ko -->
                                                 </td>
                                                 <!-- /ko -->
                                             </tr>

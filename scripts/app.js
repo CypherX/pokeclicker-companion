@@ -223,6 +223,10 @@ const isEventDiscordClientPokemon = (pokemonName) => {
     return Companion.data.EventDiscordClientPokemon.includes(pokemonName);
 };
 
+const isPokemonCaught = (pokemonName) => {
+    return partyList()[PokemonHelper.getPokemonByName(pokemonName).id] != undefined;
+};
+
 const getCaughtPokeballImage = (pokemonName) => {
     const partyPokemon = partyList()[PokemonHelper.getPokemonByName(pokemonName).id];
     if (partyPokemon) {
@@ -230,6 +234,11 @@ const getCaughtPokeballImage = (pokemonName) => {
     } else {
         return '';
     }
+};
+
+const hasPokerus = (pokemonName) => {
+    const partyPokemon = partyList()[PokemonHelper.getPokemonByName(pokemonName).id];
+    return (partyPokemon?.pokerus ?? 0) > 0;
 };
 
 const getPokerusImage = (pokemonName) => {
@@ -453,7 +462,10 @@ module.exports = {
     pokemonStatTableSearch,
     pokemonStatTableFilter,
     isEventDiscordClientPokemon,
+
+    isPokemonCaught,
     getCaughtPokeballImage,
+    hasPokerus,
     getPokerusImage,
 
     getDungeonData,
