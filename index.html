@@ -114,7 +114,11 @@
                                                         <tbody data-bind="foreach: $data.pokemon">
                                                             <tr>
                                                                 <td class="text-center" data-bind="text: $data.id"></td>
-                                                                <td data-bind="text: $data.name"></td>
+                                                                <td>
+                                                                    <knockout data-bind="text: $data.name"></knockout>
+                                                                    <a class="float-end small" href="#" target="_blank"
+                                                                        data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pok%C3%A9mon/${$data.name}` }">wiki</a>
+                                                                </td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
