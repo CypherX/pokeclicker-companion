@@ -1,6 +1,6 @@
 const UnobtainablePokemon = [
-    'Mega Mewtwo X',
-    'Mega Mewtwo Y',
+    //'Mega Mewtwo X',
+    //'Mega Mewtwo Y',
     'Mega Medicham',
     'Mega Altaria',
     'Mega Banette',
@@ -49,6 +49,7 @@ const EventDiscordClientPokemon = [
     'Squirtle (Clone)',
     'Wartortle (Clone)',
     'Blastoise (Clone)',
+    'Pikachu (Clone)',
     'Red Spearow',
     'Flying Pikachu',
     'Surfing Pikachu',
@@ -82,6 +83,7 @@ const pokemonRegionOverride = {
     ...Object.fromEntries(
         pokemonList.filter(p => Math.floor(p.id) == 25 && p.id > 25).map(p => [p.name, GameConstants.Region.alola])
     ),
+    'Pikachu (Clone)': GameConstants.Region.kanto,
     'Pinkan Pikachu': GameConstants.Region.kanto,
     'Detective Pikachu': GameConstants.Region.kanto,
     'Pikachu (World Cap)': GameConstants.Region.galar,
