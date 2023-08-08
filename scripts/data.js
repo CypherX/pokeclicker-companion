@@ -322,6 +322,7 @@ const friendSafariPokemon = [
     'Kubfu',
     'Urshifu (Single Strike)',
     'Urshifu (Rapid Strike)',
+    'Hoopa (Unbound)',
 ];
 
 module.exports = {
