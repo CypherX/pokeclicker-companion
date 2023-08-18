@@ -134,10 +134,10 @@ const DungeonListOverride = [
             ...Object.values(TownList)
                 .filter(t => t.region == GameConstants.Region.hoenn
                     && t.subRegion == GameConstants.HoennSubRegions.Orre
-                    && t instanceof DungeonTown)
+                    && t instanceof DungeonTown
+                    && !t.requirements.some(req => req instanceof DevelopmentRequirement))
                 .map(t => t.name)
         ],
-        hidden: true
     },
 ];
 
@@ -150,8 +150,10 @@ const GymListOverride = [
     {
         region: 2.2,
         name: 'Orre',
-        gyms: [ ...GameConstants.OrreGyms ],
-        hidden: true
+        gyms: [
+            ...GameConstants.OrreGyms
+                .filter(gym => !GymList[gym].requirements.some((req) => req instanceof DevelopmentRequirement))
+        ],
     },
     {
         region: 6.1,
@@ -182,8 +184,7 @@ const RouteListOverride = [
         displaySubRegion: 2,
         name: 'Orre',
         routes: Routes.regionRoutes.filter(r => r.region == GameConstants.Region.hoenn
-            && r.subRegion == GameConstants.HoennSubRegions.Orre),
-        hidden: true
+            && r.subRegion == GameConstants.HoennSubRegions.Orre)
     },
     {
         region: 6,
@@ -233,7 +234,6 @@ const friendSafariPokemon = [
     'Croconaw',
     'Feraligatr',
     'Spiky-eared Pichu',
-    'Spooky Togepi',
     'Surprise Togepi',
     'Jumpluff',
     'Forretress',
@@ -294,6 +294,7 @@ const friendSafariPokemon = [
     'Gogoat',
     'Aegislash (Blade)',
     'Goodra',
+    'Hoopa (Unbound)',
     'Dartrix',
     'Decidueye',
     'Torracat',
@@ -322,8 +323,15 @@ const friendSafariPokemon = [
     'Kubfu',
     'Urshifu (Single Strike)',
     'Urshifu (Rapid Strike)',
-    'Hoopa (Unbound)',
 ];
+
+const shadowPokemon =
+    new Set(Object.values(TownList)
+        .filter(t => t.region == GameConstants.Region.hoenn
+            && t.subRegion == GameConstants.HoennSubRegions.Orre
+            && t instanceof DungeonTown
+            && !t.requirements.some(req => req instanceof DevelopmentRequirement))
+        .map(t => t.dungeon.allAvailableShadowPokemon()).flat());
 
 module.exports = {
     UnobtainablePokemon,
@@ -336,4 +344,5 @@ module.exports = {
     RouteListOverride,
 
     friendSafariPokemon,
+    shadowPokemon,
 }

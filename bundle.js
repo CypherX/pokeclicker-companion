@@ -1,7 +1,7 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 module.exports={
   "name": "pokeclicker",
-  "version": "0.10.13",
+  "version": "0.10.14",
   "description": "PokéClicker repository",
   "main": "index.js",
   "scripts": {
@@ -81,7 +81,7 @@ module.exports={
     "husky": "^4.3.8",
     "natives": "^1.1.6",
     "postcss-less": "^6.0.0",
-    "stylelint": "^15.4.0",
+    "stylelint": "^15.10.1",
     "stylelint-config-standard-less": "^1.0.0",
     "ts-loader": "^8.0.4",
     "ts-node": "^10.9.1",
@@ -310,6 +310,7 @@ const hideFromPokemonStatsTable = (partyPokemon) => {
         if (filterVal) {
             const isResistant = partyPokemon.pokerus === GameConstants.Pokerus.Resistant;
             const isFriendSafari = Companion.data.friendSafariPokemon.includes(partyPokemon.name);
+
             switch (filterVal) {
                 case 'not-shiny':
                     if (partyPokemon.shiny) {
@@ -341,6 +342,26 @@ const hideFromPokemonStatsTable = (partyPokemon) => {
                         return true;
                     }
                     break;
+                case 'missing-shadow':
+                    if (partyPokemon.shadow || !Companion.data.shadowPokemon.has(partyPokemon.name)) {
+                        return true;
+                    }
+                break;
+                case 'missing-purified':
+                    if (partyPokemon.shadow == GameConstants.ShadowStatus.Purified || !Companion.data.shadowPokemon.has(partyPokemon.name)) {
+                        return true;
+                    }
+                break;
+                case 'shadow':
+                    if (partyPokemon.shadow != GameConstants.ShadowStatus.Shadow) {
+                        return true;
+                    }
+                break;
+                case 'purified':
+                    if (partyPokemon.shadow != GameConstants.ShadowStatus.Purified) {
+                        return true;
+                    }
+                break;
             }
         }
 
@@ -381,6 +402,10 @@ const getPokerusImage = (pokemonName) => {
     } else {
         return '';
     }
+};
+
+const getShadowStatusImage = (shadowStatus) => {
+    return `./pokeclicker/docs/assets/images/status/${shadowStatus == 1 ? 'shadow' : 'purified'}.svg`;
 };
 
 const getDungeonData = ko.pureComputed(() => {
@@ -655,6 +680,7 @@ module.exports = {
     getCaughtPokeballImage,
     hasPokerus,
     getPokerusImage,
+    getShadowStatusImage,
 
     getDungeonData,
     getGymData,
@@ -669,8 +695,8 @@ module.exports = {
 
 },{}],3:[function(require,module,exports){
 const UnobtainablePokemon = [
-    'Mega Mewtwo X',
-    'Mega Mewtwo Y',
+    //'Mega Mewtwo X',
+    //'Mega Mewtwo Y',
     'Mega Medicham',
     'Mega Altaria',
     'Mega Banette',
@@ -719,6 +745,7 @@ const EventDiscordClientPokemon = [
     'Squirtle (Clone)',
     'Wartortle (Clone)',
     'Blastoise (Clone)',
+    'Pikachu (Clone)',
     'Red Spearow',
     'Flying Pikachu',
     'Surfing Pikachu',
@@ -752,6 +779,7 @@ const pokemonRegionOverride = {
     ...Object.fromEntries(
         pokemonList.filter(p => Math.floor(p.id) == 25 && p.id > 25).map(p => [p.name, GameConstants.Region.alola])
     ),
+    'Pikachu (Clone)': GameConstants.Region.kanto,
     'Pinkan Pikachu': GameConstants.Region.kanto,
     'Detective Pikachu': GameConstants.Region.kanto,
     'Pikachu (World Cap)': GameConstants.Region.galar,
@@ -802,10 +830,10 @@ const DungeonListOverride = [
             ...Object.values(TownList)
                 .filter(t => t.region == GameConstants.Region.hoenn
                     && t.subRegion == GameConstants.HoennSubRegions.Orre
-                    && t instanceof DungeonTown)
+                    && t instanceof DungeonTown
+                    && !t.requirements.some(req => req instanceof DevelopmentRequirement))
                 .map(t => t.name)
         ],
-        hidden: true
     },
 ];
 
@@ -818,8 +846,10 @@ const GymListOverride = [
     {
         region: 2.2,
         name: 'Orre',
-        gyms: [ ...GameConstants.OrreGyms ],
-        hidden: true
+        gyms: [
+            ...GameConstants.OrreGyms
+                .filter(gym => !GymList[gym].requirements.some((req) => req instanceof DevelopmentRequirement))
+        ],
     },
     {
         region: 6.1,
@@ -850,8 +880,7 @@ const RouteListOverride = [
         displaySubRegion: 2,
         name: 'Orre',
         routes: Routes.regionRoutes.filter(r => r.region == GameConstants.Region.hoenn
-            && r.subRegion == GameConstants.HoennSubRegions.Orre),
-        hidden: true
+            && r.subRegion == GameConstants.HoennSubRegions.Orre)
     },
     {
         region: 6,
@@ -901,7 +930,6 @@ const friendSafariPokemon = [
     'Croconaw',
     'Feraligatr',
     'Spiky-eared Pichu',
-    'Spooky Togepi',
     'Surprise Togepi',
     'Jumpluff',
     'Forretress',
@@ -962,6 +990,7 @@ const friendSafariPokemon = [
     'Gogoat',
     'Aegislash (Blade)',
     'Goodra',
+    'Hoopa (Unbound)',
     'Dartrix',
     'Decidueye',
     'Torracat',
@@ -992,6 +1021,14 @@ const friendSafariPokemon = [
     'Urshifu (Rapid Strike)',
 ];
 
+const shadowPokemon =
+    new Set(Object.values(TownList)
+        .filter(t => t.region == GameConstants.Region.hoenn
+            && t.subRegion == GameConstants.HoennSubRegions.Orre
+            && t instanceof DungeonTown
+            && !t.requirements.some(req => req instanceof DevelopmentRequirement))
+        .map(t => t.dungeon.allAvailableShadowPokemon()).flat());
+
 module.exports = {
     UnobtainablePokemon,
     EventDiscordClientPokemon,
@@ -1003,6 +1040,7 @@ module.exports = {
     RouteListOverride,
 
     friendSafariPokemon,
+    shadowPokemon,
 }
 },{}],4:[function(require,module,exports){
 player = new Player();
@@ -1043,7 +1081,7 @@ App.game.breeding.initialize();
 QuestLineHelper.loadQuestLines();
 
 },{}],5:[function(require,module,exports){
-const package = require('../pokeclicker/package.json');
+const package = require('../pokeclicker-dev/package.json');
 
 window.Companion = {
     package,
@@ -1052,4 +1090,4 @@ window.Companion = {
     data: require('./data'),
 }
 
-},{"../pokeclicker/package.json":1,"./app":2,"./data":3,"./game":4}]},{},[5]);
+},{"../pokeclicker-dev/package.json":1,"./app":2,"./data":3,"./game":4}]},{},[5]);

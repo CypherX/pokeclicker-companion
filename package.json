@@ -1,5 +1,5 @@
 {
-  "name": "pokeclicker-companion-test",
+  "name": "pokeclicker-companion",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,15 +12,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CypherX/pokeclicker-companion-test.git"
+    "url": "git+https://github.com/CypherX/pokeclicker-companion.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/CypherX/pokeclicker-companion-test/issues"
+    "url": "https://github.com/CypherX/pokeclicker-companion/issues"
   },
-  "homepage": "https://github.com/CypherX/pokeclicker-companion-test#readme",
+  "homepage": "https://github.com/CypherX/pokeclicker-companion#readme",
   "devDependencies": {
     "browserify": "^17.0.0",
     "five-server": "^0.1.9",

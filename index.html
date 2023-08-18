@@ -145,6 +145,10 @@
                                                 <option value="not-resistant-friend-safari">Not Resistant & Friend Safari Only</option>
                                                 <option value="resistant">Resistant</option>
                                                 <option value="infected">Infected</option>
+                                                <option value="missing-shadow">Missing Shadow</option>
+                                                <option value="missing-purified">Missing Purified</option>
+                                                <option value="shadow">Shadow</option>
+                                                <option value="purified">Purified</option>
                                             </select>
                                         </div>
                                     </div>
@@ -176,6 +180,9 @@
                                                         <sup class="text-muted" title="Event/Discord/Client">E</sup>
                                                         <!-- /ko -->
                                                         <span class="float-end">
+                                                            <!-- ko if: $data.shadow -->
+                                                            <img height="18px" data-bind="attr: { src: Companion.getShadowStatusImage($data.shadow) }" />
+                                                            <!-- /ko -->
                                                             <img width="18px" data-bind="attr: { src: Companion.getCaughtPokeballImage($data.name) }" />
                                                             <!-- ko if: $data.pokerus -->
                                                             <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data.name) }" />
