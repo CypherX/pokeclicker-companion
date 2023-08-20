@@ -1081,7 +1081,7 @@ App.game.breeding.initialize();
 QuestLineHelper.loadQuestLines();
 
 },{}],5:[function(require,module,exports){
-const package = require('../pokeclicker-dev/package.json');
+const package = require('../pokeclicker/package.json');
 
 window.Companion = {
     package,
@@ -1090,4 +1090,4 @@ window.Companion = {
     data: require('./data'),
 }
 
-},{"../pokeclicker-dev/package.json":1,"./app":2,"./data":3,"./game":4}]},{},[5]);
+},{"../pokeclicker/package.json":1,"./app":2,"./data":3,"./game":4}]},{},[5]);
