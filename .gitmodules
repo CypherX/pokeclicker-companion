@@ -2,3 +2,7 @@
 	path = pokeclicker
 	url = https://github.com/pokeclicker/pokeclicker.git
 	branch = master
+[submodule "pokeclicker-dev"]
+	path = pokeclicker-dev
+	url = https://github.com/pokeclicker/pokeclicker.git
+	branch = develop

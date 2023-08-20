@@ -1,6 +1,6 @@
 const UnobtainablePokemon = [
-    'Mega Mewtwo X',
-    'Mega Mewtwo Y',
+    //'Mega Mewtwo X',
+    //'Mega Mewtwo Y',
     'Mega Medicham',
     'Mega Altaria',
     'Mega Banette',
@@ -49,6 +49,7 @@ const EventDiscordClientPokemon = [
     'Squirtle (Clone)',
     'Wartortle (Clone)',
     'Blastoise (Clone)',
+    'Pikachu (Clone)',
     'Red Spearow',
     'Flying Pikachu',
     'Surfing Pikachu',
@@ -82,6 +83,7 @@ const pokemonRegionOverride = {
     ...Object.fromEntries(
         pokemonList.filter(p => Math.floor(p.id) == 25 && p.id > 25).map(p => [p.name, GameConstants.Region.alola])
     ),
+    'Pikachu (Clone)': GameConstants.Region.kanto,
     'Pinkan Pikachu': GameConstants.Region.kanto,
     'Detective Pikachu': GameConstants.Region.kanto,
     'Pikachu (World Cap)': GameConstants.Region.galar,
@@ -132,10 +134,10 @@ const DungeonListOverride = [
             ...Object.values(TownList)
                 .filter(t => t.region == GameConstants.Region.hoenn
                     && t.subRegion == GameConstants.HoennSubRegions.Orre
-                    && t instanceof DungeonTown)
+                    && t instanceof DungeonTown
+                    && !t.requirements.some(req => req instanceof DevelopmentRequirement))
                 .map(t => t.name)
         ],
-        hidden: true
     },
 ];
 
@@ -148,8 +150,10 @@ const GymListOverride = [
     {
         region: 2.2,
         name: 'Orre',
-        gyms: [ ...GameConstants.OrreGyms ],
-        hidden: true
+        gyms: [
+            ...GameConstants.OrreGyms
+                .filter(gym => !GymList[gym].requirements.some((req) => req instanceof DevelopmentRequirement))
+        ],
     },
     {
         region: 6.1,
@@ -180,8 +184,7 @@ const RouteListOverride = [
         displaySubRegion: 2,
         name: 'Orre',
         routes: Routes.regionRoutes.filter(r => r.region == GameConstants.Region.hoenn
-            && r.subRegion == GameConstants.HoennSubRegions.Orre),
-        hidden: true
+            && r.subRegion == GameConstants.HoennSubRegions.Orre)
     },
     {
         region: 6,
@@ -231,7 +234,6 @@ const friendSafariPokemon = [
     'Croconaw',
     'Feraligatr',
     'Spiky-eared Pichu',
-    'Spooky Togepi',
     'Surprise Togepi',
     'Jumpluff',
     'Forretress',
@@ -292,6 +294,7 @@ const friendSafariPokemon = [
     'Gogoat',
     'Aegislash (Blade)',
     'Goodra',
+    'Hoopa (Unbound)',
     'Dartrix',
     'Decidueye',
     'Torracat',
@@ -322,6 +325,14 @@ const friendSafariPokemon = [
     'Urshifu (Rapid Strike)',
 ];
 
+const shadowPokemon =
+    new Set(Object.values(TownList)
+        .filter(t => t.region == GameConstants.Region.hoenn
+            && t.subRegion == GameConstants.HoennSubRegions.Orre
+            && t instanceof DungeonTown
+            && !t.requirements.some(req => req instanceof DevelopmentRequirement))
+        .map(t => t.dungeon.allAvailableShadowPokemon()).flat());
+
 module.exports = {
     UnobtainablePokemon,
     EventDiscordClientPokemon,
@@ -333,4 +344,5 @@ module.exports = {
     RouteListOverride,
 
     friendSafariPokemon,
+    shadowPokemon,
 }

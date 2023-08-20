@@ -201,6 +201,7 @@ const hideFromPokemonStatsTable = (partyPokemon) => {
         if (filterVal) {
             const isResistant = partyPokemon.pokerus === GameConstants.Pokerus.Resistant;
             const isFriendSafari = Companion.data.friendSafariPokemon.includes(partyPokemon.name);
+
             switch (filterVal) {
                 case 'not-shiny':
                     if (partyPokemon.shiny) {
@@ -232,6 +233,26 @@ const hideFromPokemonStatsTable = (partyPokemon) => {
                         return true;
                     }
                     break;
+                case 'missing-shadow':
+                    if (partyPokemon.shadow || !Companion.data.shadowPokemon.has(partyPokemon.name)) {
+                        return true;
+                    }
+                break;
+                case 'missing-purified':
+                    if (partyPokemon.shadow == GameConstants.ShadowStatus.Purified || !Companion.data.shadowPokemon.has(partyPokemon.name)) {
+                        return true;
+                    }
+                break;
+                case 'shadow':
+                    if (partyPokemon.shadow != GameConstants.ShadowStatus.Shadow) {
+                        return true;
+                    }
+                break;
+                case 'purified':
+                    if (partyPokemon.shadow != GameConstants.ShadowStatus.Purified) {
+                        return true;
+                    }
+                break;
             }
         }
 
@@ -272,6 +293,10 @@ const getPokerusImage = (pokemonName) => {
     } else {
         return '';
     }
+};
+
+const getShadowStatusImage = (shadowStatus) => {
+    return `./pokeclicker/docs/assets/images/status/${shadowStatus == 1 ? 'shadow' : 'purified'}.svg`;
 };
 
 const getDungeonData = ko.pureComputed(() => {
@@ -546,6 +571,7 @@ module.exports = {
     getCaughtPokeballImage,
     hasPokerus,
     getPokerusImage,
+    getShadowStatusImage,
 
     getDungeonData,
     getGymData,
