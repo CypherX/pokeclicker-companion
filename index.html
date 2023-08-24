@@ -335,6 +335,9 @@
                                                     <!-- ko if: Companion.hasPokerus($data) -->
                                                     <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data) }" />
                                                     <!-- /ko -->
+                                                    <!-- ko ifnot: Companion.hasPokerus($data) -->
+                                                    <div class="small">-</div>
+                                                    <!-- /ko -->
                                                 </td>
                                                 <!-- /ko -->
                                             </tr>
