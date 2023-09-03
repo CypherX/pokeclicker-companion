@@ -148,7 +148,10 @@ const loadFile = (file) => {
 const loadSaveData = () => {
     const saveFile = JSON.parse(atob(fr.result));
     player.highestRegion(saveFile.player.highestRegion);
+    player.trainerId = saveFile.player.trainerId;
     App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
+
+    revealEnigmaHints(false);
 
     saveData(saveFile);
 
@@ -569,6 +572,25 @@ const getFriendSafariForecast = ko.pureComputed(() => {
     return data;
 });
 
+const revealEnigmaHints = ko.observable(false);
+const getEnigmaBerries = ko.pureComputed(() => {
+    const berries = ['North', 'West', 'East', 'South'].map(d => ({ direction: d, berry: undefined }));
+    if (!saveData()) {
+        return berries;
+    }
+
+    const enigmaMutationIdx = App.game.farming.mutations.findIndex(m => m.mutatedBerry == BerryType.Enigma);
+    const hintsSeen = saveData().save.farming.mutations[enigmaMutationIdx];
+
+    for (let i = 0; i < berries.length; i++) {
+        if (hintsSeen[i] || revealEnigmaHints()) {
+            berries[i].berry = BerryType[EnigmaMutation.getReqs()[i]];
+        }
+    }
+
+    return berries;
+});
+
 $(document).ready(() => {
     const container = document.getElementById('container');
     ko.applyBindings({}, container);
@@ -686,6 +708,9 @@ module.exports = {
     getGymData,
     getRouteData,
     hideOtherStatSection,
+
+    getEnigmaBerries,
+    revealEnigmaHints,
 
     getFriendSafariForecast,
 

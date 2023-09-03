@@ -219,6 +219,11 @@
                                                 Route Defeats
                                             </button>
                                         </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="enigma-berry-tab" data-bs-toggle="pill" data-bs-target="#enigma-berry" type="button" role="tab" aria-controls="enigma-berry" aria-selected="false">
+                                                Enigma Berry
+                                            </button>
+                                        </li>
                                     </ul>
 
                                     <div class="card-body">
@@ -308,6 +313,28 @@
                                                         </table>
                                                     </div>
                                                 </div>
+                                                <!-- /ko -->
+                                            </div>
+
+                                            <div class="tab-pane" id="enigma-berry" role="tabpanel" aria-labelledby="enigma-berry-tab">
+                                                <div class="container text-center">
+                                                    <div class="row" data-bind="foreach: Companion.getEnigmaBerries">
+                                                        <div class="col">
+                                                            <div class="h4 text-decoration-underline" data-bind="text: $data.direction"></div>
+                                                            <!-- ko if: $data.berry -->
+                                                            <img width="64px" data-bind="attr: { src: `./pokeclicker/docs/assets/images/items/berry/${$data.berry}.png` }"/>
+                                                            <!-- /ko -->
+                                                            <div data-bind="text: $data.berry || '???'"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- ko if: Companion.getEnigmaBerries().some(b => !b.berry) -->
+                                                <div class="text-center mt-5">
+                                                    <button type="button" class="btn btn-primary" data-bind="click: () => Companion.revealEnigmaHints(true)">Reveal Required Berries (may result in being judged)</button>
+                                                </div>
+                                                <!-- /ko -->
+                                                <!-- ko if: Companion.revealEnigmaHints -->
+                                                <div class="text-center text-muted mt-5">Impatient (or unlucky) little shit, ain't ye?</div>
                                                 <!-- /ko -->
                                             </div>
                                         </div>
