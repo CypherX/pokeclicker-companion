@@ -151,7 +151,7 @@ const loadSaveData = () => {
     player.trainerId = saveFile.player.trainerId;
     App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
 
-    revealEnigmaHints(false);
+    revealEnigmaHintsCounter(0);
 
     saveData(saveFile);
 
@@ -573,7 +573,22 @@ const getFriendSafariForecast = ko.pureComputed(() => {
     return data;
 });
 
-const revealEnigmaHints = ko.observable(false);
+// Enigma
+const revealEnigmaHints = ko.pureComputed(() => revealEnigmaHintsCounter() > 4);
+const revealEnigmaHintsCounter = ko.observable(0);
+const revealEnigmaHintsButtonText = ko.pureComputed(() => {
+    const textOptions = [
+        'Reveal Required Berries (may result in being judged)',
+        'Are you SURE!?',
+        'No, really, are you ABSOLUTELY SURE??',
+        'Just get the hints normally, man.',
+        'Fine. Have it your way >:(',
+    ];
+    return textOptions[revealEnigmaHintsCounter()] || '...';
+});
+const revealEnigmaHintsButtonClick = () => {
+    revealEnigmaHintsCounter(revealEnigmaHintsCounter() + 1);
+}
 const getEnigmaBerries = ko.pureComputed(() => {
     const berries = ['North', 'West', 'East', 'South'].map(d => ({ direction: d, berry: undefined }));
     if (!saveData()) {
@@ -591,6 +606,7 @@ const getEnigmaBerries = ko.pureComputed(() => {
 
     return berries;
 });
+// Enigma - End
 
 $(document).ready(() => {
     const container = document.getElementById('container');
@@ -712,6 +728,8 @@ module.exports = {
 
     getEnigmaBerries,
     revealEnigmaHints,
+    revealEnigmaHintsButtonText,
+    revealEnigmaHintsButtonClick,
 
     getFriendSafariForecast,
 
