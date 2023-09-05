@@ -427,8 +427,9 @@ const getDungeonData = ko.pureComputed(() => {
     dungeonList.forEach(d => {
         d.dungeons = d.dungeons.map(dungeon => ({
             name: dungeon,
-            clears: isSaveLoaded() ? getDungeonClearCount(dungeon) : 0
-        }));
+            clears: isSaveLoaded() ? getDungeonClearCount(dungeon) : 0,
+            hide: TownList[dungeon].requirements.some(req => req instanceof DevelopmentRequirement),
+        })).filter(d => !d.hide);
     });
     
     return dungeonList.sort((a, b) => a.region - b.region);
@@ -720,8 +721,6 @@ module.exports = {
 
 },{}],3:[function(require,module,exports){
 const UnobtainablePokemon = [
-    //'Mega Mewtwo X',
-    //'Mega Mewtwo Y',
     'Mega Medicham',
     'Mega Altaria',
     'Mega Banette',
@@ -855,8 +854,7 @@ const DungeonListOverride = [
             ...Object.values(TownList)
                 .filter(t => t.region == GameConstants.Region.hoenn
                     && t.subRegion == GameConstants.HoennSubRegions.Orre
-                    && t instanceof DungeonTown
-                    && !t.requirements.some(req => req instanceof DevelopmentRequirement))
+                    && t instanceof DungeonTown)
                 .map(t => t.name)
         ],
     },

@@ -1,6 +1,4 @@
 const UnobtainablePokemon = [
-    //'Mega Mewtwo X',
-    //'Mega Mewtwo Y',
     'Mega Medicham',
     'Mega Altaria',
     'Mega Banette',
@@ -134,8 +132,7 @@ const DungeonListOverride = [
             ...Object.values(TownList)
                 .filter(t => t.region == GameConstants.Region.hoenn
                     && t.subRegion == GameConstants.HoennSubRegions.Orre
-                    && t instanceof DungeonTown
-                    && !t.requirements.some(req => req instanceof DevelopmentRequirement))
+                    && t instanceof DungeonTown)
                 .map(t => t.name)
         ],
     },
