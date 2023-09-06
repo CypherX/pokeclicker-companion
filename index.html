@@ -339,6 +339,9 @@
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <!-- ko if: !Companion.revealEnigmaHints() && Companion.getEnigmaBerries().every(b => b.berry) -->
+                                                    <div class="text-center text-success mt-5">Impressive. You got all the hints on your own 👏. You're pretty neat.</div>
+                                                    <!-- /ko -->
                                                     <!-- ko if: Companion.getEnigmaBerries().some(b => !b.berry) -->
                                                     <div class="text-center mt-5">
                                                         <button type="button" class="btn btn-primary" data-bind="text: Companion.revealEnigmaHintsButtonText, click: () => Companion.revealEnigmaHintsButtonClick()"></button>

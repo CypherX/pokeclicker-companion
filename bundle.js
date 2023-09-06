@@ -818,24 +818,20 @@ module.exports = {
     revealEnigmaHintsButtonText,
     revealEnigmaHintsButtonClick,
 
-    getFriendSafariForecast,
-
-    arrayToWhatever,
-
     generateForecasts,
-    //weatherForecastRegion,
-
+    defaultToForecastsTab,
     unownForecast,
     weatherForecast,
     boostedRoutes,
-
+    getFriendSafariForecast,
     getNextWeatherDate,
-    defaultToForecastsTab,
 
     formatDate,
     formatDateTime,
     formatTime24Hours,
     dateAddHours,
+
+    arrayToWhatever,
 };
 
 },{}],3:[function(require,module,exports){
