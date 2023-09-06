@@ -476,14 +476,22 @@
                                                                 <!-- /ko -->
                                                             </tr>
                                                         </thead>
-                                                        <tbody data-bind="foreach: Companion.weatherForecast.slice(0, 18)">
+                                                        <tbody data-bind="foreach: Object.values(Companion.weatherForecast.slice(0, 18).reduce((map, wf) => {
+                                                            map[wf.startDate.getDate()] = map[wf.startDate.getDate()] || [];
+                                                            map[wf.startDate.getDate()].push(wf);
+                                                            return map;
+                                                        }, {}))">
+                                                            <!-- ko foreach: $data -->
                                                             <tr>
-                                                                <td class="text-center" data-bind="text: Companion.formatDate($data.startDate)"></td>
+                                                                <!-- ko if: $index() == 0 -->
+                                                                <td class="text-center align-middle" data-bind="text: Companion.formatDate($data.startDate), attr: { rowspan: $parent.length }"></td>
+                                                                <!-- /ko -->
                                                                 <td class="text-center text-nowrap" data-bind="text: `${Companion.formatTime24Hours($data.startDate)} - ${Companion.formatTime24Hours(Companion.dateAddHours($data.startDate, Weather.period))}`"></td>
                                                                 <!-- ko foreach: Companion.data.validRegions -->
                                                                 <td class="text-center text-dark" data-bind="text: WeatherType[$parent.regionalWeather[$data]], style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
                                                                 <!-- /ko -->
                                                             </tr>
+                                                            <!-- /ko -->
                                                         </tbody>
                                                     </table>
                                                 </div>
