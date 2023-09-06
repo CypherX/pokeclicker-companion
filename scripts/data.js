@@ -330,6 +330,14 @@ const shadowPokemon =
             && !t.requirements.some(req => req instanceof DevelopmentRequirement))
         .map(t => t.dungeon.allAvailableShadowPokemon()).flat());
 
+const validRegions = GameHelper.enumNumbers(GameConstants.Region).filter(region => region > GameConstants.Region.none && region <= GameConstants.MAX_AVAILABLE_REGION);
+const validRegionNames = validRegions.map(region => GameConstants.camelCaseToString(GameConstants.Region[region]));
+const roamerGroups =
+    RoamingPokemonList.roamerGroups.map((rg, ri) => rg.map((sr, si) => ({ name: sr.name, region: ri, subRegionGroup: si })))
+        .flat().filter((rg) => rg.region <= GameConstants.MAX_AVAILABLE_REGION);
+const unownDungeonList = ['Ruins of Alph', 'Tanoby Ruins', 'Solaceon Ruins'];
+const unownList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!?'.split('');
+
 module.exports = {
     UnobtainablePokemon,
     EventDiscordClientPokemon,
@@ -342,4 +350,10 @@ module.exports = {
 
     friendSafariPokemon,
     shadowPokemon,
+
+    validRegions,
+    validRegionNames,
+    roamerGroups,
+    unownDungeonList,
+    unownList,
 }
