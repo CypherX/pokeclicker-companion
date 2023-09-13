@@ -241,7 +241,7 @@
                                             <div class="tab-content">
                                                 <div class="tab-pane active" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
                                                     <!-- ko foreach: Companion.getDungeonData() -->
-                                                    <div class="card border-0" data-bind="hidden: Companion.hideOtherStatSection($data)">
+                                                    <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
                                                         <div class="card-header px-2">
                                                             <h5 class="region-name text-warning mb-0" data-bind="text: $data.name ?? GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></h5>
                                                             <div class="position-absolute" style="top: 4px; right: 0;">
@@ -250,25 +250,41 @@
                                                                     data-bind="attr: { 'data-bs-target': `#dungeon-clears-collapse-${$index()}` }">[ Collapse ]</button>
                                                             </div>
                                                         </div>
-                                                        <div class="card-body p-0">
-                                                            <table class="table table-bordered table-striped table-hover table-sm">
-                                                                <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `dungeon-clears-collapse-${$index()}` }">
-                                                                    <!-- ko foreach: Companion.arrayToWhatever($data.dungeons) -->
-                                                                    <tr class="dungeon-clears-row">
-                                                                        <td class="align-middle" data-bind="text: $data[0].name"></td>
-                                                                        <td class="text-center align-middle" data-bind="text: $data[0].clears.toLocaleString()"></td>
-                                                                        <td class="align-middle" style="border-left-width: 3px;" data-bind="text: $data[1]?.name ?? ''"></td>
-                                                                        <td class="text-center align-middle" data-bind="text: $data[1] ? $data[1].clears.toLocaleString() : ''"></td>
-                                                                    </tr>
-                                                                    <!-- /ko -->
-                                                                </tbody>
-                                                            </table>
+                                                        <div class="card-body p-0 collapse show" style="transition: none;" data-bind="attr: { id: `dungeon-clears-collapse-${$index()}` }">
+                                                            <div class="table-responsive">
+                                                                <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th></th>
+                                                                            <th class="text-center w-auto">Total Clears</th>
+                                                                            <th class="text-center w-auto">Cost</th>
+                                                                            <th class="text-center w-auto">500 Clears Cost</th>
+                                                                            <th class="text-center w-auto">Remaining Cost</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <!-- ko foreach: $data.dungeons -->
+                                                                        <tr class="dungeon-clears-row">
+                                                                            <td class="align-middle" data-bind="text: $data.name"></td>
+                                                                            <td class="text-center align-middle w-auto" data-bind="text: $data.clears.toLocaleString()"></td>
+                                                                            <td class="text-center align-middle w-auto" data-bind="text: $data.cost.toLocaleString()"></td>
+                                                                            <td class="text-center align-middle w-auto" data-bind="text: ($data.cost * 500).toLocaleString()"></td>
+                                                                            <td class="text-center align-middle w-auto" data-bind="text: $data.remaining.toLocaleString()"></td>
+                                                                        </tr>
+                                                                        <!-- /ko -->
+                                                                        <tr class="table-secondary">
+                                                                            <td colspan="3"></td>
+                                                                            <td class="text-center" data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.cost, 0) * 500).toLocaleString()"></td>
+                                                                            <td class="text-center" data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.remaining, 0)).toLocaleString()"></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <!-- /ko -->
                                                 </div>
-            
-            
+
                                                 <div class="tab-pane" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
                                                     <!-- ko foreach: Companion.getGymData() -->
                                                     <div class="card border-0" data-bind="hidden: Companion.hideOtherStatSection($data)">

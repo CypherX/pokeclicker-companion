@@ -303,27 +303,33 @@ const getShadowStatusImage = (shadowStatus) => {
 };
 
 const getDungeonData = ko.pureComputed(() => {
-    const dungeonList = [];
+    const dungeonData = [];
     const dungeonOverrides = Companion.data.DungeonListOverride.map(d => d.dungeons).flat();
 
     GameConstants.RegionDungeons.forEach((rd, idx) => {
-        dungeonList.push({
+        dungeonData.push({
             region: idx,
             dungeons: rd.filter(d => !dungeonOverrides.includes(d))
         });
     });
 
-    Companion.data.DungeonListOverride.forEach((rd) => dungeonList.push({...rd}));
+    Companion.data.DungeonListOverride.forEach((rd) => dungeonData.push({...rd}));
 
-    dungeonList.forEach(d => {
-        d.dungeons = d.dungeons.map(dungeon => ({
-            name: dungeon,
-            clears: isSaveLoaded() ? getDungeonClearCount(dungeon) : 0,
-            hide: TownList[dungeon].requirements.some(req => req instanceof DevelopmentRequirement),
-        })).filter(d => !d.hide);
+    dungeonData.forEach(d => {
+        d.dungeons = d.dungeons.map(dungeon => {
+            const clears = isSaveLoaded() ? getDungeonClearCount(dungeon) : 0;
+            const cost = dungeonList[dungeon].tokenCost;
+            return {
+                name: dungeon,
+                clears: clears,
+                cost: cost,
+                remaining: Math.max((cost * 500) - (cost * clears), 0),
+                hide: TownList[dungeon].requirements.some(req => req instanceof DevelopmentRequirement),
+            };
+        }).filter(d => !d.hide);
     });
     
-    return dungeonList.sort((a, b) => a.region - b.region);
+    return dungeonData.sort((a, b) => a.region - b.region);
 });
 
 const getDungeonClearCount = (dungeon) => {
@@ -525,6 +531,22 @@ const arrayToWhatever = (array) => {
     return newArray;
 };
 
+const splitArrayAlternating = (array, n = 2) => {
+    const newArray = Array.from({ length: n }, _ => []);
+    for (let i = 0; i < array.length; i++) {
+        newArray[i % n].push(array[i]);
+    }
+
+    return newArray;
+};
+
+const splitArrayChunked = (array, n = 2) => {
+    const remainder = array.length % n;
+    const size = Math.floor(array.length / n);
+    let j = 0;
+    return Array.from({ length: n }, (_, i) => array.slice(j, j += size + (i < remainder)));
+};
+
 function compareBy(sortOption, direction) {
     return function (a, b) {
         let res, dir = direction ? -1 : 1;
@@ -636,4 +658,6 @@ module.exports = {
     dateAddHours,
 
     arrayToWhatever,
+    splitArrayAlternating,
+    splitArrayChunked,
 };
