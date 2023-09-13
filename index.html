@@ -240,6 +240,32 @@
                                         <div class="card-body">
                                             <div class="tab-content">
                                                 <div class="tab-pane active" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
+                                                    <div class="card border-0 mb-3">
+                                                        <div class="card-header px-2">
+                                                            <h5 class="region-name text-warning mb-0">Totals</h5>
+                                                        </div>
+                                                        <div class="card-body p-0 collapse show" style="transition: none;">
+                                                            <div class="table-responsive">
+                                                                <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="" style="width: 40%;">Dungeon Clears</td>
+                                                                            <td class="text-center align-middle" data-bind="text: Companion.totalDungeonClears().toLocaleString()"></td>
+                                                                            <td class="" style="width: 40%; border-left-width: 3px;">Dungeon Tokens Spent</td>
+                                                                            <td class="text-center align-middle" data-bind="text: Companion.totalDungeonTokensSpent().toLocaleString()"></td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td class="" style="width: 40%;">DT Required For All 500 Clears</td>
+                                                                            <td class="text-center align-middle" data-bind="text: Companion.totalDungeonCost500Clears().toLocaleString()"></td>
+                                                                            <td class="" style="width: 40%; border-left-width: 3px;">Remaining DT Required For All 500 Clears</td>
+                                                                            <td class="text-center align-middle" data-bind="text: Companion.remainingDungeonCost500Clears().toLocaleString()"></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
                                                     <!-- ko foreach: Companion.getDungeonData() -->
                                                     <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
                                                         <div class="card-header px-2">

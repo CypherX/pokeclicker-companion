@@ -329,7 +329,7 @@ const getDungeonData = ko.pureComputed(() => {
         }).filter(d => !d.hide);
     });
     
-    return dungeonData.sort((a, b) => a.region - b.region);
+    return dungeonData.filter(d => d.region <= GameConstants.MAX_AVAILABLE_REGION).sort((a, b) => a.region - b.region);
 });
 
 const getDungeonClearCount = (dungeon) => {
@@ -340,6 +340,22 @@ const getDungeonClearCount = (dungeon) => {
     const dungeonIndex = GameConstants.getDungeonIndex(dungeon);
     return saveData().save.statistics.dungeonsCleared[dungeonIndex] || 0;
 };
+
+const totalDungeonClears = ko.pureComputed(() => {
+    return getDungeonData().flatMap(d => d.dungeons).reduce((sum, dungeon) => sum + dungeon.clears, 0);
+});
+
+const totalDungeonTokensSpent = ko.pureComputed(() => {
+    return getDungeonData().flatMap(d => d.dungeons).reduce((sum, dungeon) => sum + dungeon.clears * dungeon.cost, 0);
+});
+
+const totalDungeonCost500Clears = ko.pureComputed(() => {
+    return getDungeonData().flatMap(d => d.dungeons).reduce((sum, dungeon) => sum + (dungeon.cost * 500), 0);
+});
+
+const remainingDungeonCost500Clears = ko.pureComputed(() => {
+    return getDungeonData().flatMap(d => d.dungeons).reduce((sum, dungeon) => sum + dungeon.remaining, 0);
+});
 
 const getGymData = ko.pureComputed(() => {
     const gymList = [];
@@ -641,6 +657,11 @@ module.exports = {
     getShadowStatusImage,
 
     getDungeonData,
+    totalDungeonClears,
+    totalDungeonTokensSpent,
+    totalDungeonCost500Clears,
+    remainingDungeonCost500Clears,
+
     getGymData,
     getRouteData,
     hideOtherStatSection,
