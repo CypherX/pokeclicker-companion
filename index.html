@@ -359,7 +359,7 @@
                                 <div class="tab-pane" id="forecasts" role="tabpanel" aria-labelledby="forecasts-tab">
                                     <div class="d-flex justify-content-end">
                                         <div class="form-check small">
-                                            <input class="form-check-input" type="checkbox" id="defaultToForecastsTab" autocomplete="off" data-bind="checked: Companion.defaultToForecastsTab">
+                                            <input class="form-check-input" type="checkbox" id="defaultToForecastsTab" autocomplete="off" data-bind="checked: Forecast.defaultToForecastsTab">
                                             <label class="form-check-label" for="defaultToForecastsTab">Start on Forecasts tab</label>
                                         </div>
                                     </div>
@@ -391,7 +391,7 @@
                                             <div class="tab-pane active" id="forecast-unowns" role="tabpanel" aria-labelledby="forecast-unowns-tab">
                                                 <h4 class="mb-2">Current & Upcoming</h4>
                                                 <div class="table-responsive mb-4">
-                                                    <table class="table table-bordered table-striped table-hover table-sm small" data-bind="with: Companion.unownForecast().slice(0, 8)">
+                                                    <table class="table table-bordered table-striped table-hover table-sm small" data-bind="with: Forecast.unownForecast().slice(0, 8)">
                                                         <thead>
                                                             <tr>
                                                                 <th></th>
@@ -426,7 +426,7 @@
                                                                     <tbody data-bind="foreach: Companion.data.unownList">
                                                                         <tr>
                                                                             <td class="text-center" data-bind="text: $data"></td>
-                                                                            <!-- ko with: Companion.unownForecast().find(f => f.unowns.some(u => u == $data)) -->
+                                                                            <!-- ko with: Forecast.unownForecast().find(f => f.unowns.some(u => u == $data)) -->
                                                                             <td class="text-center" data-bind="text: Companion.formatDate($data.startDate)"></td>
                                                                             <td class="text-center" data-bind="text: Companion.data.unownDungeonList[$data.unowns.findIndex(u => u == $parent)]"></td>
                                                                             <!-- /ko -->
@@ -452,7 +452,7 @@
                                                                             <td class="text-center" data-bind="text: $data"></td>
                                                                             <!-- ko foreach: Companion.data.unownDungeonList -->
                                                                             <td class="text-center" data-bind="
-                                                                                text: Companion.formatDate(Companion.unownForecast().find(f => f.unowns[$index()] == $parent)?.startDate) || '-'"></td>
+                                                                                text: Companion.formatDate(Forecast.unownForecast().find(f => f.unowns[$index()] == $parent)?.startDate) || '-'"></td>
                                                                             <!-- /ko -->
                                                                         </tr>
                                                                     </tbody>
@@ -476,7 +476,7 @@
                                                                 <!-- /ko -->
                                                             </tr>
                                                         </thead>
-                                                        <tbody data-bind="foreach: Object.values(Companion.weatherForecast.slice(0, 18).reduce((map, wf) => {
+                                                        <tbody data-bind="foreach: Object.values(Forecast.weatherForecast.slice(0, 18).reduce((map, wf) => {
                                                             map[wf.startDate.getDate()] = map[wf.startDate.getDate()] || [];
                                                             map[wf.startDate.getDate()].push(wf);
                                                             return map;
@@ -510,7 +510,7 @@
                                                             <tr>
                                                                 <td class="align-middle text-dark" data-bind="text: WeatherType[$data], style: { 'background-color': Weather.weatherConditions[$data].color }"></td>
                                                                 <!-- ko foreach: Companion.data.validRegions -->
-                                                                <td class="text-center align-middle" data-bind="text: Companion.formatDateTime(Companion.getNextWeatherDate($data, $parent)) || '-'"></td>
+                                                                <td class="text-center align-middle" data-bind="text: Companion.formatDateTime(Forecast.getNextWeatherDate($data, $parent)) || '-'"></td>
                                                                 <!-- /ko -->
                                                             </tr>
                                                         </tbody>
@@ -524,12 +524,12 @@
                                                         <thead>
                                                             <tr>
                                                                 <th rowspan="2"></th>
-                                                                <!-- ko foreach: Companion.boostedRoutes -->
+                                                                <!-- ko foreach: Forecast.boostedRoutes -->
                                                                 <th class="text-center table-primary" data-bind="text: Companion.formatDate($data.startDate)"></th>
                                                                 <!-- /ko -->
                                                             </tr>
                                                             <tr class="table-secondary small">
-                                                                <!-- ko foreach: Companion.boostedRoutes -->
+                                                                <!-- ko foreach: Forecast.boostedRoutes -->
                                                                 <th class="text-center" data-bind="text: `${Companion.formatTime24Hours($data.startDate)} - ${Companion.formatTime24Hours(Companion.dateAddHours($data.startDate, RoamingPokemonList.period))}`"></th>
                                                                 <!-- /ko -->
                                                             </tr>
@@ -537,7 +537,7 @@
                                                         <tbody data-bind="foreach: Companion.data.roamerGroups">
                                                             <tr>
                                                                 <td class="align-middle" data-bind="text: $data.name"></td>
-                                                                <!-- ko foreach: Companion.boostedRoutes -->
+                                                                <!-- ko foreach: Forecast.boostedRoutes -->
                                                                 <td class="text-center align-middle" data-bind="text: $data.regionalRoutes[$parentContext.$index()]"></td>
                                                                 <!-- /ko -->
                                                             </tr>

@@ -6,3 +6,5 @@ window.Companion = {
     ...require('./app'),
     data: require('./data'),
 }
+
+window.Forecast = require('./forecast');
