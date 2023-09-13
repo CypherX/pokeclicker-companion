@@ -260,6 +260,7 @@
                                                                             <th class="text-center w-auto">Cost</th>
                                                                             <th class="text-center w-auto">500 Clears Cost</th>
                                                                             <th class="text-center w-auto">Remaining Cost</th>
+                                                                            <th class="text-center w-auto">Total Spent</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -270,12 +271,14 @@
                                                                             <td class="text-center align-middle w-auto" data-bind="text: $data.cost.toLocaleString()"></td>
                                                                             <td class="text-center align-middle w-auto" data-bind="text: ($data.cost * 500).toLocaleString()"></td>
                                                                             <td class="text-center align-middle w-auto" data-bind="text: $data.remaining.toLocaleString()"></td>
+                                                                            <td class="text-center align-middle w-auto" data-bind="text: ($data.clears * $data.cost).toLocaleString()"></td>
                                                                         </tr>
                                                                         <!-- /ko -->
                                                                         <tr class="table-secondary">
                                                                             <td colspan="3"></td>
                                                                             <td class="text-center" data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.cost, 0) * 500).toLocaleString()"></td>
-                                                                            <td class="text-center" data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.remaining, 0)).toLocaleString()"></td>
+                                                                            <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.remaining, 0).toLocaleString()"></td>
+                                                                            <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.clears * dungeon.cost, 0).toLocaleString()"></td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
