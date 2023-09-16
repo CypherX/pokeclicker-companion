@@ -1,6 +1,28 @@
 const saveData = ko.observable(undefined);
+
 const showRequiredOnly = ko.observable(false);
 const showAllRegions = ko.observable(false);
+const defaultTab = ko.observable('tab-my-save');
+
+showRequiredOnly.subscribe((value) => localStorage.setItem('showRequiredOnly', +value));
+showAllRegions.subscribe((value) => localStorage.setItem('showAllRegions', +value));
+defaultTab.subscribe((value) => localStorage.setItem('defaultTab', value));
+
+if (+localStorage.getItem('showRequiredOnly')) {
+    showRequiredOnly(true);
+}
+
+if (+localStorage.getItem('showAllRegions')) {
+    showAllRegions(true);
+}
+
+if (localStorage.getItem('defaultTab')) {
+    const tab = localStorage.getItem('defaultTab');
+    if (document.getElementById(tab)) {
+        defaultTab(tab);
+        (new bootstrap.Tab(document.getElementById(tab))).show();
+    }
+}
 
 const partyList = ko.pureComputed(() => {
     if (!saveData()) {
@@ -700,4 +722,5 @@ module.exports = {
     splitArrayChunked,
 
     activeTab,
+    defaultTab,
 };

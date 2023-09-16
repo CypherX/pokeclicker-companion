@@ -108,8 +108,30 @@ module.exports={
 
 },{}],2:[function(require,module,exports){
 const saveData = ko.observable(undefined);
+
 const showRequiredOnly = ko.observable(false);
 const showAllRegions = ko.observable(false);
+const defaultTab = ko.observable('tab-my-save');
+
+showRequiredOnly.subscribe((value) => localStorage.setItem('showRequiredOnly', +value));
+showAllRegions.subscribe((value) => localStorage.setItem('showAllRegions', +value));
+defaultTab.subscribe((value) => localStorage.setItem('defaultTab', value));
+
+if (+localStorage.getItem('showRequiredOnly')) {
+    showRequiredOnly(true);
+}
+
+if (+localStorage.getItem('showAllRegions')) {
+    showAllRegions(true);
+}
+
+if (localStorage.getItem('defaultTab')) {
+    const tab = localStorage.getItem('defaultTab');
+    if (document.getElementById(tab)) {
+        defaultTab(tab);
+        (new bootstrap.Tab(document.getElementById(tab))).show();
+    }
+}
 
 const partyList = ko.pureComputed(() => {
     if (!saveData()) {
@@ -809,6 +831,7 @@ module.exports = {
     splitArrayChunked,
 
     activeTab,
+    defaultTab,
 };
 
 },{}],3:[function(require,module,exports){
@@ -1239,7 +1262,7 @@ const getNextWeatherDate = (region, weather) => {
     return weatherForecast().find(wf => wf.regionalWeather[region] === weather)?.startDate;
 };
 
-const defaultToForecastsTab = ko.observable(false);
+/*const defaultToForecastsTab = ko.observable(false);
 defaultToForecastsTab.subscribe((value) => {
     localStorage.setItem('defaultToForecastsTab', +value);
 });
@@ -1247,7 +1270,7 @@ defaultToForecastsTab.subscribe((value) => {
 if (+localStorage.getItem('defaultToForecastsTab')) {
     defaultToForecastsTab(true);
     (new bootstrap.Tab(document.getElementById('forecasts-tab'))).show();
-}
+}*/
 
 module.exports = {
     unownForecast,
@@ -1257,7 +1280,7 @@ module.exports = {
     generateForecasts,
     getNextWeatherDate,
 
-    defaultToForecastsTab,
+    //defaultToForecastsTab,
 };
 },{}],5:[function(require,module,exports){
 player = new Player();
