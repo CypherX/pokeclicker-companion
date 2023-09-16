@@ -65,7 +65,7 @@ const getNextWeatherDate = (region, weather) => {
     return weatherForecast().find(wf => wf.regionalWeather[region] === weather)?.startDate;
 };
 
-const defaultToForecastsTab = ko.observable(false);
+/*const defaultToForecastsTab = ko.observable(false);
 defaultToForecastsTab.subscribe((value) => {
     localStorage.setItem('defaultToForecastsTab', +value);
 });
@@ -73,7 +73,7 @@ defaultToForecastsTab.subscribe((value) => {
 if (+localStorage.getItem('defaultToForecastsTab')) {
     defaultToForecastsTab(true);
     (new bootstrap.Tab(document.getElementById('forecasts-tab'))).show();
-}
+}*/
 
 module.exports = {
     unownForecast,
@@ -83,5 +83,5 @@ module.exports = {
     generateForecasts,
     getNextWeatherDate,
 
-    defaultToForecastsTab,
+    //defaultToForecastsTab,
 };

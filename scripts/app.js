@@ -1,6 +1,28 @@
 const saveData = ko.observable(undefined);
+
 const showRequiredOnly = ko.observable(false);
 const showAllRegions = ko.observable(false);
+const defaultTab = ko.observable('tab-my-save');
+
+showRequiredOnly.subscribe((value) => localStorage.setItem('showRequiredOnly', +value));
+showAllRegions.subscribe((value) => localStorage.setItem('showAllRegions', +value));
+defaultTab.subscribe((value) => localStorage.setItem('defaultTab', value));
+
+if (+localStorage.getItem('showRequiredOnly')) {
+    showRequiredOnly(true);
+}
+
+if (+localStorage.getItem('showAllRegions')) {
+    showAllRegions(true);
+}
+
+if (localStorage.getItem('defaultTab')) {
+    const tab = localStorage.getItem('defaultTab');
+    if (document.getElementById(tab)) {
+        defaultTab(tab);
+        (new bootstrap.Tab(document.getElementById(tab))).show();
+    }
+}
 
 const partyList = ko.pureComputed(() => {
     if (!saveData()) {
@@ -521,12 +543,29 @@ const getEnigmaBerries = ko.pureComputed(() => {
 });
 // Enigma - End
 
+const activeTab = ko.observable('#main-tab-save');
+
 $(document).ready(() => {
     const container = document.getElementById('container');
     ko.applyBindings({}, container);
     container.classList.remove('d-none');
 
-    $('#pokemonStatsTable > thead th.sortable').click((e) => {
+    $('.btn-save-selector').click(() => {
+        document.getElementById('file-selector').click();
+    });
+
+    $('#mainNavbar button.nav-link').on('show.bs.tab', (e) => {
+        activeTab($(e.target).data('bs-target'));
+    });
+
+    /*const headerResizeObserver = new ResizeObserver(() => {
+        const headerHeight = $('#header').outerHeight(true);
+        //$('#main-content').css('height', `calc(100vh - ${headerHeight}px)`);
+    });
+
+    headerResizeObserver.observe(document.getElementById('header'));*/
+
+    $(document).on('click', '#partyPokemonTable thead th.sortable', (e) => {
         const sort = e.target.dataset.sort;
         if (pokemonStatTableSort() == sort) {
             pokemonStatTableSortDir(!pokemonStatTableSortDir());
@@ -681,4 +720,7 @@ module.exports = {
     arrayToWhatever,
     splitArrayAlternating,
     splitArrayChunked,
+
+    activeTab,
+    defaultTab,
 };
