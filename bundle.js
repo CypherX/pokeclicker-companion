@@ -630,12 +630,29 @@ const getEnigmaBerries = ko.pureComputed(() => {
 });
 // Enigma - End
 
+const activeTab = ko.observable('#main-tab-save');
+
 $(document).ready(() => {
     const container = document.getElementById('container');
     ko.applyBindings({}, container);
     container.classList.remove('d-none');
 
-    $('#pokemonStatsTable > thead th.sortable').click((e) => {
+    $('.btn-save-selector').click(() => {
+        document.getElementById('file-selector').click();
+    });
+
+    $('#mainNavbar button.nav-link').on('show.bs.tab', (e) => {
+        activeTab($(e.target).data('bs-target'));
+    });
+
+    /*const headerResizeObserver = new ResizeObserver(() => {
+        const headerHeight = $('#header').outerHeight(true);
+        //$('#main-content').css('height', `calc(100vh - ${headerHeight}px)`);
+    });
+
+    headerResizeObserver.observe(document.getElementById('header'));*/
+
+    $(document).on('click', '#partyPokemonTable thead th.sortable', (e) => {
         const sort = e.target.dataset.sort;
         if (pokemonStatTableSort() == sort) {
             pokemonStatTableSortDir(!pokemonStatTableSortDir());
@@ -790,6 +807,8 @@ module.exports = {
     arrayToWhatever,
     splitArrayAlternating,
     splitArrayChunked,
+
+    activeTab,
 };
 
 },{}],3:[function(require,module,exports){

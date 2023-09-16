@@ -2,6 +2,8 @@
 <html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="PokéClicker Companion">
         <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
         <meta http-equiv="Pragma" content="no-cache">
         <meta http-equiv="Expires" content="0">
@@ -24,152 +26,184 @@
             .dungeon-clears-row td:nth-child(even) { width: 8%; }
             th.sortable { cursor: pointer; }
             .search-hidden, .filter-hidden { display: none; }
-            .table-responsive table { margin-bottom: 0; }
+            /*.table-responsive table { margin-bottom: 0; }*/
+            
+            .table-sticky-header {
+                border-collapse: separate;
+                border-spacing: 0;
+            }
+            .table-sticky-header th {
+                position: sticky;
+                top: 0;
+                border-top: 1px solid #444;
+                border-bottom: 1px solid #444;
+                border-right: 1px solid #444;
+                z-index: 99;
+            }
+            .table-sticky-header td {
+                border-bottom: 1px solid #444;
+                border-right: 1px solid #444;
+            }
+            .table-sticky-header th:first-child,
+            .table-sticky-header td:first-child {
+                border-left: 1px solid #444;
+            }
         </style>
     </head>
     <body>
-        <div id="container" class="container d-none">
-            <div class="row justify-content-center">
-                <div class="col-12 col-xl-6 col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="card mt-5 mx-auto">
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-primary" type="button" id="btn-select-file"
-                                    onclick="document.getElementById('file-selector').click()">Select PokéClicker Save File</button>
-                            </div>
-                            <input type="file" id="file-selector" accept=".txt" class="d-none" onchange="Companion.loadFile(this.files[0])">
-                            <div class="row row-cols-sm-auto justify-content-center mt-3 small">
-                                <div class="col">
-                                    <div class="form-check" title="Show only Pokémon required to complete the Pokédex. Capturing any of the forms counts towards the completion.">
-                                        <input class="form-check-input" type="checkbox" id="hideAlternateCheck" autocomplete="off" data-bind="checked: Companion.showRequiredOnly">
-                                        <label class="form-check-label" for="hideAlternateCheck">Show Required Only</label>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="form-check" title="By default this tool will show missing Pokémon up to the highest region in the save file. Checking this will show missing Pokémon from all regions.">
-                                        <input class="form-check-input" type="checkbox" id="showAllRegionsCheck" autocomplete="off" data-bind="checked: Companion.showAllRegions">
-                                        <label class="form-check-label" for="showAllRegionsCheck">Show All Regions/Pokémon</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer text-muted text-center p-1 small">
-                            <p class="mx-0 my-1">Data is from <knockout data-bind="text: `v${Companion.package.version}`"></knockout>. Save files from other versions may result in incorrect statistics.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <input type="file" id="file-selector" accept=".txt" class="d-none" onchange="Companion.loadFile(this.files[0])">
+        <div id="container" class="d-none">
+            <!--<div class="container-xxl"></div>-->
 
-            <div class="row justify-content-center">
-                <div class="col-12 col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="card mt-5 mb-5 mx-auto">
-                        <div class="card-header p-0">
-                            <ul class="nav nav-pills nav-justified" role="tablist" id="mainTabs">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="missing-pokemon-tab" data-bs-toggle="pill" data-bs-target="#missing-pokemon" type="button" role="tab" aria-controls="missing-pokemon" aria-selected="true">
+            <div class="d-flex flex-column" style="height: 100vh;">
+                <div id="header" class="mb-4">
+                    <nav class="navbar navbar-expand-md bg-dark" data-bs-theme="dark">
+                        <div class="container-fluid">
+                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+                            <button class="btn btn-primary btn-save-selector float-end ml-auto d-md-none" type="button">Load PokéClicker Save</button>
+                            <div class="collapse navbar-collapse justify-content-lg-center" id="main-nav">
+                                <ul class="navbar-nav" id="mainNavbar" role="tablist">
+                                    <li class="nav-item">
+                                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#main-tab-save" type="button" role="tab">
+                                            My Save
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#main-tab-forecasts" type="button" role="tab">
+                                            Forecasts
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#main-tab-vitamins" type="button" role="tab">
+                                            Vitamin Tracker
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#main-tab-settings" type="button" role="tab">
+                                            Settings
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="d-none d-md-block position-absolute end-0 me-2">
+                                <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
+                            </div>
+                        </div>
+                    </nav>
+                    <!-- ko if: Companion.activeTab() == '#main-tab-save' && Companion.isSaveLoaded -->
+                    <nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark">
+                        <div class="container-fluid justify-content-lg-center">
+                            <ul class="navbar-nav" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#save-tab-missing" type="button" role="tab">
                                         Missing Pokémon
-                                        <span data-bind="text: Companion.getTotalMissingPokemonCount() > 0 ? `(${Companion.getTotalMissingPokemonCount().toLocaleString()})` : ''"></span>
+                                        <!-- ko with: Companion.getTotalMissingPokemonCount -->
+                                        <span data-bind="text: `(${Companion.getTotalMissingPokemonCount().toLocaleString()})`"></span>
+                                        <!-- /ko -->
                                     </button>
                                 </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="party-pokemon-tab" data-bs-toggle="pill" data-bs-target="#party-pokemon" type="button" role="tab" aria-controls="party-pokemon" aria-selected="false">
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#save-tab-party" type="button" role="tab">
                                         Party Pokémon
                                     </button>
                                 </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="stats-and-more-tab" data-bs-toggle="pill" data-bs-target="#stats-and-more" type="button" role="tab" aria-controls="stats-and-more" aria-selected="false">
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#save-tab-stats" type="button" role="tab">
                                         Statistics & More
                                     </button>
                                 </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="forecasts-tab" data-bs-toggle="pill" data-bs-target="#forecasts" type="button" role="tab" aria-controls="forecasts" aria-selected="false">
-                                        Forecasts
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#save-tab-friend-safari" type="button" role="tab">
+                                        Friend Safari
                                     </button>
                                 </li>
                             </ul>
                         </div>
-                        
-                        <div class="card-body">
-                            <div class="tab-content">
-                                <div class="tab-pane active" id="missing-pokemon" role="tabpanel" aria-labelledby="missing-pokemon-tab">
-                                    <div data-bind="template: { name: 'load-save-template' }"></div>
+                    </nav>
+                    <!-- /ko -->
+                </div>
 
-                                    <div data-bind="with: Companion.getMissingPokemon, visible: Companion.isSaveLoaded">
-                                        <div data-bind="visible: !$data.length">
-                                            <p class="text-center text-warning h5 my-3">None! You've caught 'em all!</p>
-                                        </div>
-                                        <div data-bind="visible: $data.length">
-                                            <p class="text-center text-muted pb-3 small" style="border-bottom: 1px solid #888;" data-bind="visible: Companion.showRequiredOnly">
-                                                The below tables will show ALL forms for any missing Pokémon but you only need to capture one to fulfill the Pokédex requirement.<br />
-                                                The numbers displayed for each region do not include alternate forms.
-                                            </p>
-                                            <div data-bind="foreach: $data">
-                                                <div class="card border-0">
-                                                    <div class="card-header px-2">
-                                                        <h5 class="region-name text-warning mb-0"
-                                                            data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`">Region</h5>
-                                                    </div>
-                                                    <div class="card-body p-0">
-                                                        <table class="table table-bordered table-striped table-hover" style="font-size: 0.9rem;">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th class="text-center" style="width: 0;">#</th>
-                                                                    <th>Name</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody data-bind="foreach: $data.pokemon">
-                                                                <tr>
-                                                                    <td class="text-center" data-bind="text: $data.id"></td>
-                                                                    <td>
-                                                                        <knockout data-bind="text: $data.name"></knockout>
-                                                                        <a class="float-end small" href="#" target="_blank"
-                                                                            data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pok%C3%A9mon/${$data.name}` }">wiki</a>
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
+                <div id="main-content" class="tab-content flex-grow-1" style="overflow: auto;">
+                    <div class="tab-pane active h-100" id="main-tab-save">
+                        <div data-bind="template: { name: 'load-save-template' }"></div>
+                        <!-- ko if: Companion.isSaveLoaded -->
+                        <div class="tab-content container-xxl h-100"> <!-- bg-dark -->
+                            <div class="tab-pane active" id="save-tab-missing">
+                                <div data-bind="with: Companion.getMissingPokemon">
+                                    <div data-bind="visible: !$data.length">
+                                        <p class="text-warning text-center h4 mt-5">Congratulations!<br/>You've caught 'em all!</p>
+                                    </div>
+                                    <div data-bind="visible: $data.length">
+                                        <p class="text-center text-muted pb-3 small" style="border-bottom: 1px solid #888;" data-bind="visible: Companion.showRequiredOnly">
+                                            The below tables will show ALL forms for any missing Pokémon but you only need to capture one to fulfill the Pokédex requirement.<br />
+                                            The numbers displayed for each region do not include alternate forms.
+                                        </p>
+                                        <!-- ko foreach: $data -->
+                                        <div class="card mb-3">
+                                            <div class="card-header rounded-0 sticky-top"
+                                                data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`"></div>
+                                            <div class="card-body p-0">
+                                                <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 0.9rem;">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="text-center" style="width: 0;">#</th>
+                                                            <th class="">Pokémon</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody data-bind="foreach: $data.pokemon">
+                                                        <tr>
+                                                            <td class="text-center" data-bind="text: $data.id"></td>
+                                                            <td>
+                                                                <knockout data-bind="text: $data.name"></knockout>
+                                                                <a class="float-end small" href="#" target="_blank"
+                                                                    data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pok%C3%A9mon/${$data.name}` }">wiki</a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
+                                        <!-- /ko -->
                                     </div>
                                 </div>
-
-                                <div class="tab-pane" id="party-pokemon" role="tabpanel" aria-labelledby="party-pokemon-tab">
-                                    <div data-bind="template: { name: 'load-save-template' }"></div>
-                                    <div data-bind="visible: Companion.isSaveLoaded">
-                                        <div class="d-flex flex-row mb-1">
-                                            <div class="me-1">
-                                                <input class="form-control" type="text" placeholder="Search for # or Name" id="pokemonStatTableSearch"
-                                                    autocomplete="off" style="width: 250px;" data-bind="textInput: Companion.pokemonStatTableSearch">
-                                            </div>
-                                            <div>
-                                                <select class="form-select" id="pokemonStatTableFilter" style="width: 250px;" autocomplete="off"
-                                                    onchange="Companion.pokemonStatTableFilter(this.value)">
-                                                    <option value="none">No Filter</option>
-                                                    <option value="not-shiny">Not Shiny</option>
-                                                    <option value="not-resistant">Not Resistant</option>
-                                                    <option value="not-resistant-not-friend-safari">Not Resistant & Not Friend Safari</option>
-                                                    <option value="not-resistant-friend-safari">Not Resistant & Friend Safari Only</option>
-                                                    <option value="resistant">Resistant</option>
-                                                    <option value="infected">Infected</option>
-                                                    <option value="missing-shadow">Missing Shadow</option>
-                                                    <option value="missing-purified">Missing Purified</option>
-                                                    <option value="shadow">Shadow</option>
-                                                    <option value="purified">Purified</option>
-                                                </select>
-                                            </div>
+                            </div>
+                            <div class="tab-pane h-100" id="save-tab-party">
+                                <div class="d-flex flex-column h-100">
+                                    <div class="d-flex flex-row flex-wrap row mb-1">
+                                        <div class="col-md-3 col-6">
+                                            <input class="form-control w-100" type="text" placeholder="Search for # or Name" id="pokemonStatTableSearch"
+                                                autocomplete="off" style="width: 250px;" data-bind="textInput: Companion.pokemonStatTableSearch">
                                         </div>
-                                        <div class="ms-1 mb-2">
-                                            <knockout class="small" data-bind="text: `Showing ${Companion.getPokemonStatsTableCount()} Pokémon`"></knockout>
-                                            <span class="float-end small">* Click a column header to sort</span>
+                                        <div class="col-md-3 col-6">
+                                            <select class="form-select w-100" id="pokemonStatTableFilter" style="width: 250px;" autocomplete="off"
+                                                onchange="Companion.pokemonStatTableFilter(this.value)">
+                                                <option value="none">No Filter</option>
+                                                <option value="not-shiny">Not Shiny</option>
+                                                <option value="not-resistant">Not Resistant</option>
+                                                <option value="not-resistant-not-friend-safari">Not Resistant & Not Friend Safari</option>
+                                                <option value="not-resistant-friend-safari">Not Resistant & Friend Safari Only</option>
+                                                <option value="resistant">Resistant</option>
+                                                <option value="infected">Infected</option>
+                                                <option value="missing-shadow">Missing Shadow</option>
+                                                <option value="missing-purified">Missing Purified</option>
+                                                <option value="shadow">Shadow</option>
+                                                <option value="purified">Purified</option>
+                                            </select>
                                         </div>
-                                        <div class="table-responsive">
-                                            <table id="pokemonStatsTable" class="table table-bordered table-striped table-hover" style="font-size: 0.9rem;">
+                                    </div>
+                                    <div class="ms-1 mb-2">
+                                        <knockout class="small" data-bind="text: `Showing ${Companion.getPokemonStatsTableCount()} Pokémon`"></knockout>
+                                        <span class="float-end small d-none d-md-block">* Click a column header to sort</span>
+                                    </div>
+                                    <div class="flex-grow-1" style="overflow: auto;">
+                                        <div class="table-responsive h-100" style="overflow: auto;">
+                                            <table class="table table-striped table-hover table-sticky-header" style="font-size: 0.9rem;" id="partyPokemonTable">
                                                 <thead>
-                                                    <tr class="fw-normal">
-                                                        <th class="text-center sortable" data-sort="id" style="width: 0;">#</th>
-                                                        <th class="sortable" data-sort="name">Name</th>
+                                                    <tr class="table-dark fw-normal border-top-0">
+                                                        <th class="text-center sortable" data-sort="id" style="width: 5%;">#</th>
+                                                        <th class="sortable" data-sort="name">Pokémon</th>
                                                         <th class="text-center sortable" data-sort="obtained" style="width: 5%;">Obtained</th>
                                                         <th class="text-center sortable" data-sort="hatched" style="width: 5%;">Hatched</th>
                                                         <th class="text-center sortable" data-sort="shiny-obtained" style="width: 5%; white-space: nowrap;">&#10024; Obtained</th>
@@ -209,426 +243,26 @@
                                             </table>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div class="tab-pane" id="stats-and-more" role="tabpanel" aria-labelledby="stats-and-more-tab">
-                                    <div data-bind="template: { name: 'load-save-template' }"></div>
-                                    <div data-bind="visible: Companion.isSaveLoaded">
-                                        <ul class="nav nav-tabs" role="tablist">
-                                            <li class="nav-item" role="presentation">
-                                                <button class="nav-link active" id="dungeon-clears-tab" data-bs-toggle="pill" data-bs-target="#dungeon-clears" type="button" role="tab" aria-controls="dungeon-clears" aria-selected="true">
-                                                    Dungeon Clears
-                                                </button>
-                                            </li>
-                                            <li class="nav-item" role="presentation">
-                                                <button class="nav-link" id="gym-clears-tab" data-bs-toggle="pill" data-bs-target="#gym-clears" type="button" role="tab" aria-controls="gym-clears" aria-selected="false">
-                                                    Gym Clears
-                                                </button>
-                                            </li>
-                                            <li class="nav-item" role="presentation">
-                                                <button class="nav-link" id="route-defeats-tab" data-bs-toggle="pill" data-bs-target="#route-defeats" type="button" role="tab" aria-controls="route-defeats" aria-selected="false">
-                                                    Route Defeats
-                                                </button>
-                                            </li>
-                                            <li class="nav-item" role="presentation">
-                                                <button class="nav-link" id="enigma-berry-tab" data-bs-toggle="pill" data-bs-target="#enigma-berry" type="button" role="tab" aria-controls="enigma-berry" aria-selected="false">
-                                                    Enigma Berry
-                                                </button>
-                                            </li>
-                                        </ul>
-    
-                                        <div class="card-body">
-                                            <div class="tab-content">
-                                                <div class="tab-pane active" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
-                                                    <div class="card border-0 mb-3">
-                                                        <div class="card-header px-2">
-                                                            <h5 class="region-name text-warning mb-0">Totals</h5>
-                                                        </div>
-                                                        <div class="card-body p-0 collapse show" style="transition: none;">
-                                                            <div class="table-responsive">
-                                                                <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <td class="" style="width: 40%;">Dungeon Clears</td>
-                                                                            <td class="text-center align-middle" data-bind="text: Companion.totalDungeonClears().toLocaleString()"></td>
-                                                                            <td class="" style="width: 40%; border-left-width: 3px;">DT For All Dungeon Achievements</td>
-                                                                            <td class="text-center align-middle" data-bind="text: Companion.totalDungeonCost500Clears().toLocaleString()"></td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="" style="width: 40%;">Dungeon Tokens Spent</td>
-                                                                            <td class="text-center align-middle" data-bind="text: Companion.totalDungeonTokensSpent().toLocaleString()"></td>
-                                                                            <td class="" style="width: 40%; border-left-width: 3px;">Remaining DT For All Dungeon Achievements</td>
-                                                                            <td class="text-center align-middle" data-bind="text: Companion.remainingDungeonCost500Clears().toLocaleString()"></td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- ko foreach: Companion.getDungeonData() -->
-                                                    <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                                                        <div class="card-header px-2">
-                                                            <h5 class="region-name text-warning mb-0" data-bind="text: $data.name ?? GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></h5>
-                                                            <div class="position-absolute" style="top: 4px; right: 0;">
-                                                                <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
-                                                                    style="text-decoration: none; font-size: 0.9rem;"
-                                                                    data-bind="attr: { 'data-bs-target': `#dungeon-clears-collapse-${$index()}` }">[ Collapse ]</button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="card-body p-0 collapse show" style="transition: none;" data-bind="attr: { id: `dungeon-clears-collapse-${$index()}` }">
-                                                            <div class="table-responsive">
-                                                                <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th></th>
-                                                                            <th class="text-center w-auto">Total Clears</th>
-                                                                            <th class="text-center w-auto">Cost</th>
-                                                                            <th class="text-center w-auto">500 Clears Cost</th>
-                                                                            <th class="text-center w-auto">Remaining Cost</th>
-                                                                            <th class="text-center w-auto">Total Spent</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        <!-- ko foreach: $data.dungeons -->
-                                                                        <tr class="dungeon-clears-row">
-                                                                            <td class="align-middle" data-bind="text: $data.name"></td>
-                                                                            <td class="text-center align-middle w-auto" data-bind="text: $data.clears.toLocaleString()"></td>
-                                                                            <td class="text-center align-middle w-auto" data-bind="text: $data.cost.toLocaleString()"></td>
-                                                                            <td class="text-center align-middle w-auto" data-bind="text: ($data.cost * 500).toLocaleString()"></td>
-                                                                            <td class="text-center align-middle w-auto" data-bind="text: $data.remaining.toLocaleString()"></td>
-                                                                            <td class="text-center align-middle w-auto" data-bind="text: ($data.clears * $data.cost).toLocaleString()"></td>
-                                                                        </tr>
-                                                                        <!-- /ko -->
-                                                                        <tr class="table-secondary">
-                                                                            <td colspan="3"></td>
-                                                                            <td class="text-center" data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.cost, 0) * 500).toLocaleString()"></td>
-                                                                            <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.remaining, 0).toLocaleString()"></td>
-                                                                            <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.clears * dungeon.cost, 0).toLocaleString()"></td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <!-- /ko -->
-                                                </div>
-
-                                                <div class="tab-pane" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
-                                                    <!-- ko foreach: Companion.getGymData() -->
-                                                    <div class="card border-0" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                                                        <div class="card-header px-2">
-                                                            <h5 class="region-name text-warning mb-0" data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></h5>
-                                                            <div class="position-absolute" style="top: 4px; right: 0;">
-                                                                <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
-                                                                    style="text-decoration: none; font-size: 0.9rem;"
-                                                                    data-bind="attr: { 'data-bs-target': `#gyms-clears-collapse-${$index()}` }">[ Collapse ]</button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="card-body p-0">
-                                                            <table class="table table-bordered table-striped table-hover table-sm">
-                                                                <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `gyms-clears-collapse-${$index()}` }">
-                                                                    <!-- ko foreach: Companion.arrayToWhatever($data.gyms) -->
-                                                                    <tr class="dungeon-clears-row">
-                                                                        <td class="align-middle" data-bind="text: GymList[$data[0].name].displayName || $data[0].name"></td>
-                                                                        <td class="text-center align-middle" data-bind="text: $data[0].clears.toLocaleString()"></td>
-                                                                        <td class="align-middle" style="border-left-width: 3px;" data-bind="text: $data[1] ? GymList[$data[1].name].displayName || $data[1].name : ''"></td>
-                                                                        <td class="text-center align-middle" data-bind="text: $data[1] ? $data[1].clears.toLocaleString() : ''"></td>
-                                                                    </tr>
-                                                                    <!-- /ko -->
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                    <!-- /ko -->
-                                                </div>
-    
-                                                <div class="tab-pane" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
-                                                    <!-- ko foreach: Companion.getRouteData() -->
-                                                    <div class="card border-0" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                                                        <div class="card-header px-2">
-                                                            <h5 class="region-name text-warning mb-0" data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></h5>
-                                                            <div class="position-absolute" style="top: 4px; right: 0;">
-                                                                <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
-                                                                    style="text-decoration: none; font-size: 0.9rem;"
-                                                                    data-bind="attr: { 'data-bs-target': `#route-defeats-collapse-${$index()}` }">[ Collapse ]</button>
-                                                            </div>
-                                                        </div>
-                                                        <div class="card-body p-0">
-                                                            <table class="table table-bordered table-striped table-hover table-sm">
-                                                                <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `route-defeats-collapse-${$index()}` }">
-                                                                    <!-- ko foreach: Companion.arrayToWhatever($data.routes) -->
-                                                                    <tr class="dungeon-clears-row">
-                                                                        <td class="align-middle" data-bind="text: $data[0].routeName"></td>
-                                                                        <td class="text-center align-middle" data-bind="text: $data[0].defeats.toLocaleString()"></td>
-                                                                        <td class="align-middle" style="border-left-width: 3px;" data-bind="text: $data[1] ? $data[1].routeName : ''"></td>
-                                                                        <td class="text-center align-middle" data-bind="text: $data[1] ? $data[1].defeats.toLocaleString() : ''"></td>
-                                                                    </tr>
-                                                                    <!-- /ko -->
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                    <!-- /ko -->
-                                                </div>
-    
-                                                <div class="tab-pane" id="enigma-berry" role="tabpanel" aria-labelledby="enigma-berry-tab">
-                                                    <div class="container text-center">
-                                                        <div class="row" data-bind="foreach: Companion.getEnigmaBerries">
-                                                            <div class="col">
-                                                                <div class="h4 text-decoration-underline" data-bind="text: $data.direction"></div>
-                                                                <!-- ko if: $data.berry -->
-                                                                <img width="64px" data-bind="attr: { src: `./pokeclicker/docs/assets/images/items/berry/${$data.berry}.png` }"/>
-                                                                <!-- /ko -->
-                                                                <div data-bind="text: $data.berry || '???'"></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <!-- ko if: !Companion.revealEnigmaHints() && Companion.getEnigmaBerries().every(b => b.berry) -->
-                                                    <div class="text-center text-success mt-5">Impressive. You got all the hints on your own 👏. You're pretty neat.</div>
-                                                    <!-- /ko -->
-                                                    <!-- ko if: Companion.getEnigmaBerries().some(b => !b.berry) -->
-                                                    <div class="text-center mt-5">
-                                                        <button type="button" class="btn btn-primary" data-bind="text: Companion.revealEnigmaHintsButtonText, click: () => Companion.revealEnigmaHintsButtonClick()"></button>
-                                                    </div>
-                                                    <!-- /ko -->
-                                                    <!-- ko if: Companion.revealEnigmaHints -->
-                                                    <div class="text-center text-muted mt-5">Impatient (or unlucky) little shit, ain't ye?</div>
-                                                    <!-- /ko -->
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane" id="forecasts" role="tabpanel" aria-labelledby="forecasts-tab">
-                                    <div class="d-flex justify-content-end">
-                                        <div class="form-check small">
-                                            <input class="form-check-input" type="checkbox" id="defaultToForecastsTab" autocomplete="off" data-bind="checked: Forecast.defaultToForecastsTab">
-                                            <label class="form-check-label" for="defaultToForecastsTab">Start on Forecasts tab</label>
-                                        </div>
-                                    </div>
-                                    <ul class="nav nav-tabs" role="tablist" id="forecastTabs">
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="forecast-unowns-tab" data-bs-toggle="pill" data-bs-target="#forecast-unowns" type="button" role="tab" aria-controls="forecast-unowns" aria-selected="true">
-                                                Unowns
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="forecast-weather-tab" data-bs-toggle="pill" data-bs-target="#forecast-weather" type="button" role="tab" aria-controls="forecast-weather" aria-selected="false">
-                                                Weather
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="forecast-boosted-routes-tab" data-bs-toggle="pill" data-bs-target="#forecast-boosted-routes" type="button" role="tab" aria-controls="forecast-boosted-routes" aria-selected="false">
-                                                Boosted Routes
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="forecast-friend-safari-tab" data-bs-toggle="pill" data-bs-target="#forecast-friend-safari" type="button" role="tab" aria-controls="forecast-friend-safari" aria-selected="false">
-                                                Friend Safari
-                                            </button>
-                                        </li>
-                                    </ul>
-
-                                    <div class="card-body">
-                                        <div class="tab-content">
-                                            <div class="tab-pane active" id="forecast-unowns" role="tabpanel" aria-labelledby="forecast-unowns-tab">
-                                                <h4 class="mb-2">Current & Upcoming</h4>
-                                                <div class="table-responsive mb-4">
-                                                    <table class="table table-bordered table-striped table-hover table-sm small" data-bind="with: Forecast.unownForecast().slice(0, 8)">
-                                                        <thead>
-                                                            <tr>
-                                                                <th></th>
-                                                                <!-- ko foreach: $data -->
-                                                                <th class="table-primary text-center" data-bind="text: Companion.formatDate($data.startDate)"></th>
-                                                                <!-- /ko -->
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody data-bind="foreach: Companion.data.unownDungeonList">
-                                                            <tr>
-                                                                <td data-bind="text: $data"></td>
-                                                                <!-- ko foreach: $parent -->
-                                                                <td class="text-center align-middle" data-bind="text: $data.unowns[$parentContext.$index()]"></td>
-                                                                <!-- /ko -->
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                <div class="container g-0">
-                                                    <div class="row">
-                                                        <div class="col-12 col-lg-6 mb-3">
-                                                            <h5 class="mb-2">Next Appearence Anywhere</h5>
-                                                            <div class="table-responsive">
-                                                                <table class="table table-bordered table-striped table-hover table-sm small">
-                                                                    <thead>
-                                                                        <tr class="table-primary">
-                                                                            <th class="text-center">Unown</th>
-                                                                            <th class="text-center">When</th>
-                                                                            <th class="text-center">Where</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody data-bind="foreach: Companion.data.unownList">
-                                                                        <tr>
-                                                                            <td class="text-center" data-bind="text: $data"></td>
-                                                                            <!-- ko with: Forecast.unownForecast().find(f => f.unowns.some(u => u == $data)) -->
-                                                                            <td class="text-center" data-bind="text: Companion.formatDate($data.startDate)"></td>
-                                                                            <td class="text-center" data-bind="text: Companion.data.unownDungeonList[$data.unowns.findIndex(u => u == $parent)]"></td>
-                                                                            <!-- /ko -->
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-12 col-lg-6 mb-3">
-                                                            <h5 class="mb-2">Next Appearence In Each Dungeon</h5>
-                                                            <div class="table-responsive">
-                                                                <table class="table table-bordered table-striped table-hover table-sm small">
-                                                                    <thead>
-                                                                        <tr class="table-primary">
-                                                                            <th class="text-center">Unown</th>
-                                                                            <!-- ko foreach: Companion.data.unownDungeonList -->
-                                                                            <th class="text-center" data-bind="text: $data"></th>
-                                                                            <!-- /ko -->
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody data-bind="foreach: Companion.data.unownList">
-                                                                        <tr>
-                                                                            <td class="text-center" data-bind="text: $data"></td>
-                                                                            <!-- ko foreach: Companion.data.unownDungeonList -->
-                                                                            <td class="text-center" data-bind="
-                                                                                text: Companion.formatDate(Forecast.unownForecast().find(f => f.unowns[$index()] == $parent)?.startDate) || '-'"></td>
-                                                                            <!-- /ko -->
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="tab-pane" id="forecast-weather" role="tabpanel" aria-labelledby="forecast-weather-tab">
-                                                <h4 class="mb-2">Current & Upcoming</h4>
-                                                <div class="table-responsive mb-3">
-                                                    <table class="table table-bordered table-hover table-sm small">
-                                                        <thead>
-                                                            <tr class="table-primary">
-                                                                <th class="text-center">Date</th>
-                                                                <th class="text-center">Time</th>
-                                                                <!-- ko foreach: Companion.data.validRegionNames -->
-                                                                <th class="text-center" data-bind="text: $data"></th>
-                                                                <!-- /ko -->
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody data-bind="foreach: Object.values(Forecast.weatherForecast.slice(0, 18).reduce((map, wf) => {
-                                                            map[wf.startDate.getDate()] = map[wf.startDate.getDate()] || [];
-                                                            map[wf.startDate.getDate()].push(wf);
-                                                            return map;
-                                                        }, {}))">
-                                                            <!-- ko foreach: $data -->
-                                                            <tr>
-                                                                <!-- ko if: $index() == 0 -->
-                                                                <td class="text-center align-middle" data-bind="text: Companion.formatDate($data.startDate), attr: { rowspan: $parent.length }"></td>
-                                                                <!-- /ko -->
-                                                                <td class="text-center text-nowrap" data-bind="text: `${Companion.formatTime24Hours($data.startDate)} - ${Companion.formatTime24Hours(Companion.dateAddHours($data.startDate, Weather.period))}`"></td>
-                                                                <!-- ko foreach: Companion.data.validRegions -->
-                                                                <td class="text-center text-dark" data-bind="text: WeatherType[$parent.regionalWeather[$data]], style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
-                                                                <!-- /ko -->
-                                                            </tr>
-                                                            <!-- /ko -->
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                <h4 class="mb-2">Next Occurrence</h4>
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered table-hover table-sm small">
-                                                        <thead>
-                                                            <tr class="table-primary">
-                                                                <th></th>
-                                                                <!-- ko foreach: Companion.data.validRegionNames -->
-                                                                <th class="text-center" data-bind="text: $data"></th>
-                                                                <!-- /ko -->
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody data-bind="foreach: GameHelper.enumNumbers(WeatherType)">
-                                                            <tr>
-                                                                <td class="align-middle text-dark" data-bind="text: WeatherType[$data], style: { 'background-color': Weather.weatherConditions[$data].color }"></td>
-                                                                <!-- ko foreach: Companion.data.validRegions -->
-                                                                <td class="text-center align-middle" data-bind="text: Companion.formatDateTime(Forecast.getNextWeatherDate($data, $parent)) || '-'"></td>
-                                                                <!-- /ko -->
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                            <div class="tab-pane" id="forecast-boosted-routes" role="tabpanel" aria-labelledby="forecast-boosted-routes">
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered table-striped table-hover table-sm small">
-                                                        <thead>
-                                                            <tr>
-                                                                <th rowspan="2"></th>
-                                                                <!-- ko foreach: Forecast.boostedRoutes -->
-                                                                <th class="text-center table-primary" data-bind="text: Companion.formatDate($data.startDate)"></th>
-                                                                <!-- /ko -->
-                                                            </tr>
-                                                            <tr class="table-secondary small">
-                                                                <!-- ko foreach: Forecast.boostedRoutes -->
-                                                                <th class="text-center" data-bind="text: `${Companion.formatTime24Hours($data.startDate)} - ${Companion.formatTime24Hours(Companion.dateAddHours($data.startDate, RoamingPokemonList.period))}`"></th>
-                                                                <!-- /ko -->
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody data-bind="foreach: Companion.data.roamerGroups">
-                                                            <tr>
-                                                                <td class="align-middle" data-bind="text: $data.name"></td>
-                                                                <!-- ko foreach: Forecast.boostedRoutes -->
-                                                                <td class="text-center align-middle" data-bind="text: $data.regionalRoutes[$parentContext.$index()]"></td>
-                                                                <!-- /ko -->
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                            <div class="tab-pane" id="forecast-friend-safari" role="tabpanel" aria-labelledby="forecast-friend-safari-tab">
-                                                <div data-bind="template: { name: 'load-save-template' }"></div>
-                                                <div data-bind="visible: Companion.isSaveLoaded">
-                                                    <p class="text-center text-warning">
-                                                        There are currently <span data-bind="text: Companion.data.friendSafariPokemon.length">0</span> Pokémon in the Friend Safari rotation.
-                                                        The rotation takes <span data-bind="text: Math.ceil(Companion.data.friendSafariPokemon.length / 5)">0</span> days to complete.
-                                                    </p>
-                                                    <table class="table table-bordered table-striped table-hover table-sm" style="font-size: 0.9rem;">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="text-center">Date</th>
-                                                                <th class="text-center" colspan="5">Pokemon</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody data-bind="foreach: Companion.getFriendSafariForecast()">
-                                                            <tr>
-                                                                <td class="text-center align-middle" data-bind="text: $data.date.toLocaleDateString()"></td>
-                                                                <!-- ko foreach: $data.pokemon -->
-                                                                <td class="text-center align-middle">
-                                                                    <div data-bind="text: $data"></div>
-                                                                    <!-- ko if: Companion.hasPokerus($data) -->
-                                                                    <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data) }" />
-                                                                    <!-- /ko -->
-                                                                    <!-- ko ifnot: Companion.hasPokerus($data) -->
-                                                                    <div class="small">-</div>
-                                                                    <!-- /ko -->
-                                                                </td>
-                                                                <!-- /ko -->
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                 </div>
                             </div>
+                            <div class="tab-pane" id="save-tab-stats">
+                                <p>stats and shit</p>
+                            </div>
+                            <div class="tab-pane" id="save-tab-friend-safari">
+                                <p>friend safari</p>
+                            </div>
                         </div>
+                        <!-- /ko -->
+                    </div>
+                    <div class="tab-pane" id="main-tab-forecasts" role="tabpanel">
+                        <p>forecasts</p>
+                    </div>
+                    <div class="tab-pane" id="main-tab-vitamins" role="tabpanel">
+                        <p>vitamin tracker</p>
+                    </div>
+                    <div class="tab-pane" id="main-tab-settings" role="tabpanel">
+                        <p>settings</p>
                     </div>
                 </div>
             </div>
@@ -640,6 +274,8 @@
 
 <script type="text/html" id="load-save-template">
     <!-- ko ifnot: Companion.isSaveLoaded -->
-    <div class="h5 text-center my-3">Load a save file to view this information.</div>
+    <div class="position-absolute top-50 start-50 translate-middle" style="z-index: -1;">
+        <h1 class="display-6">Select a save file or check out the other pages.</h1>
+    </div>
     <!-- /ko -->
 </script>
