@@ -166,7 +166,7 @@
                                         </div>-->
                                         <!-- ko foreach: $data -->
                                         <div class="card mb-3">
-                                            <div class="card-header rounded-0 sticky-top"
+                                            <div class="card-header bg-dark rounded-0 sticky-top"
                                                 data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`"></div>
                                             <div class="card-body p-0">
                                                 <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 0.9rem;">
@@ -297,7 +297,7 @@
                                     <div class="tab-content flex-grow-1 px-2" style="overflow: auto;">
                                         <div class="tab-pane active" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
                                             <div class="card border-0 mb-3">
-                                                <div class="card-header rounded-0 px-2">Totals</div>
+                                                <div class="card-header bg-dark rounded-0 px-2">Totals</div>
                                                 <div class="card-body p-0 collapse show" style="transition: none;">
                                                     <div class="table-responsive">
                                                         <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
@@ -322,7 +322,7 @@
     
                                             <!-- ko foreach: Companion.getDungeonData() -->
                                             <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                                                <div class="card-header rounded-0 px-2">
+                                                <div class="card-header bg-dark rounded-0 px-2">
                                                     <span data-bind="text: $data.name ?? GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
                                                     <div class="position-absolute" style="top: 4px; right: 0;">
                                                         <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
@@ -354,7 +354,7 @@
                                                                     <td class="text-center align-middle w-auto" data-bind="text: ($data.clears * $data.cost).toLocaleString()"></td>
                                                                 </tr>
                                                                 <!-- /ko -->
-                                                                <tr class="table-secondary">
+                                                                <tr class="table-dark">
                                                                     <td colspan="3"></td>
                                                                     <td class="text-center" data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.cost, 0) * 500).toLocaleString()"></td>
                                                                     <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.remaining, 0).toLocaleString()"></td>
@@ -371,7 +371,7 @@
                                         <div class="tab-pane" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
                                             <!-- ko foreach: Companion.getGymData() -->
                                             <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                                                <div class="card-header rounded-0 px-2">
+                                                <div class="card-header bg-dark rounded-0 px-2">
                                                     <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
                                                     <div class="position-absolute" style="top: 4px; right: 0;">
                                                         <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
@@ -400,7 +400,7 @@
                                         <div class="tab-pane" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
                                             <!-- ko foreach: Companion.getRouteData() -->
                                             <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                                                <div class="card-header rounded-0 px-2">
+                                                <div class="card-header bg-dark rounded-0 px-2">
                                                     <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
                                                     <div class="position-absolute" style="top: 4px; right: 0;">
                                                         <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
