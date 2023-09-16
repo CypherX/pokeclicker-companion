@@ -117,22 +117,6 @@ showRequiredOnly.subscribe((value) => localStorage.setItem('showRequiredOnly', +
 showAllRegions.subscribe((value) => localStorage.setItem('showAllRegions', +value));
 defaultTab.subscribe((value) => localStorage.setItem('defaultTab', value));
 
-if (+localStorage.getItem('showRequiredOnly')) {
-    showRequiredOnly(true);
-}
-
-if (+localStorage.getItem('showAllRegions')) {
-    showAllRegions(true);
-}
-
-if (localStorage.getItem('defaultTab')) {
-    const tab = localStorage.getItem('defaultTab');
-    if (document.getElementById(tab)) {
-        defaultTab(tab);
-        (new bootstrap.Tab(document.getElementById(tab))).show();
-    }
-}
-
 const partyList = ko.pureComputed(() => {
     if (!saveData()) {
         return {};
@@ -683,6 +667,22 @@ $(document).ready(() => {
             pokemonStatTableSortDir(true);
         }
     });
+
+    if (+localStorage.getItem('showRequiredOnly')) {
+        showRequiredOnly(true);
+    }
+    
+    if (+localStorage.getItem('showAllRegions')) {
+        showAllRegions(true);
+    }
+    
+    if (localStorage.getItem('defaultTab')) {
+        const tab = localStorage.getItem('defaultTab');
+        if (document.getElementById(tab)) {
+            defaultTab(tab);
+            (new bootstrap.Tab(document.getElementById(tab))).show();
+        }
+    }
 
     Forecast.generateForecasts();
 });
