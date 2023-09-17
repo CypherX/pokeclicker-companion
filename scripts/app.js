@@ -113,7 +113,7 @@ const getMissingPokemon = ko.pureComputed(() => {
         pokemon: []
     };
 
-    getObtainablePokemonList().forEach(p => {
+    Companion.data.obtainablePokemonList.forEach(p => {
         if (caughtPokemon[p.id]) {
             return;
         }
@@ -161,39 +161,6 @@ const getTotalMissingPokemonCount = ko.pureComputed(() => {
 const getPokemonNativeRegion = (pokemonName) => {
     return Companion.data.pokemonRegionOverride[pokemonName] || PokemonHelper.calcNativeRegion(pokemonName);
 };
-
-const getObtainablePokemonList = () => {
-    const unobtainableList = Companion.data.UnobtainablePokemon.filter(p => typeof p === 'string');
-    const unobtainableListRegex = Companion.data.UnobtainablePokemon.filter(p => typeof p === 'object').map(p => new RegExp(p));
-
-    const pokemon = pokemonList.filter(p => {
-        if (p.id < 1) {
-            return false;
-        }
-
-        if (PokemonHelper.calcNativeRegion(p.name) > GameConstants.MAX_AVAILABLE_REGION) {
-            return false;
-        }
-
-        if (unobtainableList.includes(p.name) || unobtainableListRegex.some(r => r.test(p.name))) {
-            return false;
-        }
-
-        return true;
-    });
-
-    return pokemon;
-};
-
-const getObtainablePokemonListByRegion = ko.pureComputed(() => {
-    const data = {};
-    getObtainablePokemonList().forEach(p => {
-        const nativeRegion = getPokemonNativeRegion(p.name);
-        data[nativeRegion] = data[nativeRegion] || [];
-        data[nativeRegion].push(p.name);
-    });
-    return data;
-});
 
 const hideFromPokemonStatsTable = (partyPokemon) => {
     return ko.pureComputed(() => {

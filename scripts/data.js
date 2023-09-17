@@ -322,6 +322,37 @@ const friendSafariPokemon = [
     'Urshifu (Rapid Strike)',
 ];
 
+const obtainablePokemonList = (() => {
+    const unobtainableList = UnobtainablePokemon.filter(p => typeof p === 'string');
+    const unobtainableListRegex = UnobtainablePokemon.filter(p => typeof p === 'object').map(p => new RegExp(p));
+
+    const pokemon = pokemonList.filter(p => {
+        if (p.id < 1) {
+            return false;
+        }
+
+        if (PokemonHelper.calcNativeRegion(p.name) > GameConstants.MAX_AVAILABLE_REGION) {
+            return false;
+        }
+
+        if (unobtainableList.includes(p.name) || unobtainableListRegex.some(r => r.test(p.name))) {
+            return false;
+        }
+
+        return true;
+    }).map(p => {
+        if (EventDiscordClientPokemon.includes(p.name)) {
+            p.nativeRegion = PokemonHelper.calcNativeRegion(p.name);
+        } else {
+            p.nativeRegion = pokemonRegionOverride[p.name] || PokemonHelper.calcNativeRegion(p.name);
+        }
+
+        return p;
+    });
+
+    return pokemon;
+})();
+
 const shadowPokemon =
     new Set(Object.values(TownList)
         .filter(t => t.region == GameConstants.Region.hoenn
@@ -349,8 +380,9 @@ module.exports = {
     RouteListOverride,
 
     friendSafariPokemon,
-    shadowPokemon,
 
+    obtainablePokemonList,
+    shadowPokemon,
     validRegions,
     validRegionNames,
     roamerGroups,

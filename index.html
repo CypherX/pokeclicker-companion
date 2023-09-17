@@ -78,11 +78,11 @@
                                             Forecasts
                                         </button>
                                     </li>
-                                    <!--<li class="nav-item">
-                                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#main-tab-vitamins" type="button" role="tab">
+                                    <li class="nav-item">
+                                        <button class="nav-link" id="tab-vitamintracker" data-bs-toggle="pill" data-bs-target="#main-tab-vitamins" type="button" role="tab">
                                             Vitamin Tracker
                                         </button>
-                                    </li>-->
+                                    </li>
                                     <li class="nav-item">
                                         <button class="nav-link" data-bs-toggle="pill" data-bs-target="#main-tab-settings" type="button" role="tab">
                                             Settings
@@ -267,7 +267,6 @@
                                             </table>
                                         </div>
                                     </div>
-                                    
                                 </div>
                             </div>
                             <div class="tab-pane h-100" id="save-tab-stats">
@@ -649,9 +648,88 @@
                             </div>
                         </div>
                     </div>
-                    <!--<div class="tab-pane" id="main-tab-vitamins" role="tabpanel">
-                        <p>vitamin tracker coming soon</p>
-                    </div>-->
+                    <div class="tab-pane h-100 container-xxl" id="main-tab-vitamins">
+                        <div class="d-flex flex-column h-100">
+                            <div class="row align-items-end">
+                                <div class="col-12 col-lg-8 col-md-6 mb-3">
+                                    <div class="row">
+                                        <div class="col-6 col-lg-4 col-sm-6">
+                                            <label class="form-label">Highest Region</label>
+                                            <select class="form-select" data-bind="
+                                                options: Companion.data.validRegions,
+                                                value: VitaminTracker.highestRegion,
+                                                optionsText: (item) => GameConstants.camelCaseToString(GameConstants.Region[item])"></select>
+                                        </div>
+                                        <div class="col-6 col-lg-4 col-sm-6">
+                                            <label class="form-label">Search</label>
+                                            <input class="form-control" type="text" placeholder="Enter # or Name" autocomplete="off">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-4 col-md-6 mb-3">
+                                    <table class="table table-bordered table-sm mb-0" style="font-size: 0.9rem;">
+                                        <thead>
+                                            <tr class="table-dark">
+                                                <th class="text-center">Protein</th>
+                                                <th class="text-center">Calcium</th>
+                                                <th class="text-center">Carbos</th>
+                                                <th class="text-center">Total Coins</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody data-bind="with: VitaminTracker.getTotalVitaminsNeeded">
+                                            <tr>
+                                                <td class="text-center" data-bind="text: vitaminCount[0].toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: vitaminCount[1].toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: vitaminCount[2].toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: totalCost.toLocaleString()"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1" style="overflow: auto;">
+                                <div class="table-responsive h-100" style="overflow: auto;">
+                                    <table class="table table-striped table-hover table-sticky-header mb-0" style="font-size: 0.9rem;">
+                                        <thead>
+                                            <tr class="table-dark fw-normal border-top-0">
+                                                <th class="text-center align-middle" style="width: 0;">#</th>
+                                                <th class="align-middle">Pokémon</th>
+                                                <th class="text-center align-middle" style="width: 10%;">Native Region</th>
+                                                <th class="text-center align-middle" style="width: 5%;">Base Attack</th>
+                                                <th class="text-center align-middle" style="width: 5%;">Attack Bonus</th>
+                                                <th class="text-center align-middle" style="width: 5%;">Egg Steps</th>
+                                                <th class="text-center" style="width: 5%;">Protein To Use</th>
+                                                <th class="text-center" style="width: 5%;">Calcium To Use</th>
+                                                <th class="text-center" style="width: 5%;">Carbos To Use</th>
+                                                <th class="text-center align-middle" style="width: 5%;"><span class="text-nowrap">Bonus w/</span> Vitamins</th>
+                                                <th class="text-center align-middle" style="width: 5%;">Steps w/ Vitamins</th>
+                                                <th class="text-center align-middle" style="width: 5%;">Breeding Efficiency</th>
+                                            </tr>
+                                        </thead>
+                                        <!-- ko with: VitaminTracker.getVitaminPokemonList -->
+                                        <tbody data-bind="foreach: $data">
+                                            <tr data-bind="hidden: VitaminTracker.hideFromVitaminTrackerTable($data)">
+                                                <td class="text-center" data-bind="text: $data.id"></td>
+                                                <td data-bind="text: $data.name"></td>
+                                                <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[$data.nativeRegion])"></td>
+                                                <td class="text-center" data-bind="text: $data.attack"></td>
+                                                <td class="text-center" data-bind="text: $data.baseAttackBonus.toFixed(2).toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: $data.baseEggSteps.toLocaleString()"></td>
+                                                <td class="text-center" style="background: rgba(52, 152, 219, 0.1);" data-bind="text: $data.bestVitamins[0]"></td>
+                                                <td class="text-center" style="background: rgba(231, 76, 60, 0.1);" data-bind="text: $data.bestVitamins[1]"></td>
+                                                <td class="text-center" style="background: rgba(0, 188, 140, 0.1);" data-bind="text: $data.bestVitamins[2]"></td>
+                                                <td class="text-center" data-bind="text: $data.attackBonus.toFixed(2).toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: $data.vitaminEggSteps.toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: $data.breedingEfficiency.toFixed(2).toLocaleString()"></td>
+                                            </tr>
+                                        </tbody>
+                                        <!-- /ko -->
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="tab-pane" id="main-tab-settings">
                         <div class="container-xxl">
                             <div class="row justify-content-center">
@@ -677,6 +755,7 @@
                                                     <select class="form-select form-select-sm" autocomplete="off" data-bind="value: Companion.defaultTab">
                                                         <option value="tab-my-save">My Save</option>
                                                         <option value="tab-forecasts">Forecasts</option>
+                                                        <option value="tab-vitamintracker">Vitamin Tracker</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-text">Choose the default tab to display when opening the Companion.</div>
