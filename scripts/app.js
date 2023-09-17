@@ -50,6 +50,8 @@ const loadSaveData = () => {
 
     revealEnigmaHintsCounter(0);
 
+    VitaminTracker.highestRegion(player.highestRegion());
+
     saveData(saveFile);
 
     if (saveFile.save.profile.name.toLowerCase() == 'bailey') {

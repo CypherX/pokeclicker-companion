@@ -54,6 +54,7 @@ const getBestVitamins = (pokemon, region) => {
 const loadVitaminTrackerTable = ko.observable(false);
 const highestRegion = ko.observable(GameConstants.Region.kanto);
 const searchValue = ko.observable('');
+const hidePokemonOptimalVitamins = ko.observable(false);
 
 const getVitaminPokemonList = ko.pureComputed(() => {
     if (!loadVitaminTrackerTable()) {
@@ -99,6 +100,13 @@ const hideFromVitaminTrackerTable = (pokemon) => {
             }
         }
 
+        if (hidePokemonOptimalVitamins()) {
+            const partyPokemon = Companion.partyList()[pokemon.id];
+            if (partyPokemon && GameHelper.enumNumbers(GameConstants.VitaminType).every((v) => pokemon.bestVitamins[v] == partyPokemon.vitaminsUsed[v]())) {
+                return true;
+            }
+        }
+
         return false;
     });
 };
@@ -110,6 +118,7 @@ $(document).ready(() => {
 module.exports = {
     highestRegion,
     searchValue,
+    hidePokemonOptimalVitamins,
 
     getVitaminPokemonList,
     hideFromVitaminTrackerTable,
