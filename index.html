@@ -317,6 +317,21 @@
                                                                     <td class="align-middle" style="width: 40%; border-left-width: 3px;">Remaining DT For All Dungeon Achievements</td>
                                                                     <td class="text-center align-middle" data-bind="text: Companion.remainingDungeonCost500Clears().toLocaleString()"></td>
                                                                 </tr>
+                                                                <tr>
+                                                                    <td class="align-middle" style="width: 40%;">Most Cleared Dungeons</td>
+                                                                    <td class="text-center align-middle" colspan="3">
+                                                                        <table class="table table-sm">
+                                                                            <tbody>
+                                                                                <tr data-bind="foreach: Companion.getMostClearedDungeons">
+                                                                                    <td class="border-bottom-0 p-0 px-1" data-bind="text: $data.name"></td>
+                                                                                </tr>
+                                                                                <tr data-bind="foreach: Companion.getMostClearedDungeons">
+                                                                                    <td class="small border-bottom-0 p-0 pt-1 px-1" data-bind="text: $data.clears.toLocaleString()"></td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
                                                             </tbody>
                                                         </table>
                                                     </div>

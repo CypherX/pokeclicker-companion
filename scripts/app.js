@@ -307,6 +307,8 @@ const getDungeonData = ko.pureComputed(() => {
     return dungeonData.filter(d => d.region <= GameConstants.MAX_AVAILABLE_REGION).sort((a, b) => a.region - b.region);
 });
 
+const getDungeonDataFlat = ko.pureComputed(() => getDungeonData().flatMap(d => d.dungeons));
+
 const getDungeonClearCount = (dungeon) => {
     if (!isSaveLoaded()) {
         return 0;
@@ -317,19 +319,23 @@ const getDungeonClearCount = (dungeon) => {
 };
 
 const totalDungeonClears = ko.pureComputed(() => {
-    return getDungeonData().flatMap(d => d.dungeons).reduce((sum, dungeon) => sum + dungeon.clears, 0);
+    return getDungeonDataFlat().reduce((sum, dungeon) => sum + dungeon.clears, 0);
 });
 
 const totalDungeonTokensSpent = ko.pureComputed(() => {
-    return getDungeonData().flatMap(d => d.dungeons).reduce((sum, dungeon) => sum + dungeon.clears * dungeon.cost, 0);
+    return getDungeonDataFlat().reduce((sum, dungeon) => sum + dungeon.clears * dungeon.cost, 0);
 });
 
 const totalDungeonCost500Clears = ko.pureComputed(() => {
-    return getDungeonData().flatMap(d => d.dungeons).reduce((sum, dungeon) => sum + (dungeon.cost * 500), 0);
+    return getDungeonDataFlat().reduce((sum, dungeon) => sum + (dungeon.cost * 500), 0);
 });
 
 const remainingDungeonCost500Clears = ko.pureComputed(() => {
-    return getDungeonData().flatMap(d => d.dungeons).reduce((sum, dungeon) => sum + dungeon.remaining, 0);
+    return getDungeonDataFlat().reduce((sum, dungeon) => sum + dungeon.remaining, 0);
+});
+
+const getMostClearedDungeons = ko.pureComputed(() => {
+    return getDungeonDataFlat().sort((a, b) => b.clears - a.clears).slice(0, 5);
 });
 
 const getGymData = ko.pureComputed(() => {
@@ -667,6 +673,7 @@ module.exports = {
     totalDungeonTokensSpent,
     totalDungeonCost500Clears,
     remainingDungeonCost500Clears,
+    getMostClearedDungeons,
 
     getGymData,
     getRouteData,
