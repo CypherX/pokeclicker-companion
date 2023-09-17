@@ -605,6 +605,7 @@ const getEnigmaBerries = ko.pureComputed(() => {
 });
 // Enigma - End
 
+const tabVisited = ko.observable({});
 const activeTab = ko.observable('#main-tab-save');
 
 $(document).ready(() => {
@@ -616,16 +617,13 @@ $(document).ready(() => {
         document.getElementById('file-selector').click();
     });
 
+    $(document).on('shown.bs.tab', 'button[data-bs-toggle="pill"]', (e) => {
+        tabVisited({ ...tabVisited(), [$(e.target).data('bs-target')]: true });
+    });
+
     $('#mainNavbar button.nav-link').on('show.bs.tab', (e) => {
         activeTab($(e.target).data('bs-target'));
     });
-
-    /*const headerResizeObserver = new ResizeObserver(() => {
-        const headerHeight = $('#header').outerHeight(true);
-        //$('#main-content').css('height', `calc(100vh - ${headerHeight}px)`);
-    });
-
-    headerResizeObserver.observe(document.getElementById('header'));*/
 
     $(document).on('click', '#partyPokemonTable thead th.sortable', (e) => {
         const sort = e.target.dataset.sort;
@@ -799,6 +797,7 @@ module.exports = {
     splitArrayAlternating,
     splitArrayChunked,
 
+    tabVisited,
     activeTab,
     defaultTab,
 };
@@ -1393,6 +1392,8 @@ const highestRegion = ko.observable(GameConstants.Region.kanto);
 const searchValue = ko.observable('');
 const hidePokemonOptimalVitamins = ko.observable(false);
 
+hidePokemonOptimalVitamins.subscribe((value) => localStorage.setItem('hidePokemonOptimalVitamins', +value));
+
 const getVitaminPokemonList = ko.pureComputed(() => {
     if (!loadVitaminTrackerTable()) {
         return [];
@@ -1449,6 +1450,10 @@ const hideFromVitaminTrackerTable = (pokemon) => {
 };
 
 $(document).ready(() => {
+    if (+localStorage.getItem('hidePokemonOptimalVitamins')) {
+        hidePokemonOptimalVitamins(true);
+    }
+
     loadVitaminTrackerTable(true);
 });
 

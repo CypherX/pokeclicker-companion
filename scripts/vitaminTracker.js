@@ -56,6 +56,8 @@ const highestRegion = ko.observable(GameConstants.Region.kanto);
 const searchValue = ko.observable('');
 const hidePokemonOptimalVitamins = ko.observable(false);
 
+hidePokemonOptimalVitamins.subscribe((value) => localStorage.setItem('hidePokemonOptimalVitamins', +value));
+
 const getVitaminPokemonList = ko.pureComputed(() => {
     if (!loadVitaminTrackerTable()) {
         return [];
@@ -112,6 +114,10 @@ const hideFromVitaminTrackerTable = (pokemon) => {
 };
 
 $(document).ready(() => {
+    if (+localStorage.getItem('hidePokemonOptimalVitamins')) {
+        hidePokemonOptimalVitamins(true);
+    }
+
     loadVitaminTrackerTable(true);
 });
 
