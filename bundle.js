@@ -159,6 +159,8 @@ const loadSaveData = () => {
 
     revealEnigmaHintsCounter(0);
 
+    VitaminTracker.highestRegion(player.highestRegion());
+
     saveData(saveFile);
 
     if (saveFile.save.profile.name.toLowerCase() == 'bailey') {
@@ -222,7 +224,7 @@ const getMissingPokemon = ko.pureComputed(() => {
         pokemon: []
     };
 
-    getObtainablePokemonList().forEach(p => {
+    Companion.data.obtainablePokemonList.forEach(p => {
         if (caughtPokemon[p.id]) {
             return;
         }
@@ -270,39 +272,6 @@ const getTotalMissingPokemonCount = ko.pureComputed(() => {
 const getPokemonNativeRegion = (pokemonName) => {
     return Companion.data.pokemonRegionOverride[pokemonName] || PokemonHelper.calcNativeRegion(pokemonName);
 };
-
-const getObtainablePokemonList = () => {
-    const unobtainableList = Companion.data.UnobtainablePokemon.filter(p => typeof p === 'string');
-    const unobtainableListRegex = Companion.data.UnobtainablePokemon.filter(p => typeof p === 'object').map(p => new RegExp(p));
-
-    const pokemon = pokemonList.filter(p => {
-        if (p.id < 1) {
-            return false;
-        }
-
-        if (PokemonHelper.calcNativeRegion(p.name) > GameConstants.MAX_AVAILABLE_REGION) {
-            return false;
-        }
-
-        if (unobtainableList.includes(p.name) || unobtainableListRegex.some(r => r.test(p.name))) {
-            return false;
-        }
-
-        return true;
-    });
-
-    return pokemon;
-};
-
-const getObtainablePokemonListByRegion = ko.pureComputed(() => {
-    const data = {};
-    getObtainablePokemonList().forEach(p => {
-        const nativeRegion = getPokemonNativeRegion(p.name);
-        data[nativeRegion] = data[nativeRegion] || [];
-        data[nativeRegion].push(p.name);
-    });
-    return data;
-});
 
 const hideFromPokemonStatsTable = (partyPokemon) => {
     return ko.pureComputed(() => {
@@ -636,6 +605,7 @@ const getEnigmaBerries = ko.pureComputed(() => {
 });
 // Enigma - End
 
+const tabVisited = ko.observable({});
 const activeTab = ko.observable('#main-tab-save');
 
 $(document).ready(() => {
@@ -647,16 +617,13 @@ $(document).ready(() => {
         document.getElementById('file-selector').click();
     });
 
+    $(document).on('shown.bs.tab', 'button[data-bs-toggle="pill"]', (e) => {
+        tabVisited({ ...tabVisited(), [$(e.target).data('bs-target')]: true });
+    });
+
     $('#mainNavbar button.nav-link').on('show.bs.tab', (e) => {
         activeTab($(e.target).data('bs-target'));
     });
-
-    /*const headerResizeObserver = new ResizeObserver(() => {
-        const headerHeight = $('#header').outerHeight(true);
-        //$('#main-content').css('height', `calc(100vh - ${headerHeight}px)`);
-    });
-
-    headerResizeObserver.observe(document.getElementById('header'));*/
 
     $(document).on('click', '#partyPokemonTable thead th.sortable', (e) => {
         const sort = e.target.dataset.sort;
@@ -830,6 +797,7 @@ module.exports = {
     splitArrayAlternating,
     splitArrayChunked,
 
+    tabVisited,
     activeTab,
     defaultTab,
 };
@@ -1159,6 +1127,37 @@ const friendSafariPokemon = [
     'Urshifu (Rapid Strike)',
 ];
 
+const obtainablePokemonList = (() => {
+    const unobtainableList = UnobtainablePokemon.filter(p => typeof p === 'string');
+    const unobtainableListRegex = UnobtainablePokemon.filter(p => typeof p === 'object').map(p => new RegExp(p));
+
+    const pokemon = pokemonList.filter(p => {
+        if (p.id < 1) {
+            return false;
+        }
+
+        if (PokemonHelper.calcNativeRegion(p.name) > GameConstants.MAX_AVAILABLE_REGION) {
+            return false;
+        }
+
+        if (unobtainableList.includes(p.name) || unobtainableListRegex.some(r => r.test(p.name))) {
+            return false;
+        }
+
+        return true;
+    }).map(p => {
+        if (EventDiscordClientPokemon.includes(p.name)) {
+            p.nativeRegion = PokemonHelper.calcNativeRegion(p.name);
+        } else {
+            p.nativeRegion = pokemonRegionOverride[p.name] || PokemonHelper.calcNativeRegion(p.name);
+        }
+
+        return p;
+    });
+
+    return pokemon;
+})();
+
 const shadowPokemon =
     new Set(Object.values(TownList)
         .filter(t => t.region == GameConstants.Region.hoenn
@@ -1186,8 +1185,9 @@ module.exports = {
     RouteListOverride,
 
     friendSafariPokemon,
-    shadowPokemon,
 
+    obtainablePokemonList,
+    shadowPokemon,
     validRegions,
     validRegionNames,
     roamerGroups,
@@ -1331,5 +1331,139 @@ window.Companion = {
 }
 
 window.Forecast = require('./forecast');
+window.VitaminTracker = require('./vitaminTracker');
 
-},{"../pokeclicker/package.json":1,"./app":2,"./data":3,"./forecast":4,"./game":5}]},{},[6]);
+},{"../pokeclicker/package.json":1,"./app":2,"./data":3,"./forecast":4,"./game":5,"./vitaminTracker":7}],7:[function(require,module,exports){
+const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
+    const attackBonusPercent = (GameConstants.BREEDING_ATTACK_BONUS + vitaminsUsed[GameConstants.VitaminType.Calcium]) / 100;
+    const proteinBoost = vitaminsUsed[GameConstants.VitaminType.Protein];
+    return (baseAttack * attackBonusPercent) + proteinBoost;
+}
+
+const calcEggSteps = (vitaminsUsed, eggCycles) => {
+    const div = 300;
+    const extraCycles = (vitaminsUsed[GameConstants.VitaminType.Calcium] + vitaminsUsed[GameConstants.VitaminType.Protein]) / 2;
+    const steps = (eggCycles + extraCycles) * GameConstants.EGG_CYCLE_MULTIPLIER;
+    return steps <= div ? steps : Math.round(((steps / div) ** (1 - vitaminsUsed[GameConstants.VitaminType.Carbos] / 70)) * div);
+}
+
+const getEfficiency = (vitaminsUsed, baseAttack, eggCycles) => {
+    return (getBreedingAttackBonus(vitaminsUsed, baseAttack) / calcEggSteps(vitaminsUsed, eggCycles)) * GameConstants.EGG_CYCLE_MULTIPLIER;
+}
+
+const getBestVitamins = (pokemon, region) => {
+    const baseAttack = pokemon.attack;
+    const eggCycles = pokemon.eggCycles;
+    // Add our initial starting eff here
+    let res = {
+        protein: 0,
+        calcium: 0,
+        carbos: 0,
+        eff: getEfficiency([0,0,0], baseAttack, eggCycles),
+    };
+    vitaminsUsed = {};
+    totalVitamins = (region + 1) * 5;
+    // Unlocked at Unova
+    carbos = (region >= GameConstants.Region.unova ? totalVitamins : 0) + 1;
+    while (carbos-- > 0) {
+        // Unlocked at Hoenn
+        calcium = (region >= GameConstants.Region.hoenn ? totalVitamins - carbos: 0) + 1;
+        while (calcium-- > 0) {
+            protein = (totalVitamins - (carbos + calcium)) + 1;
+            while (protein-- > 0) {
+                const eff = getEfficiency([protein, calcium, carbos], baseAttack, eggCycles);
+                // If the previous result is better than this, no point to continue
+                if (eff < res.eff) break;
+                // Push our data if same or better
+                res = {
+                    protein,
+                    calcium,
+                    carbos,
+                    eff,
+                };
+            }
+        }
+    }
+    return res;
+}
+
+const loadVitaminTrackerTable = ko.observable(false);
+const highestRegion = ko.observable(GameConstants.Region.kanto);
+const searchValue = ko.observable('');
+const hidePokemonOptimalVitamins = ko.observable(false);
+
+hidePokemonOptimalVitamins.subscribe((value) => localStorage.setItem('hidePokemonOptimalVitamins', +value));
+
+const getVitaminPokemonList = ko.pureComputed(() => {
+    if (!loadVitaminTrackerTable()) {
+        return [];
+    }
+
+    const region = highestRegion();
+    const pokemon = [...Companion.data.obtainablePokemonList].filter((p) => p.nativeRegion <= region);
+
+    pokemon.forEach((p) => {
+        p.baseAttackBonus = getBreedingAttackBonus([0,0,0], p.attack);
+        p.baseEggSteps = calcEggSteps([0,0,0], p.eggCycles);
+        const vitamins = getBestVitamins(p, region);
+        p.bestVitamins = [vitamins.protein, vitamins.calcium, vitamins.carbos];
+        p.breedingEfficiency = vitamins.eff;
+        p.vitaminEggSteps = calcEggSteps(p.bestVitamins, p.eggCycles);
+        p.attackBonus = getBreedingAttackBonus(p.bestVitamins, p.attack);
+    });
+    return pokemon;
+});
+
+const getTotalVitaminsNeeded = ko.pureComputed(() => {
+    const vitaminCount = [0, 0, 0];
+
+    getVitaminPokemonList().forEach((p) => {
+        p.bestVitamins.forEach((count, i) => vitaminCount[i] += count);
+    });
+
+    const totalPrice = vitaminCount.reduce((sum, count, i) => {
+        return sum += ItemList[GameConstants.VitaminType[i]].totalPrice(count);
+    }, 0);
+
+    return { vitaminCount: vitaminCount, totalCost: totalPrice };
+});
+
+const hideFromVitaminTrackerTable = (pokemon) => {
+    return ko.pureComputed(() => {
+        const searchVal = searchValue();
+        if (searchVal) {
+            if (!pokemon.id.toString().includes(searchVal)
+                && !pokemon.name.toLowerCase().includes(searchVal)) {
+                return true;
+            }
+        }
+
+        if (hidePokemonOptimalVitamins()) {
+            const partyPokemon = Companion.partyList()[pokemon.id];
+            if (partyPokemon && GameHelper.enumNumbers(GameConstants.VitaminType).every((v) => pokemon.bestVitamins[v] == partyPokemon.vitaminsUsed[v]())) {
+                return true;
+            }
+        }
+
+        return false;
+    });
+};
+
+$(document).ready(() => {
+    if (+localStorage.getItem('hidePokemonOptimalVitamins')) {
+        hidePokemonOptimalVitamins(true);
+    }
+
+    loadVitaminTrackerTable(true);
+});
+
+module.exports = {
+    highestRegion,
+    searchValue,
+    hidePokemonOptimalVitamins,
+
+    getVitaminPokemonList,
+    hideFromVitaminTrackerTable,
+    getTotalVitaminsNeeded,
+};
+},{}]},{},[6]);

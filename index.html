@@ -53,6 +53,10 @@
             .table-sticky-header td:first-child {
                 border-left: 1px solid #444;
             }
+
+            td.bg-vitamin-0 { background: rgba(52, 152, 219, 0.1); }
+            td.bg-vitamin-1 { background: rgba(231, 76, 60, 0.1); }
+            td.bg-vitamin-2 { background: rgba(0, 188, 140, 0.1); }
         </style>
     </head>
     <body>
@@ -78,11 +82,11 @@
                                             Forecasts
                                         </button>
                                     </li>
-                                    <!--<li class="nav-item">
-                                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#main-tab-vitamins" type="button" role="tab">
+                                    <li class="nav-item">
+                                        <button class="nav-link" id="tab-vitamintracker" data-bs-toggle="pill" data-bs-target="#main-tab-vitamins" type="button" role="tab">
                                             Vitamin Tracker
                                         </button>
-                                    </li>-->
+                                    </li>
                                     <li class="nav-item">
                                         <button class="nav-link" data-bs-toggle="pill" data-bs-target="#main-tab-settings" type="button" role="tab">
                                             Settings
@@ -267,7 +271,6 @@
                                             </table>
                                         </div>
                                     </div>
-                                    
                                 </div>
                             </div>
                             <div class="tab-pane h-100" id="save-tab-stats">
@@ -649,9 +652,110 @@
                             </div>
                         </div>
                     </div>
-                    <!--<div class="tab-pane" id="main-tab-vitamins" role="tabpanel">
-                        <p>vitamin tracker coming soon</p>
-                    </div>-->
+                    <div class="tab-pane h-100 container-xxl" id="main-tab-vitamins">
+                        <div class="d-flex flex-column h-100">
+                            <div class="row align-items-center">
+                                <div class="col-12 col-lg-8 col-sm-6">
+                                    <div class="row mb-2">
+                                        <div class="col-6 col-lg-4 col-sm-6">
+                                            <label class="form-label">Highest Region</label>
+                                            <select class="form-select" data-bind="
+                                                options: Companion.data.validRegions,
+                                                value: VitaminTracker.highestRegion,
+                                                optionsText: (item) => GameConstants.camelCaseToString(GameConstants.Region[item])"></select>
+                                        </div>
+                                        <div class="col-6 col-lg-4 col-sm-6">
+                                            <label class="form-label">Search</label>
+                                            <input class="form-control" type="text" placeholder="Enter # or Name" autocomplete="off"
+                                                data-bind="textInput: VitaminTracker.searchValue">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-1" data-bind="visible: Companion.isSaveLoaded">
+                                        <div class="col-12">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch" id="hidePokemonOptimalVitamins" autocomplete="off" data-bind="checked: VitaminTracker.hidePokemonOptimalVitamins">
+                                                <label class="form-check-label" for="hidePokemonOptimalVitamins">Hide Pokémon w/ Optimal Vitamins</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-4 col-sm-6 text-center">
+                                    <label class="form-label mb-0">Total Vitamins Needed</label>
+                                    <table class="table table-bordered table-sm mb-0" style="font-size: 0.9rem;">
+                                        <thead>
+                                            <tr class="table-dark">
+                                                <th class="text-center">Protein</th>
+                                                <th class="text-center">Calcium</th>
+                                                <th class="text-center">Carbos</th>
+                                                <th class="text-center">Total Coins</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody data-bind="with: VitaminTracker.getTotalVitaminsNeeded">
+                                            <tr>
+                                                <td class="text-center" data-bind="text: vitaminCount[0].toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: vitaminCount[1].toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: vitaminCount[2].toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: totalCost.toLocaleString()"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!-- ko ifnot: Companion.isSaveLoaded -->
+                                    <div class="text-end small mt-2">* Load a save file to view the vitamins your Pokémon currently have.</div>
+                                    <!-- /ko -->
+                                </div>
+                            </div>
+                            <!-- ko if: Companion.tabVisited()['#main-tab-vitamins'] -->
+                            <div class="flex-grow-1 mt-2" style="overflow: auto;">
+                                <div class="table-responsive h-100" style="overflow: auto;">
+                                    <table class="table table-striped table-hover table-sticky-header mb-0" style="font-size: 0.9rem;">
+                                        <thead>
+                                            <tr class="table-dark fw-normal border-top-0">
+                                                <th class="text-center align-middle" style="width: 0;">#</th>
+                                                <th class="align-middle">Pokémon</th>
+                                                <th class="text-center align-middle" style="width: 10%;" title="Region this Pokémon can first be obtained.">Region</th>
+                                                <th class="text-center align-middle" style="width: 5%;">Base Attack</th>
+                                                <th class="text-center align-middle" style="width: 5%;" title="Attack gained each breeding cycle with no vitamins.">Attack Bonus</th>
+                                                <th class="text-center align-middle" style="width: 5%;">Egg Steps</th>
+                                                <!-- ko foreach: GameHelper.enumNumbers(GameConstants.VitaminType) -->
+                                                <th class="text-center" style="width: 5%;"  data-bind="text: `${GameConstants.VitaminType[$data]} To Use`"
+                                                    title="Optimal amount of this vitamin to give this Pokémon based on the selected Highest Region. Loading a save file will display the current amount of vitamins alongside the optimal amount."></th>
+                                                <!-- /ko -->
+                                                <th class="text-center align-middle" style="width: 5%;" title="Attack gained each breeding cycle with optimal vitamins.">
+                                                    <span class="text-nowrap">Bonus w/</span> Vitamins
+                                                </th>
+                                                <th class="text-center align-middle" style="width: 5%;">Steps w/ Vitamins</th>
+                                                <th class="text-center align-middle" style="width: 5%;">Breeding Efficiency</th>
+                                            </tr>
+                                        </thead>
+                                        <!-- ko with: VitaminTracker.getVitaminPokemonList -->
+                                        <tbody data-bind="foreach: $data">
+                                            <tr data-bind="hidden: VitaminTracker.hideFromVitaminTrackerTable($data)">
+                                                <td class="text-center" data-bind="text: $data.id"></td>
+                                                <td data-bind="text: $data.name"></td>
+                                                <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[$data.nativeRegion])"></td>
+                                                <td class="text-center" data-bind="text: $data.attack"></td>
+                                                <td class="text-center" data-bind="text: $data.baseAttackBonus.toFixed(2).toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: $data.baseEggSteps.toLocaleString()"></td>
+                                                <!-- ko foreach: GameHelper.enumNumbers(GameConstants.VitaminType) -->
+                                                <td class="text-center" data-bind="class: `bg-vitamin-${$data}`">
+                                                    <!-- ko if: Companion.isSaveLoaded && Companion.partyList()[$parent.id] -->
+                                                    <span data-bind="text: `${Companion.partyList()[$parent.id].vitaminsUsed[$data]()} | `"></span>
+                                                    <!-- /ko -->
+                                                    <span data-bind="text: $parent.bestVitamins[$data]"></span>
+                                                </td>
+                                                <!-- /ko -->
+                                                <td class="text-center" data-bind="text: $data.attackBonus.toFixed(2).toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: $data.vitaminEggSteps.toLocaleString()"></td>
+                                                <td class="text-center" data-bind="text: $data.breedingEfficiency.toFixed(2).toLocaleString()"></td>
+                                            </tr>
+                                        </tbody>
+                                        <!-- /ko -->
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- /ko -->
+                        </div>
+                    </div>
                     <div class="tab-pane" id="main-tab-settings">
                         <div class="container-xxl">
                             <div class="row justify-content-center">
@@ -660,7 +764,7 @@
                                         <div class="card-body">
                                             <div class="d-flex flex-column mb-4">
                                                 <div class="form-check form-switch mx-auto">
-                                                    <input class="form-check-input" type="checkbox" role="switch" id="hideAlternateCheck" autocomplete="off"  data-bind="checked: Companion.showRequiredOnly">
+                                                    <input class="form-check-input" type="checkbox" role="switch" id="hideAlternateCheck" autocomplete="off" data-bind="checked: Companion.showRequiredOnly">
                                                     <label class="form-check-label" for="hideAlternateCheck">Show Required Pokémon Only</label>
                                                 </div>
                                                 <div class="form-text">Limit the Missing Pokémon section to show what is required to complete each regional Pokédex.</div>
@@ -677,6 +781,7 @@
                                                     <select class="form-select form-select-sm" autocomplete="off" data-bind="value: Companion.defaultTab">
                                                         <option value="tab-my-save">My Save</option>
                                                         <option value="tab-forecasts">Forecasts</option>
+                                                        <option value="tab-vitamintracker">Vitamin Tracker</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-text">Choose the default tab to display when opening the Companion.</div>

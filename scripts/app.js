@@ -50,6 +50,8 @@ const loadSaveData = () => {
 
     revealEnigmaHintsCounter(0);
 
+    VitaminTracker.highestRegion(player.highestRegion());
+
     saveData(saveFile);
 
     if (saveFile.save.profile.name.toLowerCase() == 'bailey') {
@@ -113,7 +115,7 @@ const getMissingPokemon = ko.pureComputed(() => {
         pokemon: []
     };
 
-    getObtainablePokemonList().forEach(p => {
+    Companion.data.obtainablePokemonList.forEach(p => {
         if (caughtPokemon[p.id]) {
             return;
         }
@@ -161,39 +163,6 @@ const getTotalMissingPokemonCount = ko.pureComputed(() => {
 const getPokemonNativeRegion = (pokemonName) => {
     return Companion.data.pokemonRegionOverride[pokemonName] || PokemonHelper.calcNativeRegion(pokemonName);
 };
-
-const getObtainablePokemonList = () => {
-    const unobtainableList = Companion.data.UnobtainablePokemon.filter(p => typeof p === 'string');
-    const unobtainableListRegex = Companion.data.UnobtainablePokemon.filter(p => typeof p === 'object').map(p => new RegExp(p));
-
-    const pokemon = pokemonList.filter(p => {
-        if (p.id < 1) {
-            return false;
-        }
-
-        if (PokemonHelper.calcNativeRegion(p.name) > GameConstants.MAX_AVAILABLE_REGION) {
-            return false;
-        }
-
-        if (unobtainableList.includes(p.name) || unobtainableListRegex.some(r => r.test(p.name))) {
-            return false;
-        }
-
-        return true;
-    });
-
-    return pokemon;
-};
-
-const getObtainablePokemonListByRegion = ko.pureComputed(() => {
-    const data = {};
-    getObtainablePokemonList().forEach(p => {
-        const nativeRegion = getPokemonNativeRegion(p.name);
-        data[nativeRegion] = data[nativeRegion] || [];
-        data[nativeRegion].push(p.name);
-    });
-    return data;
-});
 
 const hideFromPokemonStatsTable = (partyPokemon) => {
     return ko.pureComputed(() => {
@@ -527,6 +496,7 @@ const getEnigmaBerries = ko.pureComputed(() => {
 });
 // Enigma - End
 
+const tabVisited = ko.observable({});
 const activeTab = ko.observable('#main-tab-save');
 
 $(document).ready(() => {
@@ -538,16 +508,13 @@ $(document).ready(() => {
         document.getElementById('file-selector').click();
     });
 
+    $(document).on('shown.bs.tab', 'button[data-bs-toggle="pill"]', (e) => {
+        tabVisited({ ...tabVisited(), [$(e.target).data('bs-target')]: true });
+    });
+
     $('#mainNavbar button.nav-link').on('show.bs.tab', (e) => {
         activeTab($(e.target).data('bs-target'));
     });
-
-    /*const headerResizeObserver = new ResizeObserver(() => {
-        const headerHeight = $('#header').outerHeight(true);
-        //$('#main-content').css('height', `calc(100vh - ${headerHeight}px)`);
-    });
-
-    headerResizeObserver.observe(document.getElementById('header'));*/
 
     $(document).on('click', '#partyPokemonTable thead th.sortable', (e) => {
         const sort = e.target.dataset.sort;
@@ -721,6 +688,7 @@ module.exports = {
     splitArrayAlternating,
     splitArrayChunked,
 
+    tabVisited,
     activeTab,
     defaultTab,
 };
