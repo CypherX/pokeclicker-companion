@@ -651,7 +651,7 @@
                     <div class="tab-pane h-100 container-xxl" id="main-tab-vitamins">
                         <div class="d-flex flex-column h-100">
                             <div class="row align-items-end">
-                                <div class="col-12 col-lg-8 col-md-6 mb-3">
+                                <div class="col-12 col-lg-8 col-sm-6 mb-3">
                                     <div class="row">
                                         <div class="col-6 col-lg-4 col-sm-6">
                                             <label class="form-label">Highest Region</label>
@@ -662,11 +662,12 @@
                                         </div>
                                         <div class="col-6 col-lg-4 col-sm-6">
                                             <label class="form-label">Search</label>
-                                            <input class="form-control" type="text" placeholder="Enter # or Name" autocomplete="off">
+                                            <input class="form-control" type="text" placeholder="Enter # or Name" autocomplete="off"
+                                                data-bind="textInput: VitaminTracker.searchValue">
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12 col-lg-4 col-md-6 mb-3">
+                                <div class="col-12 col-lg-4 col-sm-6 mb-3">
                                     <table class="table table-bordered table-sm mb-0" style="font-size: 0.9rem;">
                                         <thead>
                                             <tr class="table-dark">
@@ -686,6 +687,7 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <!-- hide pokemon w/ optimal vitamins -->
                             </div>
 
                             <div class="flex-grow-1" style="overflow: auto;">
@@ -695,7 +697,7 @@
                                             <tr class="table-dark fw-normal border-top-0">
                                                 <th class="text-center align-middle" style="width: 0;">#</th>
                                                 <th class="align-middle">Pokémon</th>
-                                                <th class="text-center align-middle" style="width: 10%;">Native Region</th>
+                                                <th class="text-center align-middle" style="width: 10%;">Region</th>
                                                 <th class="text-center align-middle" style="width: 5%;">Base Attack</th>
                                                 <th class="text-center align-middle" style="width: 5%;">Attack Bonus</th>
                                                 <th class="text-center align-middle" style="width: 5%;">Egg Steps</th>
