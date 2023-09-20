@@ -55,8 +55,10 @@ const loadVitaminTrackerTable = ko.observable(false);
 const highestRegion = ko.observable(GameConstants.Region.kanto);
 const searchValue = ko.observable('');
 const hidePokemonOptimalVitamins = ko.observable(false);
+const hideUncaughtPokemon = ko.observable(false);
 
 hidePokemonOptimalVitamins.subscribe((value) => localStorage.setItem('hidePokemonOptimalVitamins', +value));
+hideUncaughtPokemon.subscribe((value) => localStorage.setItem('hideUncaughtPokemon', +value));
 
 const getVitaminPokemonList = ko.pureComputed(() => {
     if (!loadVitaminTrackerTable()) {
@@ -102,8 +104,13 @@ const hideFromVitaminTrackerTable = (pokemon) => {
             }
         }
 
+        const partyPokemon = Companion.partyList()[pokemon.id];
+
+        if (Companion.isSaveLoaded() && hideUncaughtPokemon() && !partyPokemon) {
+            return true;
+        }
+
         if (hidePokemonOptimalVitamins()) {
-            const partyPokemon = Companion.partyList()[pokemon.id];
             if (partyPokemon && GameHelper.enumNumbers(GameConstants.VitaminType).every((v) => pokemon.bestVitamins[v] == partyPokemon.vitaminsUsed[v]())) {
                 return true;
             }
@@ -118,6 +125,10 @@ $(document).ready(() => {
         hidePokemonOptimalVitamins(true);
     }
 
+    if (+localStorage.getItem('hideUncaughtPokemon')) {
+        hideUncaughtPokemon(true);
+    }
+
     loadVitaminTrackerTable(true);
 });
 
@@ -125,6 +136,7 @@ module.exports = {
     highestRegion,
     searchValue,
     hidePokemonOptimalVitamins,
+    hideUncaughtPokemon,
 
     getVitaminPokemonList,
     hideFromVitaminTrackerTable,
