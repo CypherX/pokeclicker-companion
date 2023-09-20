@@ -400,7 +400,7 @@
                                                 <div class="card-body p-0">
                                                     <table class="table table-bordered table-striped table-hover table-sm mb-0">
                                                         <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `gyms-clears-collapse-${$index()}` }">
-                                                            <!-- ko foreach: Companion.arrayToWhatever($data.gyms) -->
+                                                            <!-- ko foreach: Util.arrayToWhatever($data.gyms) -->
                                                             <tr class="dungeon-clears-row">
                                                                 <td class="align-middle" data-bind="text: GymList[$data[0].name].displayName || $data[0].name"></td>
                                                                 <td class="text-center align-middle" data-bind="text: $data[0].clears.toLocaleString()"></td>
@@ -429,7 +429,7 @@
                                                 <div class="card-body p-0">
                                                     <table class="table table-bordered table-striped table-hover table-sm mb-0">
                                                         <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `route-defeats-collapse-${$index()}` }">
-                                                            <!-- ko foreach: Companion.arrayToWhatever($data.routes) -->
+                                                            <!-- ko foreach: Util.arrayToWhatever($data.routes) -->
                                                             <tr class="dungeon-clears-row">
                                                                 <td class="align-middle" data-bind="text: $data[0].routeName"></td>
                                                                 <td class="text-center align-middle" data-bind="text: $data[0].defeats.toLocaleString()"></td>
@@ -518,7 +518,7 @@
                                             <tr>
                                                 <th class="table-dark"></th>
                                                 <!-- ko foreach: $data -->
-                                                <th class="table-dark text-center" data-bind="text: Companion.formatDate($data.startDate)"></th>
+                                                <th class="table-dark text-center" data-bind="text: Util.formatDate($data.startDate)"></th>
                                                 <!-- /ko -->
                                             </tr>
                                         </thead>
@@ -549,7 +549,7 @@
                                                         <tr>
                                                             <td class="text-center" data-bind="text: $data"></td>
                                                             <!-- ko with: Forecast.unownForecast().find(f => f.unowns.some(u => u == $data)) -->
-                                                            <td class="text-center" data-bind="text: Companion.formatDate($data.startDate)"></td>
+                                                            <td class="text-center" data-bind="text: Util.formatDate($data.startDate)"></td>
                                                             <td class="text-center" data-bind="text: Companion.data.unownDungeonList[$data.unowns.findIndex(u => u == $parent)]"></td>
                                                             <!-- /ko -->
                                                         </tr>
@@ -574,7 +574,7 @@
                                                             <td class="text-center" data-bind="text: $data"></td>
                                                             <!-- ko foreach: Companion.data.unownDungeonList -->
                                                             <td class="text-center" data-bind="
-                                                                text: Companion.formatDate(Forecast.unownForecast().find(f => f.unowns[$index()] == $parent)?.startDate) || '-'"></td>
+                                                                text: Util.formatDate(Forecast.unownForecast().find(f => f.unowns[$index()] == $parent)?.startDate) || '-'"></td>
                                                             <!-- /ko -->
                                                         </tr>
                                                     </tbody>
@@ -605,9 +605,9 @@
                                             <!-- ko foreach: $data -->
                                             <tr>
                                                 <!-- ko if: $index() == 0 -->
-                                                <td class="text-center align-middle" data-bind="text: Companion.formatDate($data.startDate), attr: { rowspan: $parent.length }"></td>
+                                                <td class="text-center align-middle" data-bind="text: Util.formatDate($data.startDate), attr: { rowspan: $parent.length }"></td>
                                                 <!-- /ko -->
-                                                <td class="text-center text-nowrap" data-bind="text: `${Companion.formatTime24Hours($data.startDate)} - ${Companion.formatTime24Hours(Companion.dateAddHours($data.startDate, Weather.period))}`"></td>
+                                                <td class="text-center text-nowrap" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, Weather.period))}`"></td>
                                                 <!-- ko foreach: Companion.data.validRegions -->
                                                 <td class="text-center text-dark" data-bind="text: WeatherType[$parent.regionalWeather[$data]], style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
                                                 <!-- /ko -->
@@ -631,7 +631,7 @@
                                             <tr>
                                                 <td class="align-middle text-dark" data-bind="text: WeatherType[$data], style: { 'background-color': Weather.weatherConditions[$data].color }"></td>
                                                 <!-- ko foreach: Companion.data.validRegions -->
-                                                <td class="text-center align-middle" data-bind="text: Companion.formatDateTime(Forecast.getNextWeatherDate($data, $parent)) || '-'"></td>
+                                                <td class="text-center align-middle" data-bind="text: Util.formatDateTime(Forecast.getNextWeatherDate($data, $parent)) || '-'"></td>
                                                 <!-- /ko -->
                                             </tr>
                                         </tbody>
@@ -645,12 +645,12 @@
                                             <tr>
                                                 <th rowspan="2"></th>
                                                 <!-- ko foreach: Forecast.boostedRoutes -->
-                                                <th class="text-center table-dark" data-bind="text: Companion.formatDate($data.startDate)"></th>
+                                                <th class="text-center table-dark" data-bind="text: Util.formatDate($data.startDate)"></th>
                                                 <!-- /ko -->
                                             </tr>
                                             <tr class="table-dark small">
                                                 <!-- ko foreach: Forecast.boostedRoutes -->
-                                                <th class="text-center" data-bind="text: `${Companion.formatTime24Hours($data.startDate)} - ${Companion.formatTime24Hours(Companion.dateAddHours($data.startDate, RoamingPokemonList.period))}`"></th>
+                                                <th class="text-center" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, RoamingPokemonList.period))}`"></th>
                                                 <!-- /ko -->
                                             </tr>
                                         </thead>
@@ -757,7 +757,7 @@
                                                 <td class="text-center" data-bind="text: $data.baseEggSteps.toLocaleString()"></td>
                                                 <!-- ko foreach: GameHelper.enumNumbers(GameConstants.VitaminType) -->
                                                 <td class="text-center" data-bind="class: `bg-vitamin-${$data}`">
-                                                    <!-- ko if: Companion.isSaveLoaded && Companion.partyList()[$parent.id] -->
+                                                    <!-- ko if: Companion.partyList()[$parent.id] -->
                                                     <span data-bind="text: `${Companion.partyList()[$parent.id].vitaminsUsed[$data]()} | `"></span>
                                                     <!-- /ko -->
                                                     <span data-bind="text: $parent.bestVitamins[$data]"></span>

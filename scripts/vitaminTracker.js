@@ -61,7 +61,7 @@ hidePokemonOptimalVitamins.subscribe((value) => localStorage.setItem('hidePokemo
 hideUncaughtPokemon.subscribe((value) => localStorage.setItem('hideUncaughtPokemon', +value));
 
 const getVitaminPokemonList = ko.pureComputed(() => {
-    if (!loadVitaminTrackerTable()) {
+    if (!loadVitaminTrackerTable()) { // wait until document ready to load
         return [];
     }
 

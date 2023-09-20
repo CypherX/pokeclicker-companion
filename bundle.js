@@ -660,30 +660,6 @@ $(document).ready(() => {
     Forecast.generateForecasts();
 });
 
-const arrayToWhatever = (array) => {
-    const newArray = [];
-    for (let i = 0; i < array.length; i += 2) {
-        newArray.push([array[i], array?.[i+1] ]);
-    }
-    return newArray;
-};
-
-const splitArrayAlternating = (array, n = 2) => {
-    const newArray = Array.from({ length: n }, _ => []);
-    for (let i = 0; i < array.length; i++) {
-        newArray[i % n].push(array[i]);
-    }
-
-    return newArray;
-};
-
-const splitArrayChunked = (array, n = 2) => {
-    const remainder = array.length % n;
-    const size = Math.floor(array.length / n);
-    let j = 0;
-    return Array.from({ length: n }, (_, i) => array.slice(j, j += size + (i < remainder)));
-};
-
 function compareBy(sortOption, direction) {
     return function (a, b) {
         let res, dir = direction ? -1 : 1;
@@ -729,27 +705,6 @@ function getSortValue(sortOption, partyPokemon) {
     }
 }
 
-const dateAddHours = (startDate, hours) => {
-    const date = new Date(startDate);
-    date.setHours(date.getHours() + hours);
-    return date;
-};
-
-const formatTime24Hours = (date) => {
-    if (!date) return undefined;
-    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-};
-
-const formatDate = (date) => {
-    if (!date) return undefined;
-    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-};
-
-const formatDateTime = (date) => {
-    if (!date) return undefined;
-    return `${formatDate(date)} ${formatTime24Hours(date)}`;
-};
-
 module.exports = {
     saveData,
     showRequiredOnly,
@@ -794,15 +749,6 @@ module.exports = {
     revealEnigmaHintsButtonClick,
 
     getFriendSafariForecast,
-
-    formatDate,
-    formatDateTime,
-    formatTime24Hours,
-    dateAddHours,
-
-    arrayToWhatever,
-    splitArrayAlternating,
-    splitArrayChunked,
 
     tabVisited,
     activeTab,
@@ -1339,8 +1285,65 @@ window.Companion = {
 
 window.Forecast = require('./forecast');
 window.VitaminTracker = require('./vitaminTracker');
+window.Util = require('./util');
 
-},{"../pokeclicker/package.json":1,"./app":2,"./data":3,"./forecast":4,"./game":5,"./vitaminTracker":7}],7:[function(require,module,exports){
+},{"../pokeclicker/package.json":1,"./app":2,"./data":3,"./forecast":4,"./game":5,"./util":7,"./vitaminTracker":8}],7:[function(require,module,exports){
+const formatDate = (date) => {
+    if (!date) return undefined;
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+};
+
+const formatDateTime = (date) => {
+    if (!date) return undefined;
+    return `${formatDate(date)} ${formatTime24Hours(date)}`;
+};
+
+const formatTime24Hours = (date) => {
+    if (!date) return undefined;
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+};
+
+const dateAddHours = (startDate, hours) => {
+    const date = new Date(startDate);
+    date.setHours(date.getHours() + hours);
+    return date;
+};
+
+const arrayToWhatever = (array) => {
+    const newArray = [];
+    for (let i = 0; i < array.length; i += 2) {
+        newArray.push([array[i], array?.[i+1] ]);
+    }
+    return newArray;
+};
+
+const splitArrayAlternating = (array, n = 2) => {
+    const newArray = Array.from({ length: n }, _ => []);
+    for (let i = 0; i < array.length; i++) {
+        newArray[i % n].push(array[i]);
+    }
+
+    return newArray;
+};
+
+const splitArrayChunked = (array, n = 2) => {
+    const remainder = array.length % n;
+    const size = Math.floor(array.length / n);
+    let j = 0;
+    return Array.from({ length: n }, (_, i) => array.slice(j, j += size + (i < remainder)));
+};
+
+module.exports = {
+    formatDate,
+    formatDateTime,
+    formatTime24Hours,
+    dateAddHours,
+
+    arrayToWhatever,
+    splitArrayAlternating,
+    splitArrayChunked,
+};
+},{}],8:[function(require,module,exports){
 const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
     const attackBonusPercent = (GameConstants.BREEDING_ATTACK_BONUS + vitaminsUsed[GameConstants.VitaminType.Calcium]) / 100;
     const proteinBoost = vitaminsUsed[GameConstants.VitaminType.Protein];
@@ -1404,7 +1407,7 @@ hidePokemonOptimalVitamins.subscribe((value) => localStorage.setItem('hidePokemo
 hideUncaughtPokemon.subscribe((value) => localStorage.setItem('hideUncaughtPokemon', +value));
 
 const getVitaminPokemonList = ko.pureComputed(() => {
-    if (!loadVitaminTrackerTable()) {
+    if (!loadVitaminTrackerTable()) { // wait until document ready to load
         return [];
     }
 
