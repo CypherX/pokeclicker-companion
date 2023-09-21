@@ -726,27 +726,27 @@
                             <!-- ko if: Companion.tabVisited()['#main-tab-vitamins'] -->
                             <div class="flex-grow-1 mt-2" style="overflow: auto;">
                                 <div class="table-responsive h-100" style="overflow: auto;">
-                                    <table class="table table-striped table-hover table-sticky-header mb-0" style="font-size: 0.9rem;">
+                                    <table class="table table-striped table-hover table-sticky-header mb-0" style="font-size: 0.9rem;" id="vitaminTrackerTable">
                                         <thead>
                                             <tr class="table-dark fw-normal border-top-0">
-                                                <th class="text-center align-middle" style="width: 0;">#</th>
-                                                <th class="align-middle">Pokémon</th>
+                                                <th class="text-center align-middle sortable" data-sort="id" style="width: 0;">#</th>
+                                                <th class="align-middle sortable" data-sort="name">Pokémon</th>
                                                 <th class="text-center align-middle" style="width: 10%;" title="Region this Pokémon can first be obtained.">Region</th>
-                                                <th class="text-center align-middle" style="width: 5%;">Base Attack</th>
-                                                <th class="text-center align-middle" style="width: 5%;" title="Attack gained each breeding cycle with no vitamins.">Attack Bonus</th>
-                                                <th class="text-center align-middle" style="width: 5%;">Egg Steps</th>
+                                                <th class="text-center align-middle sortable" data-sort="base-attack" style="width: 5%;">Base Attack</th>
+                                                <th class="text-center align-middle sortable" data-sort="base-bonus" style="width: 5%;" title="Attack gained each breeding cycle with no vitamins.">Attack Bonus</th>
+                                                <th class="text-center align-middle sortable" data-sort="base-steps" style="width: 5%;">Egg Steps</th>
                                                 <!-- ko foreach: GameHelper.enumNumbers(GameConstants.VitaminType) -->
-                                                <th class="text-center" style="width: 5%;"  data-bind="text: `${GameConstants.VitaminType[$data]} To Use`"
+                                                <th class="text-center" style="width: 5%;" data-bind="text: `${GameConstants.VitaminType[$data]} To Use`"
                                                     title="Optimal amount of this vitamin to give this Pokémon based on the selected Highest Region. Loading a save file will display the current amount of vitamins alongside the optimal amount."></th>
                                                 <!-- /ko -->
-                                                <th class="text-center align-middle" style="width: 5%;" title="Attack gained each breeding cycle with optimal vitamins.">
+                                                <th class="text-center align-middle sortable" data-sort="vitamin-bonus" style="width: 5%;" title="Attack gained each breeding cycle with optimal vitamins.">
                                                     <span class="text-nowrap">Bonus w/</span> Vitamins
                                                 </th>
-                                                <th class="text-center align-middle" style="width: 5%;">Steps w/ Vitamins</th>
-                                                <th class="text-center align-middle" style="width: 5%;">Breeding Efficiency</th>
+                                                <th class="text-center align-middle sortable" data-sort="vitamin-steps" style="width: 5%;">Steps w/ Vitamins</th>
+                                                <th class="text-center align-middle sortable" data-sort="breeding-efficiency" style="width: 5%;">Breeding Efficiency</th>
                                             </tr>
                                         </thead>
-                                        <!-- ko with: VitaminTracker.getVitaminPokemonList -->
+                                        <!-- ko with: VitaminTracker.getSortedVitaminList -->
                                         <tbody data-bind="foreach: $data">
                                             <tr data-bind="hidden: VitaminTracker.hideFromVitaminTrackerTable($data)">
                                                 <td class="text-center" data-bind="text: $data.id"></td>

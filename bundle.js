@@ -632,7 +632,7 @@ $(document).ready(() => {
     });
 
     $(document).on('click', '#partyPokemonTable thead th.sortable', (e) => {
-        const sort = e.target.dataset.sort;
+        const sort = e.currentTarget.dataset.sort;
         if (pokemonStatTableSort() == sort) {
             pokemonStatTableSortDir(!pokemonStatTableSortDir());
         } else {
@@ -1406,6 +1406,9 @@ const hideUncaughtPokemon = ko.observable(false);
 hidePokemonOptimalVitamins.subscribe((value) => localStorage.setItem('hidePokemonOptimalVitamins', +value));
 hideUncaughtPokemon.subscribe((value) => localStorage.setItem('hideUncaughtPokemon', +value));
 
+const tableSort = ko.observable('id');
+const tableSortDir = ko.observable(false);
+
 const getVitaminPokemonList = ko.pureComputed(() => {
     if (!loadVitaminTrackerTable()) { // wait until document ready to load
         return [];
@@ -1425,6 +1428,55 @@ const getVitaminPokemonList = ko.pureComputed(() => {
     });
     return pokemon;
 });
+
+const getSortedVitaminList = ko.pureComputed(() => {
+    const sortOption = tableSort();
+    const sortDirection = tableSortDir();
+    return Object.values(getVitaminPokemonList()).sort(compareBy(sortOption, sortDirection));
+});
+
+function compareBy(sortOption, direction) {
+    return function (a, b) {
+        let res, dir = direction ? -1 : 1;
+
+        const aValue = getSortValue(sortOption, a);
+        const bValue = getSortValue(sortOption, b);
+        
+        if (aValue == bValue) {
+            return a.id - b.id;
+        } else if (aValue < bValue) {
+            res = -1;
+        } else if (aValue > bValue) {
+            res = 1;
+        } else {
+            res = 0;
+        }
+
+        return res * dir;
+    }
+}
+
+function getSortValue(sortOption, pokemon) {
+    switch (sortOption) {
+        case 'name':
+            return pokemon.name;
+        case 'base-attack':
+            return pokemon.attack;
+        case 'base-bonus':
+            return pokemon.baseAttackBonus;
+        case 'base-steps':
+            return pokemon.baseEggSteps;
+        case 'vitamin-bonus':
+            return pokemon.attackBonus;
+        case 'vitamin-steps':
+            return pokemon.vitaminEggSteps;
+        case 'breeding-efficiency':
+            return pokemon.breedingEfficiency;
+        case 'id':
+        default:
+            return pokemon.id;
+    }
+}
 
 const getTotalVitaminsNeeded = ko.pureComputed(() => {
     const vitaminCount = [0, 0, 0];
@@ -1475,6 +1527,17 @@ $(document).ready(() => {
         hideUncaughtPokemon(true);
     }
 
+    $(document).on('click', '#vitaminTrackerTable thead th.sortable', (e) => {
+        const sort = e.currentTarget.dataset.sort;
+        console.log(sort);
+        if (tableSort() == sort) {
+            tableSortDir(!tableSortDir());
+        } else {
+            tableSort(sort);
+            tableSortDir(true);
+        }
+    });
+
     loadVitaminTrackerTable(true);
 });
 
@@ -1484,7 +1547,7 @@ module.exports = {
     hidePokemonOptimalVitamins,
     hideUncaughtPokemon,
 
-    getVitaminPokemonList,
+    getSortedVitaminList,
     hideFromVitaminTrackerTable,
     getTotalVitaminsNeeded,
 };

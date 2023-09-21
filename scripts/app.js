@@ -523,7 +523,7 @@ $(document).ready(() => {
     });
 
     $(document).on('click', '#partyPokemonTable thead th.sortable', (e) => {
-        const sort = e.target.dataset.sort;
+        const sort = e.currentTarget.dataset.sort;
         if (pokemonStatTableSort() == sort) {
             pokemonStatTableSortDir(!pokemonStatTableSortDir());
         } else {
