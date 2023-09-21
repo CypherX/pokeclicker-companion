@@ -748,21 +748,16 @@
                                         </thead>
                                         <!-- ko with: VitaminTracker.getSortedVitaminList -->
                                         <tbody data-bind="foreach: $data">
-                                            <tr data-bind="hidden: VitaminTracker.hideFromVitaminTrackerTable($data)">
+                                            <tr>
                                                 <td class="text-center" data-bind="text: $data.id"></td>
                                                 <td data-bind="text: $data.name"></td>
                                                 <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[$data.nativeRegion])"></td>
                                                 <td class="text-center" data-bind="text: $data.attack"></td>
                                                 <td class="text-center" data-bind="text: $data.baseAttackBonus.toFixed(2).toLocaleString()"></td>
                                                 <td class="text-center" data-bind="text: $data.baseEggSteps.toLocaleString()"></td>
-                                                <!-- ko foreach: GameHelper.enumNumbers(GameConstants.VitaminType) -->
-                                                <td class="text-center" data-bind="class: `bg-vitamin-${$data}`">
-                                                    <!-- ko if: Companion.partyList()[$parent.id] -->
-                                                    <span data-bind="text: `${Companion.partyList()[$parent.id].vitaminsUsed[$data]()} | `"></span>
-                                                    <!-- /ko -->
-                                                    <span data-bind="text: $parent.bestVitamins[$data]"></span>
-                                                </td>
-                                                <!-- /ko -->
+                                                <td class="text-center bg-vitamin-0" data-bind="text: $data.vitaminText[0]"></td>
+                                                <td class="text-center bg-vitamin-1" data-bind="text: $data.vitaminText[1]"></td>
+                                                <td class="text-center bg-vitamin-2" data-bind="text: $data.vitaminText[2]"></td>
                                                 <td class="text-center" data-bind="text: $data.attackBonus.toFixed(2).toLocaleString()"></td>
                                                 <td class="text-center" data-bind="text: $data.vitaminEggSteps.toLocaleString()"></td>
                                                 <td class="text-center" data-bind="text: $data.breedingEfficiency.toFixed(2).toLocaleString()"></td>
@@ -815,7 +810,7 @@
             </div>
         </div>
 
-        <script src="bundle.js?v=20230920"></script>
+        <script src="bundle.js?v=20230920-1"></script>
     </body>
 </html>
 
