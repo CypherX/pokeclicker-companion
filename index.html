@@ -232,6 +232,9 @@
                                                     <tr class="table-dark fw-normal border-top-0">
                                                         <th class="text-center sortable" data-sort="id" style="width: 5%;">#</th>
                                                         <th class="sortable" data-sort="name">Pokémon</th>
+                                                        <th class="text-center sortable" data-sort="attack" style="width: 5%;">Attack</th>
+                                                        <th class="text-center sortable text-nowrap" data-sort="base-breeding-eff" style="width: 5%;" title="Base Breeding Efficiency - includes vitamins.">Base BE</th>
+                                                        <th class="text-center sortable text-nowrap" data-sort="breeding-eff" style="width: 5%;" title="Calculated Breeding Efficiency - includes vitamins, EVs, held item, and shadow/purification.">BE</th>
                                                         <th class="text-center sortable" data-sort="obtained" style="width: 5%;">Obtained</th>
                                                         <th class="text-center sortable" data-sort="hatched" style="width: 5%;">Hatched</th>
                                                         <th class="text-center sortable" data-sort="shiny-obtained" style="width: 5%; white-space: nowrap;">&#10024; Obtained</th>
@@ -241,8 +244,8 @@
                                                         <th class="text-center sortable" data-sort="ev-bonus" style="width: 5%; white-space: nowrap;">EV Bonus</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody data-bind="foreach: Companion.getSortedPartyList()">
-                                                    <tr data-bind="hidden: Companion.hideFromPokemonStatsTable($data)()">
+                                                <tbody data-bind="foreach: Companion.getSortedPartyList">
+                                                    <tr data-bind="hidden: Companion.hideFromPokemonStatsTable($data)">
                                                         <td class="text-center" data-bind="text: $data.id"></td>
                                                         <td>
                                                             <span data-bind="text: $data.name"></span>
@@ -259,6 +262,9 @@
                                                                 <!-- /ko -->
                                                             </span>
                                                         </td>
+                                                        <td class="text-center" data-bind="text: $data.totalAttack.toLocaleString()"></td>
+                                                        <td class="text-center" data-bind="text: $data.baseBreedingEff.toFixed(3).toLocaleString()"></td>
+                                                        <td class="text-center" data-bind="text: $data.breedingEff.toFixed(3).toLocaleString()"></td>
                                                         <td class="text-center" data-bind="text: $data.statistics.totalObtained.toLocaleString()"></td>
                                                         <td class="text-center" data-bind="text: $data.statistics.totalHatched.toLocaleString()"></td>
                                                         <td class="text-center" data-bind="text: $data.statistics.totalShinyObtained.toLocaleString()"></td>
@@ -810,7 +816,7 @@
             </div>
         </div>
 
-        <script src="bundle.js?v=20230920-1"></script>
+        <script src="bundle.js?v=20230923"></script>
     </body>
 </html>
 

@@ -20,6 +20,14 @@ const partyList = ko.pureComputed(() => {
         const partyPokemon = PokemonFactory.generatePartyPokemon(p.id);
         partyPokemon.fromJSON(p);
 
+        partyPokemon.totalAttack = partyPokemon.calculateAttack(100);
+        partyPokemon.baseBreedingEff = (partyPokemon.getBreedingAttackBonus() / partyPokemon.getEggSteps()) * GameConstants.EGG_CYCLE_MULTIPLIER;
+
+        const heldItemBonus = partyPokemon.heldItem && partyPokemon.heldItem() instanceof AttackBonusHeldItem ? partyPokemon.heldItem().attackBonus : 1;
+        const shadowBonus = partyPokemon.shadow == GameConstants.ShadowStatus.Shadow ? 0.8 : (partyPokemon.shadow == GameConstants.ShadowStatus.Purified ? 1.2 : 1);
+        const attackBonus = partyPokemon.getBreedingAttackBonus() * partyPokemon.calculateEVAttackBonus() * heldItemBonus * shadowBonus;
+        partyPokemon.breedingEff = (attackBonus / partyPokemon.getEggSteps()) * GameConstants.EGG_CYCLE_MULTIPLIER;
+
         partyPokemon.statistics = {
             totalObtained: statistics.pokemonCaptured[p.id] || 0,
             totalHatched: statistics.pokemonHatched[p.id] || 0,
@@ -576,6 +584,12 @@ function getSortValue(sortOption, partyPokemon) {
     switch (sortOption) {
         case 'name':
             return partyPokemon.name;
+        case 'attack':
+            return partyPokemon.totalAttack;
+        case 'base-breeding-eff':
+            return partyPokemon.baseBreedingEff;
+        case 'breeding-eff':
+            return partyPokemon.breedingEff;
         case 'obtained':
             return partyPokemon.statistics.totalObtained;
         case 'hatched':
