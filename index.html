@@ -249,17 +249,15 @@
                                                         <td class="text-center" data-bind="text: $data.id"></td>
                                                         <td>
                                                             <span data-bind="text: $data.name"></span>
-                                                            <!-- ko if: Companion.isEventDiscordClientPokemon($data.name) -->
-                                                            <sup class="text-muted" title="Event/Discord/Client">E</sup>
-                                                            <!-- /ko -->
+                                                            <knockout data-bind="if: Companion.isEventDiscordClientPokemon($data.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
                                                             <span class="float-end">
-                                                                <!-- ko if: $data.shadow -->
-                                                                <img height="18px" data-bind="attr: { src: Companion.getShadowStatusImage($data.shadow) }" />
-                                                                <!-- /ko -->
+                                                                <knockout data-bind="if: $data.shadow">
+                                                                    <img height="18px" data-bind="attr: { src: Companion.getShadowStatusImage($data.shadow) }" />
+                                                                </knockout>
+                                                                <knockout data-bind="if: $data.pokerus">
+                                                                    <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data.name) }" />
+                                                                </knockout>
                                                                 <img width="18px" data-bind="attr: { src: Companion.getCaughtPokeballImage($data.name) }" />
-                                                                <!-- ko if: $data.pokerus -->
-                                                                <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data.name) }" />
-                                                                <!-- /ko -->
                                                             </span>
                                                         </td>
                                                         <td class="text-center" data-bind="text: $data.totalAttack.toLocaleString()"></td>
@@ -816,7 +814,7 @@
             </div>
         </div>
 
-        <script src="bundle.js?v=20230923"></script>
+        <script src="bundle.js?v=20230924"></script>
     </body>
 </html>
 

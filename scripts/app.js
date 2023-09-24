@@ -90,14 +90,10 @@ const isSaveLoaded = ko.pureComputed(() => {
 });
 
 const getSortedPartyList = ko.pureComputed(() => {
-    if (!saveData()) {
-        return [];
-    }
-
     const sortOption = pokemonStatTableSort();
     const sortDirection = pokemonStatTableSortDir();
     return Object.values(partyList()).sort(compareBy(sortOption, sortDirection));
-});
+}).extend({ rateLimit: 100 });
 
 const getMissingPokemon = ko.pureComputed(() => {
     if (!isSaveLoaded()) {
@@ -274,15 +270,19 @@ const hasPokerus = (pokemonName) => {
 
 const getPokerusImage = (pokemonName) => {
     const partyPokemon = partyList()[PokemonHelper.getPokemonByName(pokemonName).id];
-    if (partyPokemon) {
-        return `./pokeclicker/docs/assets/images/breeding/pokerus/${GameConstants.Pokerus[partyPokemon.pokerus]}.png`;
-    } else {
-        return '';
+    if (!partyPokemon || partyPokemon.pokerus == GameConstants.Pokerus.Uninfected) {
+        return '//:0';
     }
+
+    return `./pokeclicker/docs/assets/images/breeding/pokerus/${GameConstants.Pokerus[partyPokemon.pokerus]}.png`;
 };
 
 const getShadowStatusImage = (shadowStatus) => {
-    return `./pokeclicker/docs/assets/images/status/${shadowStatus == 1 ? 'shadow' : 'purified'}.svg`;
+    if (shadowStatus == GameConstants.ShadowStatus.None) {
+        return '//:0';
+    }
+
+    return `./pokeclicker/docs/assets/images/status/${shadowStatus == GameConstants.ShadowStatus.Shadow ? 'shadow' : 'purified'}.svg`;
 };
 
 const getDungeonData = ko.pureComputed(() => {
