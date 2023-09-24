@@ -106,7 +106,7 @@ const getVitaminPokemonList = ko.pureComputed(() => {
     });
 
     return pokemon;
-});
+}).extend({ rateLimit: 100 });
 
 const getFilteredVitaminList = () => {
     const region = highestRegion();
