@@ -231,7 +231,7 @@
                                                 <thead>
                                                     <tr class="table-dark fw-normal border-top-0">
                                                         <th class="text-center sortable" data-sort="id" style="width: 5%;">#</th>
-                                                        <th class="sortable" data-sort="name">Pokémon</th>
+                                                        <th class="sortable" colspan="2" data-sort="name">Pokémon</th>
                                                         <th class="text-center sortable" data-sort="attack" style="width: 5%;">Attack</th>
                                                         <th class="text-center sortable text-nowrap" data-sort="base-breeding-eff" style="width: 5%;" title="Base Breeding Efficiency - includes vitamins.">Base BE</th>
                                                         <th class="text-center sortable text-nowrap" data-sort="breeding-eff" style="width: 5%;" title="Calculated Breeding Efficiency - includes vitamins, EVs, held item, and shadow/purification.">BE</th>
@@ -247,18 +247,18 @@
                                                 <tbody data-bind="foreach: Companion.getSortedPartyList">
                                                     <tr data-bind="hidden: Companion.hideFromPokemonStatsTable($data)">
                                                         <td class="text-center" data-bind="text: $data.id"></td>
-                                                        <td>
+                                                        <td class="border-end-0">
                                                             <span data-bind="text: $data.name"></span>
                                                             <knockout data-bind="if: Companion.isEventDiscordClientPokemon($data.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
-                                                            <span class="float-end">
-                                                                <knockout data-bind="if: $data.shadow">
-                                                                    <img height="18px" data-bind="attr: { src: Companion.getShadowStatusImage($data.shadow) }" />
-                                                                </knockout>
-                                                                <knockout data-bind="if: $data.pokerus">
-                                                                    <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data.name) }" />
-                                                                </knockout>
-                                                                <img width="18px" data-bind="attr: { src: Companion.getCaughtPokeballImage($data.name) }" />
-                                                            </span>
+                                                        </td>
+                                                        <td class="text-end text-nowrap align-middle px-1" style="width: 1px;">
+                                                            <knockout data-bind="if: $data.shadow">
+                                                                <img height="18px" data-bind="attr: { src: Companion.getShadowStatusImage($data.shadow) }" />
+                                                            </knockout>
+                                                            <knockout data-bind="if: $data.pokerus">
+                                                                <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data.name) }" />
+                                                            </knockout>
+                                                            <img width="18px" data-bind="attr: { src: Companion.getCaughtPokeballImage($data.name) }" />
                                                         </td>
                                                         <td class="text-center" data-bind="text: $data.totalAttack.toLocaleString()"></td>
                                                         <td class="text-center" data-bind="text: $data.baseBreedingEff.toFixed(3).toLocaleString()"></td>
