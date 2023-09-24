@@ -1416,9 +1416,11 @@ const highestRegion = ko.observable(GameConstants.Region.kanto);
 const searchValue = ko.observable('');
 const hidePokemonOptimalVitamins = ko.observable(false);
 const hideUncaughtPokemon = ko.observable(false);
+const hideShinyPokemon = ko.observable(false);
 
 hidePokemonOptimalVitamins.subscribe((value) => localStorage.setItem('hidePokemonOptimalVitamins', +value));
 hideUncaughtPokemon.subscribe((value) => localStorage.setItem('hideUncaughtPokemon', +value));
+hideShinyPokemon.subscribe((value) => localStorage.setItem('hideShinyPokemon', +value));
 
 const tableSort = ko.observable('id');
 const tableSortDir = ko.observable(false);
@@ -1484,6 +1486,10 @@ const getFilteredVitaminList = () => {
 
         const partyPokemon = Companion.partyList()[pokemon.id];
         if (Companion.isSaveLoaded() && hideUncaughtPokemon() && !partyPokemon) {
+            return false;
+        }
+
+        if (partyPokemon?.shiny && hideShinyPokemon()) {
             return false;
         }
 
@@ -1569,6 +1575,10 @@ $(document).ready(() => {
         hideUncaughtPokemon(true);
     }
 
+    if (+localStorage.getItem('hideShinyPokemon')) {
+        hideShinyPokemon(true);
+    }
+
     $(document).on('click', '#vitaminTrackerTable thead th.sortable', (e) => {
         const sort = e.currentTarget.dataset.sort;
         if (tableSort() == sort) {
@@ -1587,6 +1597,7 @@ module.exports = {
     searchValue,
     hidePokemonOptimalVitamins,
     hideUncaughtPokemon,
+    hideShinyPokemon,
 
     getSortedVitaminList,
     getTotalVitaminsNeeded,
