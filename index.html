@@ -158,8 +158,8 @@
                         <div data-bind="template: { name: 'load-save-template' }"></div>
                         <!-- ko if: Companion.isSaveLoaded -->
                         <div class="tab-content container-xxl h-100"> <!-- bg-dark -->
-                            <div class="tab-pane show active" id="save-tab-missing">
-                                <div data-bind="with: Companion.getMissingPokemon">
+                            <div class="tab-pane h-100 show active" id="save-tab-missing">
+                                <div class="d-flex flex-column" data-bind="with: Companion.getMissingPokemon">
                                     <div data-bind="visible: !$data.length">
                                         <p class="text-warning text-center h4 mt-5">Congratulations!<br/>You've caught 'em all!</p>
                                     </div>
