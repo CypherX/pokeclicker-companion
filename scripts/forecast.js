@@ -1,6 +1,7 @@
 const unownForecast = ko.observableArray();
 const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
+const berryMasters = ko.observableArray();
 
 const generateForecasts = () => {
     const date = new Date();
@@ -8,6 +9,7 @@ const generateForecasts = () => {
     const unownData = [];
     const weatherData = [];
     const boostedRouteData = [];
+    const berryMasterData = [];
 
     for (let day = 0; day < 120; day++) {
 
@@ -20,6 +22,13 @@ const generateForecasts = () => {
                 SeededDateRand.fromArray(TanobyUnownList),
                 SeededDateRand.fromArray(SolaceonUnownList),
             ]
+        });
+
+        // Berry Masters
+        BerryDeal.generateDeals(date);
+        berryMasterData.push({
+            date: new Date(date),
+            traderDeals: Object.values(BerryDeal.list).map((d) => [...d()])
         });
 
         // Weather
@@ -59,29 +68,59 @@ const generateForecasts = () => {
     unownForecast(unownData);
     weatherForecast(weatherData);
     boostedRoutes(boostedRouteData.slice(0, 6));
+    berryMasters(berryMasterData);
 };
 
 const getNextWeatherDate = (region, weather) => {
     return weatherForecast().find(wf => wf.regionalWeather[region] === weather)?.startDate;
 };
 
-/*const defaultToForecastsTab = ko.observable(false);
-defaultToForecastsTab.subscribe((value) => {
-    localStorage.setItem('defaultToForecastsTab', +value);
-});
+const getBerryMasterDeals = (berryTrader, days = undefined) => {
+    const deals = days != undefined ? berryMasters().slice(0, days) : berryMasters();
+    return deals.map(d => ({ date: d.date, deals: d.traderDeals[berryTrader] }));
+};
 
-if (+localStorage.getItem('defaultToForecastsTab')) {
-    defaultToForecastsTab(true);
-    (new bootstrap.Tab(document.getElementById('forecasts-tab'))).show();
-}*/
+const getBerryMasterNextItemDate = (berryTrader) => {
+    const items = {};
+
+    getBerryMasterDeals(berryTrader).forEach((t) => t.deals.forEach((d) => {
+        const itemName = d.item.itemType.name;
+        if (!items[itemName]) {
+            items[itemName] = {
+                date: t.date,
+                item: d.item.itemType._displayName || itemName,
+                amount: d.item.amount,
+                berries: d.berries
+            };
+        }
+    }));
+
+    return Object.values(items).sort((a, b) => a.item.localeCompare(b.item));
+};
+
+const getBerryMasterPokemonMinMaxCost = (berryTrader) => {
+    const pokemonList = [...Companion.data.berryMasterPokemonCosts[berryTrader]];
+    pokemonList.forEach((p) => {
+        p.minDate = getBerryMasterNextPokemonCost(berryTrader, p.pokemon, p.minCost),
+        p.maxDate = getBerryMasterNextPokemonCost(berryTrader, p.pokemon, p.maxCost)
+    });
+
+    return pokemonList;
+};
+
+const getBerryMasterNextPokemonCost = (berryTrader, pokemonName, cost) => {
+    return getBerryMasterDeals(berryTrader).find(t => t.deals.find(d => d.item.itemType.name == pokemonName && d.berries[0].amount == cost))?.date;
+};
 
 module.exports = {
     unownForecast,
     weatherForecast,
     boostedRoutes,
+    berryMasters,
 
     generateForecasts,
     getNextWeatherDate,
-
-    //defaultToForecastsTab,
+    getBerryMasterDeals,
+    getBerryMasterNextItemDate,
+    getBerryMasterPokemonMinMaxCost,
 };

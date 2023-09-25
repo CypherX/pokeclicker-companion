@@ -148,6 +148,11 @@
                                         Boosted Routes
                                     </button>
                                 </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecast-tab-berrymasters" type="button" role="tab">
+                                        Berry Masters
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                     </nav>
@@ -669,6 +674,127 @@
                                     </table>
                                 </div>
                             </div>
+                            <div class="tab-pane h-100" id="forecast-tab-berrymasters">
+                                <div class="d-flex flex-column h-100">
+                                    <ul class="nav nav-tabs mb-4" role="tablist" data-bind="foreach: GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None')">
+                                        <li class="nav-item">
+                                            <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
+                                                data-bind="text: $data, css: { active: $index() == 0 },
+                                                    attr: { id: `berrymaster-${$index()}-tab`, 'data-bs-target': `#berrymaster-${$index()}` }"></button>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content flex-grow-1" style="overflow: auto;" data-bind="foreach: GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None')">
+                                        <div class="tab-pane" role="tabpanel" data-bind="css: { active: $index() == 0 }, attr: { id: `berrymaster-${$index()}` }">
+                                            <div class="container-xxl">
+                                                <!-- ko if: Forecast.berryMasters().length -->
+                                                <div class="row">
+                                                    <div class="col-12 col-md-6 mb-3">
+                                                        <h4 class="mb-2">Current & Upcoming</h4>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-sm small">
+                                                                <thead>
+                                                                    <tr class="table-dark">
+                                                                        <th>Date</th>
+                                                                        <th>Give</th>
+                                                                        <th>Receive</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <!-- ko foreach: { data: Forecast.getBerryMasterDeals($index(), 7), as: 'date' } -->
+                                                                <tbody data-bind="foreach: { data: deals, as: 'deal' }">
+                                                                    <!-- ko foreach: { data: deal.berries, as: 'berry' } -->
+                                                                    <tr data-bind="">
+                                                                        <!-- ko if: $parentContext.$index() == 0 && $index() == 0 -->
+                                                                        <td class="align-middle" data-bind="text: Util.formatDate(date.date), attr: { rowspan: date.deals.reduce((sum, d) => sum += d.berries.length, 0) }"></td>
+                                                                        <!-- /ko -->
+                                                                        
+                                                                        <td data-bind="text: `${berry.amount} × ${BerryType[berry.berryType]}`, css: { 'border-bottom-0': $index() < deal.berries.length - 1 }"></td>
+                    
+                                                                        <!-- ko if: $index() == 0 -->
+                                                                        <td class="align-middle" data-bind="text: `${$parent.item.amount} × ${$parent.item.itemType._displayName ?? $parent.item.itemType.name}`, attr: { rowspan: deal.berries.length }"></td>
+                                                                        <!-- /ko -->
+                                                                    </tr>
+                                                                    <!-- /ko -->
+                                                                </tbody>
+                                                                <!-- /ko -->
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12 col-md-6">
+                                                        <!-- ko ifnot: Companion.data.berryMasterPokemonLocations.includes($index())  -->
+                                                        <h4 class="mb-2">Next Occurrence</h4>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-bordered table-hover table-striped table-sm small">
+                                                                <thead>
+                                                                    <tr class="table-dark">
+                                                                        <th>Item</th>
+                                                                        <th class="text-center">Date</th>
+                                                                        <th class="text-center">Cost</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody data-bind="foreach: Forecast.getBerryMasterNextItemDate($index())">
+                                                                    <tr>
+                                                                        <td class="align-middle" data-bind="text: `${item} × ${amount}`"></td>
+                                                                        <td class="text-center align-middle" data-bind="text: Util.formatDate(date)"></td>
+                                                                        <td class="align-middle">
+                                                                            <div class="d-flex justify-content-evenly text-center" data-bind="foreach: berries">
+                                                                                <div class="px-2" data-bind="text: `${amount} × ${BerryType[berryType]}`"></div>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        <!-- /ko -->
+                                                        <!-- ko if: Companion.data.berryMasterPokemonLocations.includes($index()) -->
+                                                        <div data-bind="with: Forecast.getBerryMasterPokemonMinMaxCost($index())">
+                                                            <h4 class="mb-2">Next Minimum Cost</h4>
+                                                            <div class="table-responsive">
+                                                                <table class="table table-bordered table-hover table-striped table-sm small">
+                                                                    <thead>
+                                                                        <tr class="table-dark">
+                                                                            <th>Pokémon</th>
+                                                                            <th class="text-center">Date</th>
+                                                                            <th class="text-center">Cost</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody data-bind="foreach: $data">
+                                                                        <tr>
+                                                                            <td data-bind="text: pokemon"></td>
+                                                                            <td class="text-center" data-bind="text: Util.formatDate(minDate) || '-'"></td>
+                                                                            <td class="text-center" data-bind="text: minCost"></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <h4 class="mt-3 mb-2">Next Maximum Cost</h4>
+                                                            <div class="table-responsive">
+                                                                <table class="table table-bordered table-hover table-striped table-sm small">
+                                                                    <thead>
+                                                                        <tr class="table-dark">
+                                                                            <th>Pokémon</th>
+                                                                            <th class="text-center">Date</th>
+                                                                            <th class="text-center">Cost</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody data-bind="foreach: $data">
+                                                                        <tr>
+                                                                            <td data-bind="text: pokemon"></td>
+                                                                            <td class="text-center" data-bind="text: Util.formatDate(maxDate) || '-'"></td>
+                                                                            <td class="text-center" data-bind="text: maxCost"></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                        <!-- /ko -->
+                                                    </div>
+                                                </div>
+                                                <!-- /ko -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="tab-pane h-100 container-xxl" id="main-tab-vitamins">
@@ -818,7 +944,7 @@
             </div>
         </div>
 
-        <script src="bundle.js?v=20230924-1"></script>
+        <script src="bundle.js?v=20230925"></script>
     </body>
 </html>
 

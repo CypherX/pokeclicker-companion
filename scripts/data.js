@@ -368,6 +368,21 @@ const roamerGroups =
         .flat().filter((rg) => rg.region <= GameConstants.MAX_AVAILABLE_REGION);
 const unownDungeonList = ['Ruins of Alph', 'Tanoby Ruins', 'Solaceon Ruins'];
 const unownList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!?'.split('');
+const berryMasterPokemonLocations = [GameConstants.BerryTraderLocations['Pinkan Pokémon Reserve'], GameConstants.BerryTraderLocations['Secret Berry Shop']];
+const berryMasterPokemonCosts = {
+    [GameConstants.BerryTraderLocations['Pinkan Pokémon Reserve']]: [
+        { pokemon: 'Pinkan Arbok', minCost: 40, maxCost: 60 },
+        { pokemon: 'Pinkan Oddish', minCost: 20, maxCost: 40 },
+        { pokemon: 'Pinkan Poliwhirl', minCost: 40, maxCost: 60 },
+        { pokemon: 'Pinkan Geodude', minCost: 20, maxCost: 40 },
+        { pokemon: 'Pinkan Weezing', minCost: 80, maxCost: 100 },
+        { pokemon: 'Pinkan Scyther', minCost: 80, maxCost: 100 },
+        { pokemon: 'Pinkan Electabuzz', minCost: 80, maxCost: 100 }
+    ],
+    [GameConstants.BerryTraderLocations['Secret Berry Shop']]: [
+        { pokemon: 'Grotle (Acorn)', minCost: 80, maxCost: 100 }
+    ]
+};
 
 module.exports = {
     UnobtainablePokemon,
@@ -388,4 +403,6 @@ module.exports = {
     roamerGroups,
     unownDungeonList,
     unownList,
+    berryMasterPokemonLocations,
+    berryMasterPokemonCosts,
 }
