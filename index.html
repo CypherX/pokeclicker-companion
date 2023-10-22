@@ -396,6 +396,7 @@
                                         </div>
     
                                         <div class="tab-pane" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
+                                            <div class="text-end small"><span class="text-danger">⚹</span> Incomplete gym (fewer than 1,000 clears)</div>
                                             <!-- ko foreach: Companion.getGymData() -->
                                             <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
                                                 <div class="card-header bg-dark rounded-0 px-2">
@@ -410,11 +411,15 @@
                                                     <table class="table table-bordered table-striped table-hover table-sm mb-0">
                                                         <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `gyms-clears-collapse-${$index()}` }">
                                                             <!-- ko foreach: Util.arrayToWhatever($data.gyms) -->
-                                                            <tr class="dungeon-clears-row">
-                                                                <td class="align-middle" data-bind="text: GymList[$data[0].name].displayName || $data[0].name"></td>
-                                                                <td class="text-center align-middle" data-bind="text: $data[0].clears.toLocaleString()"></td>
-                                                                <td class="align-middle" style="border-left-width: 3px;" data-bind="text: $data[1] ? GymList[$data[1].name].displayName || $data[1].name : ''"></td>
-                                                                <td class="text-center align-middle" data-bind="text: $data[1] ? $data[1].clears.toLocaleString() : ''"></td>
+                                                            <tr class="dungeon-clears-row" data-bind="foreach: $data">
+                                                                <td class="align-middle">
+                                                                    <div class="position-relative">
+                                                                        <span data-bind="text: GymList[$data?.name]?.displayName || $data?.name"></span>
+                                                                        <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
+                                                                            data-bind="visible: $data?.clears < 1000">⚹</div>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="text-center align-middle" data-bind="text: $data?.clears.toLocaleString()"></td>
                                                             </tr>
                                                             <!-- /ko -->
                                                         </tbody>
@@ -425,6 +430,7 @@
                                         </div>
     
                                         <div class="tab-pane" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
+                                            <div class="text-end small"><span class="text-danger">⚹</span> Incomplete route (fewer than 10,000 defeats)</div>
                                             <!-- ko foreach: Companion.getRouteData() -->
                                             <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
                                                 <div class="card-header bg-dark rounded-0 px-2">
@@ -439,11 +445,15 @@
                                                     <table class="table table-bordered table-striped table-hover table-sm mb-0">
                                                         <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `route-defeats-collapse-${$index()}` }">
                                                             <!-- ko foreach: Util.arrayToWhatever($data.routes) -->
-                                                            <tr class="dungeon-clears-row">
-                                                                <td class="align-middle" data-bind="text: $data[0].routeName"></td>
-                                                                <td class="text-center align-middle" data-bind="text: $data[0].defeats.toLocaleString()"></td>
-                                                                <td class="align-middle" style="border-left-width: 3px;" data-bind="text: $data[1] ? $data[1].routeName : ''"></td>
-                                                                <td class="text-center align-middle" data-bind="text: $data[1] ? $data[1].defeats.toLocaleString() : ''"></td>
+                                                            <tr class="dungeon-clears-row" data-bind="foreach: $data">
+                                                                <td class="align-middle">
+                                                                    <div class="position-relative">
+                                                                        <span data-bind="text: $data?.routeName"></span>
+                                                                        <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
+                                                                            data-bind="visible: $data?.defeats < 10000">⚹</div>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="text-center align-middle" data-bind="text: $data?.defeats.toLocaleString()"></td>
                                                             </tr>
                                                             <!-- /ko -->
                                                         </tbody>
