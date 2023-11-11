@@ -113,7 +113,7 @@ const getFilteredVitaminList = () => {
     const searchVal = searchValue();
 
     return pokemonVitaminList.filter((pokemon) => {
-        if (pokemon.nativeRegion > region) {
+        if (pokemon.obtainRegion > region) {
             return false;
         }
 

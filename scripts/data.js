@@ -341,10 +341,11 @@ const obtainablePokemonList = (() => {
 
         return true;
     }).map(p => {
+        p.nativeRegion = PokemonHelper.calcNativeRegion(p.name);
         if (EventDiscordClientPokemon.includes(p.name)) {
-            p.nativeRegion = PokemonHelper.calcNativeRegion(p.name);
+            p.obtainRegion = p.nativeRegion;
         } else {
-            p.nativeRegion = pokemonRegionOverride[p.name] || PokemonHelper.calcNativeRegion(p.name);
+            p.obtainRegion = pokemonRegionOverride[p.name] || p.nativeRegion;
         }
 
         return p;

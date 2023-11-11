@@ -233,24 +233,23 @@ const getMissingPokemon = ko.pureComputed(() => {
             return;
         }
 
-        const nativeRegion = getPokemonNativeRegion(p.name);
-        if (!showAllRegions() && nativeRegion > player.highestRegion()) {
+        const obtainRegion = p.obtainRegion;
+        if (!showAllRegions() && obtainRegion > player.highestRegion()) {
             return;
         }
 
         if (showRequiredOnly()) {
-            if (nativeRegion == -2) {
+            if (obtainRegion == -2) {
                 return;
             }
 
-            //const gameRegion = PokemonHelper.calcNativeRegion(p.name);
             const formCaught = saveData().save.party.caughtPokemon.some(c => Math.floor(c.id) == Math.floor(p.id));
             if (formCaught) {
                 return;
             }
         }
 
-        missingPokemon[nativeRegion].pokemon.push(p);
+        missingPokemon[obtainRegion].pokemon.push(p);
     });
 
     return Object.values(missingPokemon).filter(r => r.pokemon.length);
@@ -272,10 +271,6 @@ const getTotalMissingPokemonCount = ko.pureComputed(() => {
         return count + getMissingRegionPokemonCount(r.region)();
     }, 0);
 });
-
-const getPokemonNativeRegion = (pokemonName) => {
-    return Companion.data.pokemonRegionOverride[pokemonName] || PokemonHelper.calcNativeRegion(pokemonName);
-};
 
 const hideFromPokemonStatsTable = (partyPokemon) => {
     return ko.pureComputed(() => {
@@ -1113,10 +1108,11 @@ const obtainablePokemonList = (() => {
 
         return true;
     }).map(p => {
+        p.nativeRegion = PokemonHelper.calcNativeRegion(p.name);
         if (EventDiscordClientPokemon.includes(p.name)) {
-            p.nativeRegion = PokemonHelper.calcNativeRegion(p.name);
+            p.obtainRegion = p.nativeRegion;
         } else {
-            p.nativeRegion = pokemonRegionOverride[p.name] || PokemonHelper.calcNativeRegion(p.name);
+            p.obtainRegion = pokemonRegionOverride[p.name] || p.nativeRegion;
         }
 
         return p;
@@ -1529,7 +1525,7 @@ const getFilteredVitaminList = () => {
     const searchVal = searchValue();
 
     return pokemonVitaminList.filter((pokemon) => {
-        if (pokemon.nativeRegion > region) {
+        if (pokemon.obtainRegion > region) {
             return false;
         }
 
