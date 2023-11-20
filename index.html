@@ -347,6 +347,7 @@
                                                 </div>
                                             </div>
     
+                                            <div class="text-end small"><span class="text-danger">⚹</span> Incomplete dungeon (fewer than 500 clears)</div>
                                             <!-- ko foreach: Companion.getDungeonData() -->
                                             <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
                                                 <div class="card-header bg-dark rounded-0 px-2">
@@ -373,7 +374,13 @@
                                                             <tbody>
                                                                 <!-- ko foreach: $data.dungeons -->
                                                                 <tr class="dungeon-clears-row">
-                                                                    <td class="align-middle" data-bind="text: $data.name"></td>
+                                                                    <td class="align-middle">
+                                                                        <div class="position-relative">
+                                                                            <span data-bind="text: $data.name"></span>
+                                                                            <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
+                                                                                data-bind="visible: $data.clears < 500">⚹</div>
+                                                                        </div>
+                                                                    </td>
                                                                     <td class="text-center align-middle w-auto" data-bind="text: $data.clears.toLocaleString()"></td>
                                                                     <td class="text-center align-middle w-auto" data-bind="text: $data.cost.toLocaleString()"></td>
                                                                     <td class="text-center align-middle w-auto" data-bind="text: ($data.cost * 500).toLocaleString()"></td>
