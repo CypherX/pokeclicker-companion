@@ -19,16 +19,18 @@ const UnobtainablePokemon = [
     'Arceus (Dark)',
     'Arceus (Steel)',
     'Arceus (Fairy)',
-    'Eternamax Eternatus',
     'Dugtrio (Punk)',
     'Weepinbell (Fancy)',
     'Gengar (Punk)',
     'Onix (Rocker)',
     'Tangela (Pom-pom)',
     'Goldeen (Diva)',
-    'XD001',
+    'Pikachu (Rock Star)',
+    'Pikachu (Belle)',
+    'Pikachu (Pop Star)',
+    'Pikachu (Ph. D.)',
+    'Pikachu (Libre)',
     'Furfrou (Heart)',
-    /Gigantamax .+/
 ];
 
 const EventDiscordClientPokemon = [
@@ -48,20 +50,25 @@ const EventDiscordClientPokemon = [
     'Wartortle (Clone)',
     'Blastoise (Clone)',
     'Pikachu (Clone)',
+    'Pikachu (Easter)',
     'Red Spearow',
     'Flying Pikachu',
     'Surfing Pikachu',
     'Pikachu (Gengar)',
     'Let\'s Go Pikachu',
     'Charity Chansey',
+    'Santa Jynx',
     'Let\'s Go Eevee',
     'Santa Snorlax',
+    'Snorlax (Snowman)',
     'Armored Mewtwo',
     'Spooky Togepi',
     'Surprise Togepi',
     'Spooky Togetic',
+    'Reindeer Stantler',
     'Blessing Blissey',
     'Grinch Celebi',
+    'Torchic (Egg)',
     'Handout Happiny',
     'Elf Munchlax',
     'Spooky Togekiss',
@@ -92,6 +99,13 @@ const pokemonRegionOverride = {
             .map(p => [p.name, GameConstants.Region.kalos])
     ),
 
+    // Gigantamax
+    ...Object.fromEntries(
+        pokemonList.filter(p => p.name.startsWith('Gigantamax ') || p.name.startsWith('Eternamax'))
+            .map(p => [p.name, GameConstants.Region.galar])
+    ),
+
+    'XD001': GameConstants.Region.hoenn,
     'Hoppip (Chimecho)': GameConstants.Region.hoenn,
     'Meltan': GameConstants.Region.alola,
     'Melmetal': GameConstants.Region.alola,
@@ -350,13 +364,30 @@ const obtainablePokemonList = (() => {
     return pokemon;
 })();
 
-const shadowPokemon =
-    new Set(Object.values(TownList)
+const shadowPokemon = (() => {
+    const dungeons = Object.values(TownList)
         .filter(t => t.region == GameConstants.Region.hoenn
             && t.subRegion == GameConstants.HoennSubRegions.Orre
             && t instanceof DungeonTown
             && !t.requirements.some(req => req instanceof DevelopmentRequirement))
-        .map(t => t.dungeon.allAvailableShadowPokemon()).flat());
+        .map(t => t.dungeon);
+
+    const pokemon = [];
+    dungeons.forEach(d => {
+        d.enemyList.forEach(enemy => {
+            if (enemy instanceof DungeonTrainer) {
+                pokemon.push(...enemy.getTeam().filter(p => p.shadow == GameConstants.ShadowStatus.Shadow).map(p => p.name));
+            }
+        });
+        d.bossList.forEach(boss => {
+            if (boss instanceof DungeonTrainer) {
+                pokemon.push(...boss.getTeam().filter(p => p.shadow == GameConstants.ShadowStatus.Shadow).map(p => p.name));
+            }
+        });
+    });
+
+    return new Set(pokemon);
+})();
 
 const validRegions = GameHelper.enumNumbers(GameConstants.Region).filter(region => region > GameConstants.Region.none && region <= GameConstants.MAX_AVAILABLE_REGION);
 const validRegionNames = validRegions.map(region => GameConstants.camelCaseToString(GameConstants.Region[region]));
