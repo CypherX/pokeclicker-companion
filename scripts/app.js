@@ -552,22 +552,6 @@ $(document).ready(() => {
     }
 
     Forecast.generateForecasts();
-
-    try {
-        let uuid = localStorage.getItem('uuid');
-        if (!uuid) {
-            uuid = crypto.randomUUID();
-            localStorage.setItem('uuid', uuid);
-        }
-        $.ajax({
-            type: 'GET',
-            url: `https://api.cipherworks.net/tracking/visitor/${uuid}`,
-            async: true,
-            dataType: 'jsonp',
-            crossDomain: true,
-            cache: false,
-        });
-    } catch (e) {}
 });
 
 function compareBy(sortOption, direction) {
