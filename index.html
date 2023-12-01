@@ -156,6 +156,9 @@
                             </ul>
                         </div>
                     </nav>
+                    <div class="alert alert-danger rounded-0 p-2 text-center" data-bind="visible: Companion.isOlderVersionSave">
+                        The loaded save is from an older version of PokéClicker and may result in incorrect data and statistics.
+                    </div>
                 </div>
 
                 <div id="main-content" class="tab-content flex-grow-1" style="overflow: auto;">
@@ -961,7 +964,7 @@
             </div>
         </div>
 
-        <script src="bundle.js?v=20231201"></script>
+        <script src="bundle.js?v=20231201b"></script>
     </body>
 </html>
 

@@ -191,6 +191,15 @@ const loadSaveData = () => {
     }
 };
 
+const isOlderVersionSave = ko.pureComputed(() => {
+    if (!saveData()) {
+        return false;
+    }
+
+    const saveVersion = saveData().save.update.version;
+    return saveVersion != Companion.package.version;
+});
+
 const fr = new FileReader();
 fr.addEventListener('load', loadSaveData);
 
@@ -721,6 +730,7 @@ module.exports = {
 
     loadFile,
     isSaveLoaded,
+    isOlderVersionSave,
 
     getMissingPokemon,
     getTotalMissingPokemonCount,
