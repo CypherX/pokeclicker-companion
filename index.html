@@ -971,7 +971,8 @@
 <script type="text/html" id="load-save-template">
     <!-- ko ifnot: Companion.isSaveLoaded -->
     <div class="position-absolute top-50 start-50 translate-middle" style="z-index: -1;">
-        <h1 class="display-6">Select a save file or check out the other pages.</h1>
+        <h1 class="display-6 mb-0">Select a save file or check out the other pages.</h1>
+        <small class="font-monospace">PokéClicker <code data-bind="text: `v${Companion.package.version}`"></code></small>
     </div>
     <!-- /ko -->
 </script>
