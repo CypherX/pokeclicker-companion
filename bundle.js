@@ -840,7 +840,7 @@ const EventDiscordClientPokemon = [
     'Snorlax (Snowman)',
     'Armored Mewtwo',
     'Spooky Togepi',
-    'Surprise Togepi',
+    'Togepi (Flowering Crown)',
     'Spooky Togetic',
     'Reindeer Stantler',
     'Blessing Blissey',
