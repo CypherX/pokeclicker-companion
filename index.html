@@ -12,9 +12,9 @@
 
         <script src="./pokeclicker/docs/libs/jquery.min.js"></script>
         <script src="./pokeclicker/docs/libs/knockout-latest.js"></script>
-        <script src="./pokeclicker/docs/scripts/modules.min.js?v=0.10.16"></script>
-        <script src="./pokeclicker/docs/scripts/script.min.js?v=0.10.16"></script>
-        <script type="text/javascript" src="./scripts/bootstrap.min.js"></script>
+        <script src="./pokeclicker/docs/scripts/modules.min.js?v=0.10.17"></script>
+        <script src="./pokeclicker/docs/scripts/script.min.js?v=0.10.17"></script>
+        <script type="text/javascript" src="./scripts/bootstrap.bundle.min.js"></script>
 
         <style type="text/css">
             a { text-decoration: none; }
@@ -241,8 +241,10 @@
                                                         <th class="text-center sortable" data-sort="id" style="width: 5%;">#</th>
                                                         <th class="sortable" colspan="2" data-sort="name">Pokémon</th>
                                                         <th class="text-center sortable" data-sort="attack" style="width: 5%;">Attack</th>
-                                                        <th class="text-center sortable text-nowrap" data-sort="base-breeding-eff" style="width: 5%;" title="Base Breeding Efficiency - includes vitamins.">Base BE</th>
-                                                        <th class="text-center sortable text-nowrap" data-sort="breeding-eff" style="width: 5%;" title="Calculated Breeding Efficiency - includes vitamins, EVs, held item, and shadow/purification.">BE</th>
+                                                        <th class="text-center sortable text-nowrap" data-sort="base-breeding-eff" style="width: 5%;"
+                                                            data-bind="tooltip: { title: 'Base Breeding Efficiency - includes vitamins' }">Base BE</th>
+                                                        <th class="text-center sortable text-nowrap" data-sort="breeding-eff" style="width: 5%;"
+                                                            data-bind="tooltip: { title: 'Calculated Breeding Efficiency - includes vitamins, EVs, held item, and shadow/purification' }">BE</th>
                                                         <th class="text-center sortable" data-sort="obtained" style="width: 5%;">Obtained</th>
                                                         <th class="text-center sortable" data-sort="hatched" style="width: 5%;">Hatched</th>
                                                         <th class="text-center sortable" data-sort="shiny-obtained" style="width: 5%; white-space: nowrap;">&#10024; Obtained</th>
@@ -882,23 +884,40 @@
                                 <div class="table-responsive h-100" style="overflow: auto;">
                                     <table class="table table-striped table-hover table-sticky-header mb-0" style="font-size: 0.9rem;" id="vitaminTrackerTable">
                                         <thead>
-                                            <tr class="table-dark fw-normal border-top-0">
-                                                <th class="text-center align-middle sortable" data-sort="id" style="width: 0;">#</th>
-                                                <th class="align-middle sortable" data-sort="name">Pokémon</th>
-                                                <th class="text-center align-middle" style="width: 10%;" title="Region this Pokémon can first be obtained.">Native Region</th>
-                                                <th class="text-center align-middle sortable" data-sort="base-attack" style="width: 5%;">Base Attack</th>
-                                                <th class="text-center align-middle sortable" data-sort="base-bonus" style="width: 5%;" title="Attack gained each breeding cycle with no vitamins.">Attack Bonus</th>
-                                                <th class="text-center align-middle sortable" data-sort="base-steps" style="width: 5%;">Egg Steps</th>
+                                            <tr class="table-dark fw-normal border-top-0 align-middle">
+                                                <th class="text-center sortable" data-sort="id" style="width: 0;"
+                                                    data-bind="attr: { rowspan: Companion.isSaveLoaded() ? 2 : 1 }">#</th>
+                                                <th class="sortable" data-sort="name"
+                                                    data-bind="attr: { rowspan: Companion.isSaveLoaded() ? 2 : 1 }">Pokémon</th>
+                                                <th class="text-center" style="width: 10%;"
+                                                    data-bind="attr: { rowspan: Companion.isSaveLoaded() ? 2 : 1 }">Native Region</th>
+                                                <th class="text-center sortable" data-sort="base-attack" style="width: 5%;"
+                                                    data-bind="attr: { rowspan: Companion.isSaveLoaded() ? 2 : 1 }">Base Attack</th>
+                                                <th class="text-center sortable" data-sort="base-bonus" style="width: 5%;"
+                                                    data-bind="attr: { rowspan: Companion.isSaveLoaded() ? 2 : 1 },
+                                                        tooltip: { title: 'Attack gained each breeding cycle with no vitamins.' }">Attack Bonus</th>
+                                                <th class="text-center sortable" data-sort="base-steps" style="width: 5%;"
+                                                    data-bind="attr: { rowspan: Companion.isSaveLoaded() ? 2 : 1 }">Egg Steps</th>
                                                 <!-- ko foreach: GameHelper.enumNumbers(GameConstants.VitaminType) -->
-                                                <th class="text-center" style="width: 5%;" data-bind="text: `${GameConstants.VitaminType[$data]} To Use`"
-                                                    title="Optimal amount of this vitamin to give this Pokémon based on the selected Highest Region. Loading a save file will display the current amount of vitamins alongside the optimal amount."></th>
+                                                <th class="text-center" style="width: 5%;" data-bind="text: `${GameConstants.VitaminType[$data]}`, tooltip: {
+                                                    title: `Optimal amount of ${GameConstants.VitaminType[$data]} to give this Pokémon based on the selected Highest Region. Loading a save file will display the current amount of vitamins alongside the optimal amount.`
+                                                }"></th>
                                                 <!-- /ko -->
-                                                <th class="text-center align-middle sortable" data-sort="vitamin-bonus" style="width: 5%;" title="Attack gained each breeding cycle with optimal vitamins.">
+                                                <th class="text-center sortable" data-sort="vitamin-bonus" style="width: 5%;"
+                                                    data-bind="attr: { rowspan: Companion.isSaveLoaded() ? 2 : 1 },
+                                                        tooltip: { title: 'Attack gained each breeding cycle with optimal vitamins.' }">
                                                     <span class="text-nowrap">Bonus w/</span> Vitamins
                                                 </th>
-                                                <th class="text-center align-middle sortable" data-sort="vitamin-steps" style="width: 5%;">Steps w/ Vitamins</th>
-                                                <th class="text-center align-middle sortable" data-sort="breeding-efficiency" style="width: 5%;">Breeding Efficiency</th>
+                                                <th class="text-center sortable" data-sort="vitamin-steps" style="width: 5%;"
+                                                    data-bind="attr: { rowspan: Companion.isSaveLoaded() ? 2 : 1 }">Steps w/ Vitamins</th>
+                                                <th class="text-center sortable" data-sort="breeding-efficiency" style="width: 5%;"
+                                                    data-bind="attr: { rowspan: Companion.isSaveLoaded() ? 2 : 1 }">Breeding Efficiency</th>
                                             </tr>
+                                            <!-- ko if: Companion.isSaveLoaded -->
+                                            <tr class="table-dark fw-normal border-top-0 align-middle">
+                                                <th colspan="3" class="text-center p-1 border-top-0 border-start-0">Current | Optimal</th>
+                                            </tr>
+                                            <!-- /ko -->
                                         </thead>
                                         <!-- ko with: VitaminTracker.getSortedVitaminList -->
                                         <tbody data-bind="foreach: $data">
@@ -970,7 +989,7 @@
             </symbol>
         </svg>
 
-        <script src="bundle.js?v=20231201b"></script>
+        <script src="bundle.js?v=20231204"></script>
     </body>
 </html>
 

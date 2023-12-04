@@ -1250,6 +1250,44 @@ App.game.farming.initialize();
 App.game.breeding.initialize();
 QuestLineHelper.loadQuestLines();
 
+
+// Knockout tooltip bindings
+ko.bindingHandlers.tooltip = {
+  init: (element, valueAccessor) => {
+      const local = ko.utils.unwrapObservable(valueAccessor()), options = {};
+
+      ko.utils.extend(options, ko.bindingHandlers.tooltip.options);
+      ko.utils.extend(options, local);
+
+      $(element).tooltip(options);
+
+      ko.utils.domNodeDisposal.addDisposeCallback(element, () => {
+          $(element).tooltip('dispose');
+      });
+  },
+  'update': function (element, valueAccessor) {
+    const local = ko.utils.unwrapObservable(valueAccessor());
+    const options = {};
+
+    ko.utils.extend(options, ko.bindingHandlers.tooltip.options);
+    ko.utils.extend(options, local);
+
+    // Update the config of the tooltip
+    const tooltipData = bootstrap.Tooltip.getInstance(element);
+    tooltipData._config.title = options.title;
+
+    // If the tooltip is visible, update its text
+    const tooltipInner = tooltipData.tip && tooltipData.tip.querySelector('.tooltip-inner');
+    if (tooltipInner) {
+        tooltipInner.innerHTML = tooltipData._config.title || '';
+    }
+    if (tooltipData && tooltipData._config) {
+        if (tooltipData._config.title === '') {
+            $(element).tooltip('hide');
+        }
+    }
+  }
+};
 },{}],6:[function(require,module,exports){
 const package = require('../pokeclicker/package.json');
 
