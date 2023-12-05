@@ -1348,6 +1348,22 @@ const splitArrayChunked = (array, n = 2) => {
     return Array.from({ length: n }, (_, i) => array.slice(j, j += size + (i < remainder)));
 };
 
+const exportToCsv = (headers, data, fileName = 'export') => {
+    const rows = [
+        headers.join(','),
+        ...data.map(d => d.join(','))
+    ];
+
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', `${fileName}.csv`);
+    a.click();
+};
+
+
+
 module.exports = {
     formatDate,
     formatDateTime,
@@ -1357,6 +1373,8 @@ module.exports = {
     arrayToWhatever,
     splitArrayAlternating,
     splitArrayChunked,
+
+    exportToCsv,
 };
 },{}],8:[function(require,module,exports){
 const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
@@ -1524,6 +1542,58 @@ const getTotalVitaminsNeeded = ko.pureComputed(() => {
     return { vitaminCount: vitaminCount, totalCost: totalPrice };
 });
 
+const exportData = () => {
+    const isSaveLoaded = Companion.isSaveLoaded();
+    const headers = [ '#', 'Pokemon' ];
+    if (isSaveLoaded) {
+        headers.push('Caught', 'Shiny');
+    }
+    headers.push('Native Region', 'Base Attack', 'Base Attack Bonus', 'Base Egg Steps');
+    GameHelper.enumStrings(GameConstants.VitaminType).forEach((v) => {
+        if (isSaveLoaded) {
+            headers.push(`Current ${v}`);
+        }
+        headers.push(`Optimal ${v}`);
+    });
+    headers.push('Vitamin Attack Bonus', 'Vitamin Egg Steps', 'Breeding Efficiency');
+
+    const data = [];
+    getSortedVitaminList().forEach((p) => {
+        const row = [ p.id, `"${p.name}"` ];
+
+        if (isSaveLoaded) {
+            row.push(
+                Companion.partyList()[p.id] ? 1 : 0,
+                Companion.partyList()[p.id]?.shiny ? 1 : 0
+            );
+        }
+
+        row.push(
+            GameConstants.camelCaseToString(GameConstants.Region[p.nativeRegion]),
+            p.attack,
+            p.baseAttackBonus.toFixed(2),
+            p.baseEggSteps
+        );
+
+        p.bestVitamins.forEach((v, i) => {
+            if (isSaveLoaded) {
+                row.push(Companion.partyList()[p.id]?.vitaminsUsed[i]() ?? 0);
+            }
+            row.push(v);
+        });
+
+        row.push(
+            p.attackBonus.toFixed(2),
+            p.vitaminEggSteps,
+            p.breedingEfficiency.toFixed(3)
+        );
+
+        data.push(row);
+    });
+
+    Util.exportToCsv(headers, data, `VitaminTracker-${Date.now()}`);
+};
+
 function compareBy(sortOption, direction) {
     return function (a, b) {
         let res, dir = direction ? -1 : 1;
@@ -1602,5 +1672,7 @@ module.exports = {
 
     getSortedVitaminList,
     getTotalVitaminsNeeded,
+
+    exportData,
 };
 },{}]},{},[6]);

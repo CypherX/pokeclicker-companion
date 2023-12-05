@@ -43,6 +43,22 @@ const splitArrayChunked = (array, n = 2) => {
     return Array.from({ length: n }, (_, i) => array.slice(j, j += size + (i < remainder)));
 };
 
+const exportToCsv = (headers, data, fileName = 'export') => {
+    const rows = [
+        headers.join(','),
+        ...data.map(d => d.join(','))
+    ];
+
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', `${fileName}.csv`);
+    a.click();
+};
+
+
+
 module.exports = {
     formatDate,
     formatDateTime,
@@ -52,4 +68,6 @@ module.exports = {
     arrayToWhatever,
     splitArrayAlternating,
     splitArrayChunked,
+
+    exportToCsv,
 };
