@@ -289,6 +289,36 @@ const getShadowStatusImage = (shadowStatus) => {
     return `./pokeclicker/docs/assets/images/status/${shadowStatus == GameConstants.ShadowStatus.Shadow ? 'shadow' : 'purified'}.svg`;
 };
 
+const exportPartyPokemon = () => {
+    const headers = [
+        '#', 'Pokemon', 'Shiny', 'Pokerus', 'Shadow Status', 'Attack',
+        'Base Breeding Eff', 'Breeding Eff', 'Obtained', 'Hatched',
+        'Shiny Obtained', 'Shiny Hatched', 'Defeated', 'Effort Points',
+        'EVs', 'EV Bonus'
+    ];
+
+    const data = getSortedPartyList().map((p) => [
+        p.id,
+        `"${p.name}"`,
+        p.shiny ? 1 : 0,
+        p.pokerus,
+        Companion.data.shadowPokemon.has(p.name) ? p.shadow : -1,
+        p.totalAttack,
+        p.baseBreedingEff,
+        p.breedingEff,
+        p.statistics.totalObtained,
+        p.statistics.totalHatched,
+        p.statistics.totalShinyObtained,
+        p.statistics.totalShinyHatched,
+        p.statistics.totalDefeated,
+        p.effortPoints,
+        p.evs(),
+        p.calculateEVAttackBonus(),
+    ]);
+
+    Util.exportToCsv(headers, data, `PartyPokemon-${Date.now()}`);
+};
+
 const getDungeonData = ko.pureComputed(() => {
     const dungeonData = [];
     const dungeonOverrides = Companion.data.DungeonListOverride.map(d => d.dungeons).flat();
@@ -641,6 +671,7 @@ module.exports = {
     hasPokerus,
     getPokerusImage,
     getShadowStatusImage,
+    exportPartyPokemon,
 
     getDungeonData,
     totalDungeonClears,

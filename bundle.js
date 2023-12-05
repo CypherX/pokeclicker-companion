@@ -398,6 +398,36 @@ const getShadowStatusImage = (shadowStatus) => {
     return `./pokeclicker/docs/assets/images/status/${shadowStatus == GameConstants.ShadowStatus.Shadow ? 'shadow' : 'purified'}.svg`;
 };
 
+const exportPartyPokemon = () => {
+    const headers = [
+        '#', 'Pokemon', 'Shiny', 'Pokerus', 'Shadow Status', 'Attack',
+        'Base Breeding Eff', 'Breeding Eff', 'Obtained', 'Hatched',
+        'Shiny Obtained', 'Shiny Hatched', 'Defeated', 'Effort Points',
+        'EVs', 'EV Bonus'
+    ];
+
+    const data = getSortedPartyList().map((p) => [
+        p.id,
+        `"${p.name}"`,
+        p.shiny ? 1 : 0,
+        p.pokerus,
+        Companion.data.shadowPokemon.has(p.name) ? p.shadow : -1,
+        p.totalAttack,
+        p.baseBreedingEff,
+        p.breedingEff,
+        p.statistics.totalObtained,
+        p.statistics.totalHatched,
+        p.statistics.totalShinyObtained,
+        p.statistics.totalShinyHatched,
+        p.statistics.totalDefeated,
+        p.effortPoints,
+        p.evs(),
+        p.calculateEVAttackBonus(),
+    ]);
+
+    Util.exportToCsv(headers, data, `PartyPokemon-${Date.now()}`);
+};
+
 const getDungeonData = ko.pureComputed(() => {
     const dungeonData = [];
     const dungeonOverrides = Companion.data.DungeonListOverride.map(d => d.dungeons).flat();
@@ -750,6 +780,7 @@ module.exports = {
     hasPokerus,
     getPokerusImage,
     getShadowStatusImage,
+    exportPartyPokemon,
 
     getDungeonData,
     totalDungeonClears,
@@ -1571,7 +1602,7 @@ const exportData = () => {
         row.push(
             GameConstants.camelCaseToString(GameConstants.Region[p.nativeRegion]),
             p.attack,
-            p.baseAttackBonus.toFixed(2),
+            p.baseAttackBonus,
             p.baseEggSteps
         );
 
@@ -1583,9 +1614,9 @@ const exportData = () => {
         });
 
         row.push(
-            p.attackBonus.toFixed(2),
+            p.attackBonus,
             p.vitaminEggSteps,
-            p.breedingEfficiency.toFixed(3)
+            p.breedingEfficiency
         );
 
         data.push(row);

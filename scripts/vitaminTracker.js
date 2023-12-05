@@ -192,7 +192,7 @@ const exportData = () => {
         row.push(
             GameConstants.camelCaseToString(GameConstants.Region[p.nativeRegion]),
             p.attack,
-            p.baseAttackBonus.toFixed(2),
+            p.baseAttackBonus,
             p.baseEggSteps
         );
 
@@ -204,9 +204,9 @@ const exportData = () => {
         });
 
         row.push(
-            p.attackBonus.toFixed(2),
+            p.attackBonus,
             p.vitaminEggSteps,
-            p.breedingEfficiency.toFixed(3)
+            p.breedingEfficiency
         );
 
         data.push(row);

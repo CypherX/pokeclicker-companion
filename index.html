@@ -210,11 +210,11 @@
                             <div class="tab-pane h-100" id="save-tab-party">
                                 <div class="d-flex flex-column h-100">
                                     <div class="d-flex flex-row flex-wrap row mb-1">
-                                        <div class="col-md-3 col-6">
+                                        <div class="col-md-3 col-5">
                                             <input class="form-control w-100" type="text" placeholder="Search for # or Name" id="pokemonStatTableSearch"
                                                 autocomplete="off" style="width: 250px;" data-bind="textInput: Companion.pokemonStatTableSearch">
                                         </div>
-                                        <div class="col-md-3 col-6">
+                                        <div class="col-md-3 col-5">
                                             <select class="form-select w-100" id="pokemonStatTableFilter" style="width: 250px;" autocomplete="off"
                                                 onchange="Companion.pokemonStatTableFilter(this.value)">
                                                 <option value="none">No Filter</option>
@@ -229,6 +229,12 @@
                                                 <option value="shadow">Shadow</option>
                                                 <option value="purified">Purified</option>
                                             </select>
+                                        </div>
+                                        <div class="col-md-6 col-2 text-end">
+                                            <button type="button" class="btn btn-secondary" data-bind="click: () => Companion.exportPartyPokemon(), tooltip: {
+                                                title: 'Export Party Pokemon table to CSV file.<br /><br />Pokerus<br/>0 = Not infected, 1 = Infected, 2 = Contagious, 3 = Resistant<br /><br />Shadow Status<br />-1 = No shadow form, 0 = Shadow not obtained, 1 = Shadow, 2 = Purified',
+                                                html: true,
+                                            }">Export</button>
                                         </div>
                                     </div>
                                     <div class="ms-1 mb-2">
