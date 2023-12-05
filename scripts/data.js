@@ -238,6 +238,8 @@ const obtainablePokemonList = (() => {
     return pokemon;
 })();
 
+const obtainablePokemonMap = obtainablePokemonList.reduce((map, p) => { map[p.id] = p; return map; }, {});
+
 const shadowPokemon = (() => {
     const dungeons = Object.values(TownList)
         .filter(t => t.region == GameConstants.Region.hoenn
@@ -299,6 +301,7 @@ module.exports = {
     friendSafariPokemon,
 
     obtainablePokemonList,
+    obtainablePokemonMap,
     shadowPokemon,
     validRegions,
     validRegionNames,

@@ -291,8 +291,8 @@ const getShadowStatusImage = (shadowStatus) => {
 
 const exportPartyPokemon = () => {
     const headers = [
-        '#', 'Pokemon', 'Shiny', 'Pokerus', 'Shadow Status', 'Attack',
-        'Base Breeding Eff', 'Breeding Eff', 'Obtained', 'Hatched',
+        '#', 'Pokemon', 'Shiny', 'Pokerus', 'Shadow Status', 'Native Region',
+        'Attack', 'Base Breeding Eff', 'Breeding Eff', 'Obtained', 'Hatched',
         'Shiny Obtained', 'Shiny Hatched', 'Defeated', 'Effort Points',
         'EVs', 'EV Bonus'
     ];
@@ -303,6 +303,7 @@ const exportPartyPokemon = () => {
         p.shiny ? 1 : 0,
         p.pokerus,
         Companion.data.shadowPokemon.has(p.name) ? p.shadow : -1,
+        GameConstants.camelCaseToString(GameConstants.Region[PokemonHelper.calcNativeRegion(p.name)]),
         p.totalAttack,
         p.baseBreedingEff,
         p.breedingEff,
