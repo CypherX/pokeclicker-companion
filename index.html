@@ -882,7 +882,10 @@
                                         </tbody>
                                     </table>
                                     <!-- ko ifnot: Companion.isSaveLoaded -->
-                                    <div class="text-end small mt-2">* Load a save file to view the vitamins your Pokémon currently have.</div>
+                                    <div class="text-end small mt-2">* Load a save file to view the vitamins your Pokémon currently have</div>
+                                    <!-- /ko -->
+                                    <!-- ko if: Companion.isSaveLoaded -->
+                                    <div class="text-end small mt-2">* Above totals do not include vitamins you have already purchased</div>
                                     <!-- /ko -->
                                 </div>
                             </div>
