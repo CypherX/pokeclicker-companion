@@ -838,6 +838,11 @@
                                             <input class="form-control" type="text" placeholder="Enter # or Name" autocomplete="off"
                                                 data-bind="textInput: VitaminTracker.searchValue">
                                         </div>
+                                        <div class="col-3 col-lg-2 col-sm-3 d-flex align-items-end">
+                                            <button type="button" class="btn btn-secondary" data-bind="click: () => VitaminTracker.exportData(), tooltip: {
+                                                title: 'Export Vitamin Tracker table data to CSV file.'
+                                            }">Export</button>
+                                        </div>
                                     </div>
                                     <div class="row mb-1" data-bind="visible: Companion.isSaveLoaded">
                                         <div class="col-12">
@@ -991,7 +996,7 @@
             </symbol>
         </svg>
 
-        <script src="bundle.js?v=20231204"></script>
+        <script src="bundle.js?v=20231204b"></script>
     </body>
 </html>
 
