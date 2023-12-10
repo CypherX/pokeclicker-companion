@@ -103,9 +103,9 @@
                     </nav>
 
                     <nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#main-tab-save' && Companion.isSaveLoaded">
-                        <div class="container-fluid justify-content-lg-center">
+                        <div class="container-fluid justify-content-lg-center g-0">
                             <ul class="navbar-nav" role="tablist">
-                                <li class="nav-item">
+                                <li class="nav-item mx-1">
                                     <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#save-tab-missing" type="button" role="tab">
                                         Missing Pokémon
                                         <!-- ko with: Companion.getTotalMissingPokemonCount -->
@@ -113,17 +113,17 @@
                                         <!-- /ko -->
                                     </button>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item mx-1">
                                     <button class="nav-link" data-bs-toggle="pill" data-bs-target="#save-tab-party" type="button" role="tab">
                                         Party Pokémon
                                     </button>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item mx-1">
                                     <button class="nav-link" data-bs-toggle="pill" data-bs-target="#save-tab-stats" type="button" role="tab">
                                         Statistics & More
                                     </button>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item mx-1">
                                     <button class="nav-link" data-bs-toggle="pill" data-bs-target="#save-tab-friend-safari" type="button" role="tab">
                                         Friend Safari
                                     </button>
@@ -133,26 +133,31 @@
                     </nav>
 
                     <nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#main-tab-forecasts'">
-                        <div class="container-fluid justify-content-lg-center">
+                        <div class="container-fluid justify-content-lg-center g-0">
                             <ul class="navbar-nav" role="tablist">
-                                <li class="nav-item">
+                                <li class="nav-item mx-1">
                                     <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#forecast-tab-unowns" type="button" role="tab">
-                                        Unowns
+                                        Unown
                                     </button>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item mx-1">
                                     <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecast-tab-weather" type="button" role="tab">
                                         Weather
                                     </button>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item mx-1">
                                     <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecast-tab-routes" type="button" role="tab">
                                         Boosted Routes
                                     </button>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item mx-1">
                                     <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecast-tab-berrymasters" type="button" role="tab">
                                         Berry Masters
+                                    </button>
+                                </li>
+                                <li class="nav-item mx-1">
+                                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecast-tab-underground" type="button" role="tab">
+                                        Daily Deals
                                     </button>
                                 </li>
                             </ul>
@@ -825,6 +830,51 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="tab-pane h-100" id="forecast-tab-underground">
+                                <div class="table-responsive h-100">
+                                    <table class="table table-bordered table-hover table-striped table-sticky-header table-sm small">
+                                        <thead>
+                                            <tr class="table-dark align-middle">
+                                                <th rowspan="2">Item</th>
+                                                <th colspan="2" class="text-center">Next Give Trade</th>
+                                                <th colspan="2" class="text-center">Next Receive Trade</th>
+                                            </tr>
+                                            <tr class="table-dark">
+                                                <th class="text-center">Date</th>
+                                                <th class="text-center">Trade</th>
+                                                <th class="text-center">Date</th>
+                                                <th class="text-center">Trade</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody data-bind="foreach: Object.entries(Forecast.getNextOccurrenceUndergroundItems())">
+                                            <tr>
+                                                <td data-bind="text: $data[0]"></td>
+                                                <!-- ko if: $data[1].give -->
+                                                <td class="text-center"
+                                                    data-bind="text: Util.formatDate($data[1].give.date)"></td>
+                                                <td class="text-center"
+                                                    data-bind="text: `${$data[1].give.amount1} × ${$data[1].give.item1.name} → ${$data[1].give.amount2} × ${$data[1].give.item2.name}`"></td>
+                                                <!-- /ko -->
+                                                <!-- ko ifnot: $data[1].give -->
+                                                <td class="text-center">-</td>
+                                                <td class="text-center">-</td>
+                                                <!-- /ko -->
+
+                                                <!-- ko if: $data[1].receive -->
+                                                <td class="text-center"
+                                                    data-bind="text: Util.formatDate($data[1].receive.date)"></td>
+                                                <td class="text-center"
+                                                    data-bind="text: `${$data[1].receive.amount1} × ${$data[1].receive.item1.name} → ${$data[1].receive.amount2} × ${$data[1].receive.item2.name}`"></td>
+                                                <!-- /ko -->
+                                                <!-- ko ifnot: $data[1].receive -->
+                                                <td class="text-center">-</td>
+                                                <td class="text-center">-</td>
+                                                <!-- /ko -->
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="tab-pane h-100 container-xxl" id="main-tab-vitamins">
@@ -1005,7 +1055,7 @@
             </symbol>
         </svg>
 
-        <script src="bundle.js?v=20231204b"></script>
+        <script src="bundle.js?v=20231209"></script>
     </body>
 </html>
 

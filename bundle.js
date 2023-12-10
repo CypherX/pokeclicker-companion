@@ -1125,6 +1125,7 @@ const unownForecast = ko.observableArray();
 const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
+const dailyDeals = ko.observableArray();
 
 const generateForecasts = () => {
     const date = new Date();
@@ -1133,13 +1134,15 @@ const generateForecasts = () => {
     const weatherData = [];
     const boostedRouteData = [];
     const berryMasterData = [];
+    const dailyDealData = [];
 
     for (let day = 0; day < 120; day++) {
+        const saveDate = new Date(date);
 
         // Unown
         SeededDateRand.seedWithDate(date);
         unownData.push({
-            startDate: new Date(date),
+            startDate: saveDate,
             unowns: [
                 SeededDateRand.fromArray(AlphUnownList),
                 SeededDateRand.fromArray(TanobyUnownList),
@@ -1150,8 +1153,15 @@ const generateForecasts = () => {
         // Berry Masters
         BerryDeal.generateDeals(date);
         berryMasterData.push({
-            date: new Date(date),
+            date: saveDate,
             traderDeals: Object.values(BerryDeal.list).map((d) => [...d()])
+        });
+
+        // Daily Deals
+        DailyDeal.generateDeals(5, date);
+        dailyDealData.push({
+            date: saveDate,
+            deals: [...DailyDeal.list()]
         });
 
         // Weather
@@ -1192,6 +1202,7 @@ const generateForecasts = () => {
     weatherForecast(weatherData);
     boostedRoutes(boostedRouteData.slice(0, 6));
     berryMasters(berryMasterData);
+    dailyDeals(dailyDealData);
 };
 
 const getNextWeatherDate = (region, weather) => {
@@ -1235,17 +1246,76 @@ const getBerryMasterNextPokemonCost = (berryTrader, pokemonName, cost) => {
     return getBerryMasterDeals(berryTrader).find(t => t.deals.find(d => d.item.itemType.name == pokemonName && d.berries[0].amount == cost))?.date;
 };
 
+const getUndergroundItemList = () => {
+    return UndergroundItems.list
+        .filter(i => i.valueType !== UndergroundItemValueType.MegaStone)
+        .map(i => i.name)
+        .sort((a, b) => a.localeCompare(b))
+};
+
+const getNextOccurrenceUndergroundItems = () => {
+    const items = getUndergroundItemList().reduce((a, v) => ({ ...a, [v]: {} }), {});
+    dailyDeals().forEach((d) => d.deals.forEach((deal) => {
+        if (!items[deal.item1.name].give) {
+            items[deal.item1.name].give = {
+                date: d.date,
+                ...deal
+            };
+        }
+
+        if (!items[deal.item2.name].receive) {
+            items[deal.item2.name].receive = {
+                date: d.date,
+                ...deal
+            };
+        }
+    }));
+
+    return items;
+};
+
+/*const getDailyDealNextItemDate = () => {
+    const itemsGive = {};
+    const itemsReceive = {};
+
+    dailyDeals().forEach((d) => d.deals.forEach((deal) => {
+        const giveItemName = deal.item1.name;
+        if (!itemsGive[giveItemName]) {
+            itemsGive[giveItemName] = {
+                date: d.date,
+                ...deal
+            };
+
+            const receiveItemName = deal.item2.name;
+            if (!itemsReceive[receiveItemName]) {
+                itemsReceive[receiveItemName] = {
+                    date: d.date,
+                    ...deal
+                };
+            }
+        }
+    }));
+
+    return {
+        give: Object.values(itemsGive).sort((a, b) => a.item1.name.localeCompare(b.item1.name)),
+        receive: Object.values(itemsReceive).sort((a, b) => a.item2.name.localeCompare(b.item2.name))
+    };
+};*/
+
 module.exports = {
     unownForecast,
     weatherForecast,
     boostedRoutes,
     berryMasters,
+    dailyDeals,
 
     generateForecasts,
     getNextWeatherDate,
     getBerryMasterDeals,
     getBerryMasterNextItemDate,
     getBerryMasterPokemonMinMaxCost,
+    //getDailyDealNextItemDate,
+    getNextOccurrenceUndergroundItems,
 };
 },{}],5:[function(require,module,exports){
 player = new Player();
