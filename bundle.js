@@ -1274,33 +1274,37 @@ const getNextOccurrenceUndergroundItems = () => {
     return items;
 };
 
-/*const getDailyDealNextItemDate = () => {
-    const itemsGive = {};
-    const itemsReceive = {};
+const selectedDailyDealItemNextTrades = ko.pureComputed(() => {
+    const item = selectedDailyDealItem();
+    if (!item) {
+        return [];
+    }
 
-    dailyDeals().forEach((d) => d.deals.forEach((deal) => {
-        const giveItemName = deal.item1.name;
-        if (!itemsGive[giveItemName]) {
-            itemsGive[giveItemName] = {
-                date: d.date,
-                ...deal
-            };
+    return findNextTradesForItem(item);
+});
 
-            const receiveItemName = deal.item2.name;
-            if (!itemsReceive[receiveItemName]) {
-                itemsReceive[receiveItemName] = {
-                    date: d.date,
-                    ...deal
-                };
-            }
-        }
-    }));
+const findNextTradesForItem = (itemName, days = 1095) => {
+    if (!itemName) {
+        return [];
+    }
 
-    return {
-        give: Object.values(itemsGive).sort((a, b) => a.item1.name.localeCompare(b.item1.name)),
-        receive: Object.values(itemsReceive).sort((a, b) => a.item2.name.localeCompare(b.item2.name))
-    };
-};*/
+    const date = new Date();
+    const deals = [];
+    for (let i = 0; i < days; i++) {
+        DailyDeal.generateDeals(5, date);
+        const saveDate = new Date(date);
+        deals.push(
+            ...DailyDeal.list()
+                .filter((deal) => deal.item1.name == itemName || deal.item2.name == itemName)
+                .map((deal) => ({ date: saveDate, ...deal }))
+        );
+        date.setDate(date.getDate() + 1);
+    }
+
+    return deals;
+};
+
+const selectedDailyDealItem = ko.observable();
 
 module.exports = {
     unownForecast,
@@ -1309,12 +1313,15 @@ module.exports = {
     berryMasters,
     dailyDeals,
 
+    selectedDailyDealItem,
+    selectedDailyDealItemNextTrades,
+
     generateForecasts,
     getNextWeatherDate,
     getBerryMasterDeals,
     getBerryMasterNextItemDate,
     getBerryMasterPokemonMinMaxCost,
-    //getDailyDealNextItemDate,
+    getUndergroundItemList,
     getNextOccurrenceUndergroundItems,
 };
 },{}],5:[function(require,module,exports){
