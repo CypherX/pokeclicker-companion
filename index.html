@@ -97,7 +97,28 @@
                                 </ul>
                             </div>
                             <div class="d-none d-md-block position-absolute end-0 me-2">
-                                <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
+                                <div class="btn-group">
+                                    <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
+                                    <!-- ko if: Companion.prevLoadedSaves().length -->
+                                    <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li class="small"><a class="dropdown-item disabled" href="#">Previously Loaded Saves</a></li>
+                                        <!-- ko foreach: Companion.prevLoadedSaves -->
+                                        <li class="small">
+                                            <div class="d-flex align-items-center">
+                                                <a class="dropdown-item flex-grow-1 pe-2" href="#" data-bind="text: $data.name, click: () => { Companion.loadPreviousFile($index()) }"></a>
+                                                <div class="text-danger ms-2 me-3" style="cursor: pointer;"
+                                                    data-bind="click: (_, e) => { Companion.prevLoadedSaves.splice($index(), 1); e.stopPropagation(); }">x</div>
+                                            </div>
+                                        </li>
+                                        <!-- /ko -->
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li class="small"><a class="dropdown-item" href="#" data-bind="click: () => { Companion.prevLoadedSaves([]); }">Remove All</a></li>
+                                    </ul>
+                                    <!-- /ko -->
+                                </div>
                             </div>
                         </div>
                     </nav>

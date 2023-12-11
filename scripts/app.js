@@ -46,12 +46,30 @@ const pokemonStatTableFilter = ko.observable('none');
 const pokemonStatTableSort = ko.observable('id');
 const pokemonStatTableSortDir = ko.observable(false);
 
+const prevLoadedSaves = ko.observableArray();
+
 const loadFile = (file) => {
-    fr.readAsText(file);
+    const fileName = file.name;
+    const fileReader = new FileReader();
+    fileReader.addEventListener('load', () => {
+        loadSaveData(atob(fileReader.result), fileName);
+    });
+
+    fileReader.readAsText(file);
 };
 
-const loadSaveData = () => {
-    const saveFile = JSON.parse(atob(fr.result));
+const loadPreviousFile = (index) => {
+    const file = prevLoadedSaves()[index];
+    if (file) {
+        const lzutf8 = require('lzutf8');
+        const decompressed = lzutf8.decompress(file.data, { inputEncoding: 'Base64' });
+        loadSaveData(decompressed, file.name);
+    }
+};
+
+const loadSaveData = (saveString, fileName) => {
+    //const saveFile = JSON.parse(atob(fr.result));
+    const saveFile = JSON.parse(saveString);
     player.highestRegion(saveFile.player.highestRegion);
     player.trainerId = saveFile.player.trainerId;
     App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
@@ -61,6 +79,19 @@ const loadSaveData = () => {
     VitaminTracker.highestRegion(player.highestRegion());
 
     saveData(saveFile);
+
+    const prevDataIndex = prevLoadedSaves().findIndex((save) => save.name == fileName);
+    if (prevDataIndex > 0) {
+        prevLoadedSaves.unshift(prevLoadedSaves.splice(prevDataIndex, 1)[0]);
+    } else if (prevDataIndex == -1) {
+        const lzutf8 = require('lzutf8');
+        const compressed = lzutf8.compress(saveString, { outputEncoding: 'Base64' });
+
+        const arr = prevLoadedSaves();
+        arr.unshift({ name: fileName, data: compressed });
+        arr.length = Math.min(arr.length, 5);
+        prevLoadedSaves(arr);
+    }
 
     if (saveFile.save.profile.name.toLowerCase() == 'bailey') {
         if (Rand.intBetween(1, 20) == 1) {
@@ -90,9 +121,6 @@ const isOlderVersionSave = ko.pureComputed(() => {
     const saveVersion = saveData().save.update.version;
     return saveVersion != Companion.package.version;
 });
-
-const fr = new FileReader();
-fr.addEventListener('load', loadSaveData);
 
 const isSaveLoaded = ko.pureComputed(() => {
     return saveData() !== undefined;
@@ -592,6 +620,15 @@ $(document).ready(() => {
     }
 
     Forecast.generateForecasts();
+
+    const prevSaves = localStorage.getItem('prevLoadedSaves');
+    if (prevSaves) {
+        prevLoadedSaves(JSON.parse(prevSaves));
+    }
+
+    prevLoadedSaves.subscribe((value) => {
+        localStorage.setItem('prevLoadedSaves', JSON.stringify(value));
+    });
 });
 
 function compareBy(sortOption, direction) {
@@ -650,7 +687,9 @@ module.exports = {
     showRequiredOnly,
     showAllRegions,
 
+    prevLoadedSaves,
     loadFile,
+    loadPreviousFile,
     isSaveLoaded,
     isOlderVersionSave,
 
