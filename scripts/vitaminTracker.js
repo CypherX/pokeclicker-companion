@@ -165,7 +165,7 @@ const getTotalVitaminsNeeded = ko.pureComputed(() => {
 
 const exportData = () => {
     const isSaveLoaded = Companion.isSaveLoaded();
-    const headers = [ '#', 'Pokemon' ];
+    const headers = [ '#', 'Pokemon', 'Type 1', 'Type 2' ];
     if (isSaveLoaded) {
         headers.push('Caught', 'Shiny');
     }
@@ -180,7 +180,8 @@ const exportData = () => {
 
     const data = [];
     getSortedVitaminList().forEach((p) => {
-        const row = [ p.id, `"${p.name}"` ];
+        const types = pokemonMap[p.id].type;
+        const row = [ p.id, `"${p.name}"`, PokemonType[types[0]], PokemonType[types[1] ?? -1] ];
 
         if (isSaveLoaded) {
             row.push(

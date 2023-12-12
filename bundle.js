@@ -11811,7 +11811,7 @@ const getShadowStatusImage = (shadowStatus) => {
 
 const exportPartyPokemon = () => {
     const headers = [
-        '#', 'Pokemon', 'Shiny', 'Pokerus', 'Shadow Status', 'Native Region',
+        '#', 'Pokemon', 'Type 1', 'Type 2', 'Shiny', 'Pokerus', 'Shadow Status', 'Native Region',
         'Attack', 'Base Breeding Eff', 'Breeding Eff', 'Obtained', 'Hatched',
         'Shiny Obtained', 'Shiny Hatched', 'Defeated', 'Effort Points',
         'EVs', 'EV Bonus'
@@ -11820,6 +11820,8 @@ const exportPartyPokemon = () => {
     const data = getSortedPartyList().map((p) => [
         p.id,
         `"${p.name}"`,
+        PokemonType[pokemonMap[p.id].type[0]],
+        PokemonType[pokemonMap[p.id].type[1] ?? -1],
         p.shiny ? 1 : 0,
         p.pokerus,
         Companion.data.shadowPokemon.has(p.name) ? p.shadow : -1,
@@ -13023,7 +13025,7 @@ const getVitaminPokemonList = ko.pureComputed(() => {
 
 const getFilteredVitaminList = () => {
     const region = highestRegion();
-    const searchVal = searchValue();
+    const searchVal = searchValue()?.toLowerCase();
 
     return pokemonVitaminList.filter((pokemon) => {
         if (pokemon.obtainRegion > region) {
@@ -13078,7 +13080,7 @@ const getTotalVitaminsNeeded = ko.pureComputed(() => {
 
 const exportData = () => {
     const isSaveLoaded = Companion.isSaveLoaded();
-    const headers = [ '#', 'Pokemon' ];
+    const headers = [ '#', 'Pokemon', 'Type 1', 'Type 2' ];
     if (isSaveLoaded) {
         headers.push('Caught', 'Shiny');
     }
@@ -13093,7 +13095,8 @@ const exportData = () => {
 
     const data = [];
     getSortedVitaminList().forEach((p) => {
-        const row = [ p.id, `"${p.name}"` ];
+        const types = pokemonMap[p.id].type;
+        const row = [ p.id, `"${p.name}"`, PokemonType[types[0]], PokemonType[types[1] ?? -1] ];
 
         if (isSaveLoaded) {
             row.push(

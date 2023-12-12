@@ -319,7 +319,7 @@ const getShadowStatusImage = (shadowStatus) => {
 
 const exportPartyPokemon = () => {
     const headers = [
-        '#', 'Pokemon', 'Shiny', 'Pokerus', 'Shadow Status', 'Native Region',
+        '#', 'Pokemon', 'Type 1', 'Type 2', 'Shiny', 'Pokerus', 'Shadow Status', 'Native Region',
         'Attack', 'Base Breeding Eff', 'Breeding Eff', 'Obtained', 'Hatched',
         'Shiny Obtained', 'Shiny Hatched', 'Defeated', 'Effort Points',
         'EVs', 'EV Bonus'
@@ -328,6 +328,8 @@ const exportPartyPokemon = () => {
     const data = getSortedPartyList().map((p) => [
         p.id,
         `"${p.name}"`,
+        PokemonType[pokemonMap[p.id].type[0]],
+        PokemonType[pokemonMap[p.id].type[1] ?? -1],
         p.shiny ? 1 : 0,
         p.pokerus,
         Companion.data.shadowPokemon.has(p.name) ? p.shadow : -1,
