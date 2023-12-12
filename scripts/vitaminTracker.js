@@ -110,7 +110,7 @@ const getVitaminPokemonList = ko.pureComputed(() => {
 
 const getFilteredVitaminList = () => {
     const region = highestRegion();
-    const searchVal = searchValue();
+    const searchVal = searchValue()?.toLowerCase();
 
     return pokemonVitaminList.filter((pokemon) => {
         if (pokemon.obtainRegion > region) {
