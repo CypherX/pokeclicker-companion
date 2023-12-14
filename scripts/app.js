@@ -451,41 +451,6 @@ const getFriendSafariForecast = ko.pureComputed(() => {
     return data;
 });
 
-// Enigma
-const revealEnigmaHints = ko.pureComputed(() => revealEnigmaHintsCounter() > 4);
-const revealEnigmaHintsCounter = ko.observable(0);
-const revealEnigmaHintsButtonText = ko.pureComputed(() => {
-    const textOptions = [
-        'Reveal Required Berries (may result in being judged)',
-        'Are you SURE!?',
-        'No, really, are you ABSOLUTELY SURE??',
-        'Just get the hints normally, man.',
-        'Fine. Have it your way >:(',
-    ];
-    return textOptions[revealEnigmaHintsCounter()] || '...';
-});
-const revealEnigmaHintsButtonClick = () => {
-    revealEnigmaHintsCounter(revealEnigmaHintsCounter() + 1);
-}
-const getEnigmaBerries = ko.pureComputed(() => {
-    const berries = ['North', 'West', 'East', 'South'].map(d => ({ direction: d, berry: undefined }));
-    if (!Companion.save.isLoaded()) {
-        return berries;
-    }
-
-    const enigmaMutationIdx = App.game.farming.mutations.findIndex(m => m.mutatedBerry == BerryType.Enigma);
-    const hintsSeen = Companion.save.saveData().save.farming.mutations[enigmaMutationIdx];
-
-    for (let i = 0; i < berries.length; i++) {
-        if (hintsSeen[i] || revealEnigmaHints()) {
-            berries[i].berry = BerryType[EnigmaMutation.getReqs()[i]];
-        }
-    }
-
-    return berries;
-});
-// Enigma - End
-
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#main-tab-save');
 
@@ -604,12 +569,6 @@ module.exports = {
     getGymData,
     getRouteData,
     hideOtherStatSection,
-
-    getEnigmaBerries,
-    revealEnigmaHints,
-    revealEnigmaHintsCounter,
-    revealEnigmaHintsButtonText,
-    revealEnigmaHintsButtonClick,
 
     getFriendSafariForecast,
 

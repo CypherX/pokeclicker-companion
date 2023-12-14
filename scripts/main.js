@@ -11,4 +11,5 @@ window.Companion = {
 
 window.Forecast = require('./forecast');
 window.VitaminTracker = require('./vitaminTracker');
+window.Enigma = require('./enigma');
 window.Util = require('./util');

@@ -17,7 +17,7 @@ const loadSaveData = (saveString, fileName) => {
     player.trainerId = saveFile.player.trainerId;
     App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
 
-    Companion.revealEnigmaHintsCounter(0);
+    Enigma.revealHintsCounter(0);
 
     VitaminTracker.highestRegion(player.highestRegion());
 

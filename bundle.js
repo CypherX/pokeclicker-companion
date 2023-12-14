@@ -11943,41 +11943,6 @@ const getFriendSafariForecast = ko.pureComputed(() => {
     return data;
 });
 
-// Enigma
-const revealEnigmaHints = ko.pureComputed(() => revealEnigmaHintsCounter() > 4);
-const revealEnigmaHintsCounter = ko.observable(0);
-const revealEnigmaHintsButtonText = ko.pureComputed(() => {
-    const textOptions = [
-        'Reveal Required Berries (may result in being judged)',
-        'Are you SURE!?',
-        'No, really, are you ABSOLUTELY SURE??',
-        'Just get the hints normally, man.',
-        'Fine. Have it your way >:(',
-    ];
-    return textOptions[revealEnigmaHintsCounter()] || '...';
-});
-const revealEnigmaHintsButtonClick = () => {
-    revealEnigmaHintsCounter(revealEnigmaHintsCounter() + 1);
-}
-const getEnigmaBerries = ko.pureComputed(() => {
-    const berries = ['North', 'West', 'East', 'South'].map(d => ({ direction: d, berry: undefined }));
-    if (!Companion.save.isLoaded()) {
-        return berries;
-    }
-
-    const enigmaMutationIdx = App.game.farming.mutations.findIndex(m => m.mutatedBerry == BerryType.Enigma);
-    const hintsSeen = Companion.save.saveData().save.farming.mutations[enigmaMutationIdx];
-
-    for (let i = 0; i < berries.length; i++) {
-        if (hintsSeen[i] || revealEnigmaHints()) {
-            berries[i].berry = BerryType[EnigmaMutation.getReqs()[i]];
-        }
-    }
-
-    return berries;
-});
-// Enigma - End
-
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#main-tab-save');
 
@@ -12096,12 +12061,6 @@ module.exports = {
     getGymData,
     getRouteData,
     hideOtherStatSection,
-
-    getEnigmaBerries,
-    revealEnigmaHints,
-    revealEnigmaHintsCounter,
-    revealEnigmaHintsButtonText,
-    revealEnigmaHintsButtonClick,
 
     getFriendSafariForecast,
 
@@ -12424,6 +12383,47 @@ module.exports = {
     berryMasterPokemonCosts,
 }
 },{}],38:[function(require,module,exports){
+const revealHintsCounter = ko.observable(0);
+const revealHints = ko.pureComputed(() => revealHintsCounter() > 4);
+
+const buttonTextList = [
+    'Reveal Required Berries (may result in being judged)',
+    'Are you SURE!?',
+    'No, really, are you ABSOLUTELY SURE??',
+    'Just get the hints normally, man.',
+    'Fine. Have it your way >:(',
+];
+
+const buttonText = ko.pureComputed(() => buttonTextList[revealHintsCounter()] || '...');
+
+const revealHintsButtonClick = () => revealHintsCounter(revealHintsCounter() + 1);
+
+const getBerries = ko.pureComputed(() => {
+    const berries = ['North', 'West', 'East', 'South'].map(d => ({ direction: d, berry: undefined }));
+    if (!Companion.save.isLoaded()) {
+        return berries;
+    }
+
+    const enigmaMutationIdx = App.game.farming.mutations.findIndex(m => m.mutatedBerry == BerryType.Enigma);
+    const hintsSeen = Companion.save.saveData().save.farming.mutations[enigmaMutationIdx];
+
+    for (let i = 0; i < berries.length; i++) {
+        if (hintsSeen[i] || revealHints()) {
+            berries[i].berry = BerryType[EnigmaMutation.getReqs()[i]];
+        }
+    }
+
+    return berries;
+});
+
+module.exports = {
+    revealHintsCounter,
+    revealHints,
+    buttonText,
+    revealHintsButtonClick,
+    getBerries,
+};
+},{}],39:[function(require,module,exports){
 const unownForecast = ko.observableArray();
 const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
@@ -12627,7 +12627,7 @@ module.exports = {
     getUndergroundItemList,
     getNextOccurrenceUndergroundItems,
 };
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 player = new Player();
 player.highestRegion(0);
 const multiplier = new Multiplier();
@@ -12703,7 +12703,7 @@ ko.bindingHandlers.tooltip = {
     }
   }
 };
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 const package = require('../pokeclicker/package.json');
 
 window.Companion = {
@@ -12717,9 +12717,10 @@ window.Companion = {
 
 window.Forecast = require('./forecast');
 window.VitaminTracker = require('./vitaminTracker');
+window.Enigma = require('./enigma');
 window.Util = require('./util');
 
-},{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./forecast":38,"./game":39,"./save":41,"./settings":42,"./util":43,"./vitaminTracker":44}],41:[function(require,module,exports){
+},{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./enigma":38,"./forecast":39,"./game":40,"./save":42,"./settings":43,"./util":44,"./vitaminTracker":45}],42:[function(require,module,exports){
 const saveData = ko.observable();
 const prevLoadedSaves = ko.observableArray();
 
@@ -12739,7 +12740,7 @@ const loadSaveData = (saveString, fileName) => {
     player.trainerId = saveFile.player.trainerId;
     App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
 
-    Companion.revealEnigmaHintsCounter(0);
+    Enigma.revealHintsCounter(0);
 
     VitaminTracker.highestRegion(player.highestRegion());
 
@@ -12817,7 +12818,7 @@ module.exports = {
 
     initialize,
 }
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 const showRequiredOnly = ko.observable(false);
 const showAllRegions = ko.observable(false);
 const defaultTab = ko.observable('tab-my-save');
@@ -12851,7 +12852,7 @@ module.exports = {
 
     initialize,
 };
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 const formatDate = (date) => {
     if (!date) return undefined;
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
@@ -12941,7 +12942,7 @@ module.exports = {
     compressString,
     decompressString,
 };
-},{"lzutf8":6}],44:[function(require,module,exports){
+},{"lzutf8":6}],45:[function(require,module,exports){
 const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
     const attackBonusPercent = (GameConstants.BREEDING_ATTACK_BONUS + vitaminsUsed[GameConstants.VitaminType.Calcium]) / 100;
     const proteinBoost = vitaminsUsed[GameConstants.VitaminType.Protein];
@@ -13241,4 +13242,4 @@ module.exports = {
 
     exportData,
 };
-},{}]},{},[40]);
+},{}]},{},[41]);

@@ -511,7 +511,7 @@
     
                                         <div class="tab-pane" id="enigma-berry" role="tabpanel" aria-labelledby="enigma-berry-tab">
                                             <div class="container text-center">
-                                                <div class="row" data-bind="foreach: Companion.getEnigmaBerries">
+                                                <div class="row" data-bind="foreach: Enigma.getBerries">
                                                     <div class="col-6 col-sm-3 mb-5">
                                                         <div class="h4 text-decoration-underline" data-bind="text: $data.direction"></div>
                                                         <!-- ko if: $data.berry -->
@@ -521,15 +521,15 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!-- ko if: !Companion.revealEnigmaHints() && Companion.getEnigmaBerries().every(b => b.berry) -->
+                                            <!-- ko if: !Enigma.revealHints() && Enigma.getBerries().every(b => b.berry) -->
                                             <div class="text-center text-success mt-5">Impressive. You got all the hints on your own 👏. You're pretty neat.</div>
                                             <!-- /ko -->
-                                            <!-- ko if: Companion.getEnigmaBerries().some(b => !b.berry) -->
+                                            <!-- ko if: Enigma.getBerries().some(b => !b.berry) -->
                                             <div class="text-center mt-5">
-                                                <button type="button" class="btn btn-primary" data-bind="text: Companion.revealEnigmaHintsButtonText, click: () => Companion.revealEnigmaHintsButtonClick()"></button>
+                                                <button type="button" class="btn btn-primary" data-bind="text: Enigma.buttonText, click: () => Enigma.revealHintsButtonClick()"></button>
                                             </div>
                                             <!-- /ko -->
-                                            <!-- ko if: Companion.revealEnigmaHints -->
+                                            <!-- ko if: Enigma.revealHints -->
                                             <div class="text-center text-muted mt-5">Impatient (or unlucky) little shit, ain't ye?</div>
                                             <!-- /ko -->
                                         </div>
