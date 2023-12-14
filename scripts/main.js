@@ -5,6 +5,7 @@ window.Companion = {
     ...require('./game'),
     ...require('./app'),
     data: require('./data'),
+    save: require('./save'),
 }
 
 window.Forecast = require('./forecast');

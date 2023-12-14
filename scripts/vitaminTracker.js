@@ -92,7 +92,7 @@ const getVitaminPokemonList = ko.pureComputed(() => {
     }
 
     const region = highestRegion();
-    const saveLoaded = Companion.isSaveLoaded();
+    const saveLoaded = Companion.save.isLoaded();
     const pokemon = getFilteredVitaminList();
     pokemon.forEach((p) => {
         const regionVitamins = p.regionVitamins[region];
@@ -125,7 +125,7 @@ const getFilteredVitaminList = () => {
         }
 
         const partyPokemon = Companion.partyList()[pokemon.id];
-        if (Companion.isSaveLoaded() && hideUncaughtPokemon() && !partyPokemon) {
+        if (Companion.save.isLoaded() && hideUncaughtPokemon() && !partyPokemon) {
             return false;
         }
 
@@ -164,7 +164,7 @@ const getTotalVitaminsNeeded = ko.pureComputed(() => {
 });
 
 const exportData = () => {
-    const isSaveLoaded = Companion.isSaveLoaded();
+    const isSaveLoaded = Companion.save.isLoaded();
     const headers = [ '#', 'Pokemon', 'Type 1', 'Type 2' ];
     if (isSaveLoaded) {
         headers.push('Caught', 'Shiny');

@@ -49,7 +49,11 @@ const exportToCsv = (headers, data, fileName = 'export') => {
         ...data.map(d => d.join(','))
     ];
 
-    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    downloadFile(rows.join('\n'), fileName, 'text/csv');
+};
+
+const downloadFile = (data, fileName, type = 'text/plain') => {
+    const blob = new Blob([data], { type });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -57,7 +61,15 @@ const exportToCsv = (headers, data, fileName = 'export') => {
     a.click();
 };
 
+const lzutf8 = require('lzutf8');
 
+const compressString = (input, outputEncoding = 'Base64') => {
+    return lzutf8.compress(input, { outputEncoding });
+};
+
+const decompressString = (input, inputEncoding = 'Base64') => {
+    return lzutf8.decompress(input, { inputEncoding });
+};
 
 module.exports = {
     formatDate,
@@ -70,4 +82,8 @@ module.exports = {
     splitArrayChunked,
 
     exportToCsv,
+    downloadFile,
+
+    compressString,
+    decompressString,
 };

@@ -11490,8 +11490,6 @@ module.exports={
 }
 
 },{}],36:[function(require,module,exports){
-const saveData = ko.observable(undefined);
-
 const showRequiredOnly = ko.observable(false);
 const showAllRegions = ko.observable(false);
 const defaultTab = ko.observable('tab-my-save');
@@ -11501,12 +11499,9 @@ showAllRegions.subscribe((value) => localStorage.setItem('showAllRegions', +valu
 defaultTab.subscribe((value) => localStorage.setItem('defaultTab', value));
 
 const partyList = ko.pureComputed(() => {
-    if (!saveData()) {
-        return {};
-    }
-
-    const party = saveData().save.party.caughtPokemon;
-    const statistics = saveData().save.statistics;
+    const saveData = Companion.save.saveData();
+    const party = saveData?.save.party.caughtPokemon ?? [];
+    const statistics = saveData?.save.statistics;
 
     return party.reduce((_map, p) => {
         const partyPokemon = PokemonFactory.generatePartyPokemon(p.id);
@@ -11538,86 +11533,6 @@ const pokemonStatTableFilter = ko.observable('none');
 const pokemonStatTableSort = ko.observable('id');
 const pokemonStatTableSortDir = ko.observable(false);
 
-const prevLoadedSaves = ko.observableArray();
-
-const loadFile = (file) => {
-    const fileName = file.name;
-    const fileReader = new FileReader();
-    fileReader.addEventListener('load', () => {
-        loadSaveData(atob(fileReader.result), fileName);
-    });
-
-    fileReader.readAsText(file);
-};
-
-const loadPreviousFile = (index) => {
-    const file = prevLoadedSaves()[index];
-    if (file) {
-        const lzutf8 = require('lzutf8');
-        const decompressed = lzutf8.decompress(file.data, { inputEncoding: 'Base64' });
-        loadSaveData(decompressed, file.name);
-    }
-};
-
-const loadSaveData = (saveString, fileName) => {
-    //const saveFile = JSON.parse(atob(fr.result));
-    const saveFile = JSON.parse(saveString);
-    player.highestRegion(saveFile.player.highestRegion);
-    player.trainerId = saveFile.player.trainerId;
-    App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
-
-    revealEnigmaHintsCounter(0);
-
-    VitaminTracker.highestRegion(player.highestRegion());
-
-    saveData(saveFile);
-
-    const prevDataIndex = prevLoadedSaves().findIndex((save) => save.name == fileName);
-    if (prevDataIndex > 0) {
-        prevLoadedSaves.unshift(prevLoadedSaves.splice(prevDataIndex, 1)[0]);
-    } else if (prevDataIndex == -1) {
-        const lzutf8 = require('lzutf8');
-        const compressed = lzutf8.compress(saveString, { outputEncoding: 'Base64' });
-
-        const arr = prevLoadedSaves();
-        arr.unshift({ name: fileName, data: compressed });
-        arr.length = Math.min(arr.length, 5);
-        prevLoadedSaves(arr);
-    }
-
-    if (saveFile.save.profile.name.toLowerCase() == 'bailey') {
-        if (Rand.intBetween(1, 20) == 1) {
-            alert('Ȟ̷̨̠͈͖̲̠͍͓̊͂̐e̵͈͖̮̼̼͚͍̳̠̖̺͚̓͝ĺ̷̢̧̧̻̫͚̒l̴̛̲̼͒̽́͒̆̑͑̃̌̎o̸̡̘̞̝̭̙̠̰͋̆̚.̵̡̛̹͙̤̺̳̱͚̹̏͌̓̓̌̿̊̒́͂̂̊͂̚ ̵̨̨̖̭̞̰͖̞̮͚̺̟̰̔B̴̢̰̳͓̬̤̯̬͍̙͎̟͉͓̙̓̈́̓̽͑̍̓̂͑́͘͘a̵̛̭̬͎̪̔͋͌̀͂̏i̷̱͉̪͖̫͇̮͔̯͆̄̔͋͂ḽ̵̳͕͆̎̈́ę̶̛͕̘͎̮̯͙̱͔̙͓͉̿̽̍͂̋̇̏̐̈̽͜y̷̡̟̦̓̍͐̓̆̀̍̂̕.̶̤͖͚̅̅̒̔͘͘ ̴̧̤͔̜̪̦͇̿̀̋͒̾̋͋̚W̸̨̜͍̲̖̱̯̖͇̣̩̉̏͘͘͘͜͝͝e̴̛̩͈̥̻̺̝̲̹͂̈́̉͆̀̀͊́͐.̶̢̱͙̱̱͈͖̳̫̝͇̰̐̏̀̂̎̇͋͛͛̇̉͐́̚̕ͅͅ ̸̙̩̥͕̪̖̅̆̓̏̕͝͝͝ͅS̸̙͈̺͙̟͓̠̼͍͖̭͇͂̍̊͂̎̃̂͜e̸̟͊́̈́͆̉̽̎̔̈̊̔̑̕̕̚e̷̛̯̼̱͐͊͒̈́́̽͐̏̉̔.̴̧̛̉̈̊͛͐ ̶̨͕̗̱̙͚̗̩͉̖̥͈̠̬̑̉̀Ỹ̷̡͖̪̝̦͈̲͘͝o̵̢͍̗͍̱̪̮̊͛͛͋̂̆̔̒͊́̈͂̾̋ͅû̶̹̳̽͌̊̌̓̑͝.̶̡̢̹̤͚͚̟͇͕͖̦̠̪͆̍̈̉̉̈́͆̑̎̆͘̚͝ ̶̙͈͋̾͊̆̒̌͐̂Ŵ̸̧̺̗̥̲͈̳̟̜͚̜͚̏̽͗̊̾̐̿̉͝ȩ̵̼̪͎͉͇͙̭͎̻͈͗̈́͂̓̈́̒̃̈̔̋̉̂̈̕ͅ.̷̤͔͕̎̎̐̂͆̈́̀ ̸̢̧̻̗̯̥͓̥͕̱̖̬̲̅́̒͌̿̎̔͌̈͌̀͠͠ͅͅÂ̸̛̛̖͕̱̫̲̞̯̫͉͖̻̳͂̂̅̈́̑̓́͐̈̀r̷̢̗̳̗̤͔͓̻̳̳̠̳̬̩̞̆̎̾̈́͋̊̕͝e̴͓͇͙̬͔̼͔͇̋̋̐̐̽͐̈́͘̚.̸͍̞̼͈̖̩̮̹̈́̊̄͠ ̴͓͔̬̟̈́̈W̵͍͍̼̜̤͔̭̻̞̫̹̎̇̿́̀͘ͅa̷̡̡̨̩̙͍͖̜̍̾̈́͊̽̂͂͜t̵̟͚͙͇̫͚̠̭͈̣̘̫͆͒̑͊̀͒̆̉́͑͋̊̕͘ͅç̶̮͉͍̫̋̅̅̓͑͠ḩ̷͕̟̠̩̼̼͓̜̳̦͝ĭ̵̧̢̨̼͓̩͈̮͖͖͓̰͕̈́̈́͂̋̅̐̍̔̎̀́̕n̸̛͚͕̝̐́̿͌͂̊͛̓̂̓̓͑͋͝g̸̞̠̭͖̯̲͕̫̗͖͔͙̀̿̇͜.̸̨̡̢̱͖͙̰͍͙̟͈͓̪͙͊̓̆̃́̀̀̈́');
-        } else {
-            const hour = (new Date()).getHours();
-            if (hour < 5) {
-                alert('Bailey! What are you still doing up!? GO TO BED!');
-            } else if (hour < 12) {
-                alert('Good morning, Bailey! Did you sleep well?');
-            } else if (hour < 18) {
-                alert('Good afternoon, Bailey! We missed you. Enjoy your stay.');
-            } else if (hour < 22) {
-                alert('Good evening, Bailey. How was your day? ');
-            } else {
-                alert('Hello, Bailey. It\'s getting kind of late, perhaps consider retiring to bed soon?');
-            }
-        }
-    }
-};
-
-const isOlderVersionSave = ko.pureComputed(() => {
-    if (!saveData()) {
-        return false;
-    }
-
-    const saveVersion = saveData().save.update.version;
-    return saveVersion != Companion.package.version;
-});
-
-const isSaveLoaded = ko.pureComputed(() => {
-    return saveData() !== undefined;
-});
-
 const getSortedPartyList = ko.pureComputed(() => {
     const sortOption = pokemonStatTableSort();
     const sortDirection = pokemonStatTableSortDir();
@@ -11625,7 +11540,7 @@ const getSortedPartyList = ko.pureComputed(() => {
 }).extend({ rateLimit: 100 });
 
 const getMissingPokemon = ko.pureComputed(() => {
-    if (!isSaveLoaded()) {
+    if (!Companion.save.isLoaded()) {
         return [];
     }
 
@@ -11648,6 +11563,8 @@ const getMissingPokemon = ko.pureComputed(() => {
         pokemon: []
     };
 
+    const saveData = Companion.save.saveData();
+
     Companion.data.obtainablePokemonList.forEach(p => {
         if (caughtPokemon[p.id]) {
             return;
@@ -11663,7 +11580,7 @@ const getMissingPokemon = ko.pureComputed(() => {
                 return;
             }
 
-            const formCaught = saveData().save.party.caughtPokemon.some(c => Math.floor(c.id) == Math.floor(p.id));
+            const formCaught = saveData.save.party.caughtPokemon.some(c => Math.floor(c.id) == Math.floor(p.id));
             if (formCaught) {
                 return;
             }
@@ -11857,7 +11774,7 @@ const getDungeonData = ko.pureComputed(() => {
 
     dungeonData.forEach(d => {
         d.dungeons = d.dungeons.map(dungeon => {
-            const clears = isSaveLoaded() ? getDungeonClearCount(dungeon) : 0;
+            const clears = getDungeonClearCount(dungeon);
             const cost = dungeonList[dungeon].tokenCost;
             return {
                 name: dungeon,
@@ -11875,12 +11792,12 @@ const getDungeonData = ko.pureComputed(() => {
 const getDungeonDataFlat = ko.pureComputed(() => getDungeonData().flatMap(d => d.dungeons));
 
 const getDungeonClearCount = (dungeon) => {
-    if (!isSaveLoaded()) {
+    if (!Companion.save.isLoaded()) {
         return 0;
     }
 
     const dungeonIndex = GameConstants.getDungeonIndex(dungeon);
-    return saveData().save.statistics.dungeonsCleared[dungeonIndex] || 0;
+    return Companion.save.saveData().save.statistics.dungeonsCleared[dungeonIndex] || 0;
 };
 
 const totalDungeonClears = ko.pureComputed(() => {
@@ -11926,7 +11843,7 @@ const getGymData = ko.pureComputed(() => {
     gymList.forEach(g => {
         g.gyms = g.gyms.map(gym => ({
             name: gym,
-            clears: isSaveLoaded() ? getGymClearCount(gym) : 0
+            clears: getGymClearCount(gym)
         }));
     });
 
@@ -11934,12 +11851,12 @@ const getGymData = ko.pureComputed(() => {
 });
 
 const getGymClearCount = (gym) => {
-    if (!saveData()) {
+    if (!Companion.save.isLoaded()) {
         return 0;
     }
 
     const gymIndex = GameConstants.getGymIndex(gym);
-    return saveData().save.statistics.gymsDefeated[gymIndex] || 0;
+    return Companion.save.saveData().save.statistics.gymsDefeated[gymIndex] || 0;
 };
 
 const getRouteData = ko.pureComputed(() => {
@@ -11968,7 +11885,7 @@ const getRouteData = ko.pureComputed(() => {
         const regionName = GameConstants.camelCaseToString(GameConstants.Region[r.region]);
         r.routes.forEach(route => {
             route.routeName = route.routeName.replace(regionName, '').trim();
-            route.defeats = isSaveLoaded() ? getRouteDefeatCount(route.region, route.number) : 0;
+            route.defeats = getRouteDefeatCount(route.region, route.number);
         });
     });
 
@@ -11978,12 +11895,12 @@ const getRouteData = ko.pureComputed(() => {
 });
 
 const getRouteDefeatCount = (region, routeNumber) => {
-    if (!saveData()) {
+    if (!Companion.save.isLoaded()) {
         return 0;
     }
 
     const regionName = GameConstants.Region[region];
-    return saveData().save.statistics.routeKills[regionName][routeNumber] || 0;
+    return Companion.save.saveData().save.statistics.routeKills[regionName][routeNumber] || 0;
 };
 
 const hideOtherStatSection = (data) => {
@@ -12004,11 +11921,11 @@ const hideOtherStatSection = (data) => {
 };
 
 const getFriendSafariForecast = ko.pureComputed(() => {
-    if (!saveData()) {
+    if (!Companion.save.isLoaded()) {
         return [];
     }
 
-    const trainerId = saveData().player.trainerId || '000000';
+    const trainerId = Companion.save.saveData().player.trainerId || '000000';
     SeededRand.seed(+trainerId);
     const shuffledPokemon = new Array(5).fill(SeededRand.shuffleArray(Companion.data.friendSafariPokemon)).flat();
 
@@ -12050,12 +11967,12 @@ const revealEnigmaHintsButtonClick = () => {
 }
 const getEnigmaBerries = ko.pureComputed(() => {
     const berries = ['North', 'West', 'East', 'South'].map(d => ({ direction: d, berry: undefined }));
-    if (!saveData()) {
+    if (!Companion.save.isLoaded()) {
         return berries;
     }
 
     const enigmaMutationIdx = App.game.farming.mutations.findIndex(m => m.mutatedBerry == BerryType.Enigma);
-    const hintsSeen = saveData().save.farming.mutations[enigmaMutationIdx];
+    const hintsSeen = Companion.save.saveData().save.farming.mutations[enigmaMutationIdx];
 
     for (let i = 0; i < berries.length; i++) {
         if (hintsSeen[i] || revealEnigmaHints()) {
@@ -12117,10 +12034,10 @@ $(document).ready(() => {
 
     const prevSaves = localStorage.getItem('prevLoadedSaves');
     if (prevSaves) {
-        prevLoadedSaves(JSON.parse(prevSaves));
+        Companion.save.prevLoadedSaves(JSON.parse(prevSaves));
     }
 
-    prevLoadedSaves.subscribe((value) => {
+    Companion.save.prevLoadedSaves.subscribe((value) => {
         localStorage.setItem('prevLoadedSaves', JSON.stringify(value));
     });
 });
@@ -12177,15 +12094,8 @@ function getSortValue(sortOption, partyPokemon) {
 }
 
 module.exports = {
-    saveData,
     showRequiredOnly,
     showAllRegions,
-
-    prevLoadedSaves,
-    loadFile,
-    loadPreviousFile,
-    isSaveLoaded,
-    isOlderVersionSave,
 
     getMissingPokemon,
     getTotalMissingPokemonCount,
@@ -12220,6 +12130,7 @@ module.exports = {
 
     getEnigmaBerries,
     revealEnigmaHints,
+    revealEnigmaHintsCounter,
     revealEnigmaHintsButtonText,
     revealEnigmaHintsButtonClick,
 
@@ -12230,7 +12141,7 @@ module.exports = {
     defaultTab,
 };
 
-},{"lzutf8":6}],37:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 const UnobtainablePokemon = [
     'Mega Medicham',
     'Mega Altaria',
@@ -12832,13 +12743,99 @@ window.Companion = {
     ...require('./game'),
     ...require('./app'),
     data: require('./data'),
+    save: require('./save'),
 }
 
 window.Forecast = require('./forecast');
 window.VitaminTracker = require('./vitaminTracker');
 window.Util = require('./util');
 
-},{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./forecast":38,"./game":39,"./util":41,"./vitaminTracker":42}],41:[function(require,module,exports){
+},{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./forecast":38,"./game":39,"./save":41,"./util":42,"./vitaminTracker":43}],41:[function(require,module,exports){
+const saveData = ko.observable();
+const prevLoadedSaves = ko.observableArray();
+
+const loadFile = (file) => {
+    const fileName = file.name;
+    const fileReader = new FileReader();
+    fileReader.addEventListener('load', () => {
+        loadSaveData(atob(fileReader.result), fileName);
+    });
+
+    fileReader.readAsText(file);
+};
+
+const loadSaveData = (saveString, fileName) => {
+    const saveFile = JSON.parse(saveString);
+    player.highestRegion(saveFile.player.highestRegion);
+    player.trainerId = saveFile.player.trainerId;
+    App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
+
+    Companion.revealEnigmaHintsCounter(0);
+
+    VitaminTracker.highestRegion(player.highestRegion());
+
+    saveData(saveFile);
+
+    const prevDataIndex = prevLoadedSaves().findIndex((save) => save.name == fileName);
+    if (prevDataIndex > 0) {
+        prevLoadedSaves.unshift(prevLoadedSaves.splice(prevDataIndex, 1)[0]);
+    } else if (prevDataIndex == -1) {
+        const compressed = Util.compressString(saveString);
+        const arr = prevLoadedSaves();
+        arr.unshift({ name: fileName, data: compressed });
+        arr.length = Math.min(arr.length, 5);
+        prevLoadedSaves(arr);
+    }
+
+    if (saveFile.save.profile.name.toLowerCase() == 'bailey') {
+        if (Rand.intBetween(1, 20) == 1) {
+            alert('Ȟ̷̨̠͈͖̲̠͍͓̊͂̐e̵͈͖̮̼̼͚͍̳̠̖̺͚̓͝ĺ̷̢̧̧̻̫͚̒l̴̛̲̼͒̽́͒̆̑͑̃̌̎o̸̡̘̞̝̭̙̠̰͋̆̚.̵̡̛̹͙̤̺̳̱͚̹̏͌̓̓̌̿̊̒́͂̂̊͂̚ ̵̨̨̖̭̞̰͖̞̮͚̺̟̰̔B̴̢̰̳͓̬̤̯̬͍̙͎̟͉͓̙̓̈́̓̽͑̍̓̂͑́͘͘a̵̛̭̬͎̪̔͋͌̀͂̏i̷̱͉̪͖̫͇̮͔̯͆̄̔͋͂ḽ̵̳͕͆̎̈́ę̶̛͕̘͎̮̯͙̱͔̙͓͉̿̽̍͂̋̇̏̐̈̽͜y̷̡̟̦̓̍͐̓̆̀̍̂̕.̶̤͖͚̅̅̒̔͘͘ ̴̧̤͔̜̪̦͇̿̀̋͒̾̋͋̚W̸̨̜͍̲̖̱̯̖͇̣̩̉̏͘͘͘͜͝͝e̴̛̩͈̥̻̺̝̲̹͂̈́̉͆̀̀͊́͐.̶̢̱͙̱̱͈͖̳̫̝͇̰̐̏̀̂̎̇͋͛͛̇̉͐́̚̕ͅͅ ̸̙̩̥͕̪̖̅̆̓̏̕͝͝͝ͅS̸̙͈̺͙̟͓̠̼͍͖̭͇͂̍̊͂̎̃̂͜e̸̟͊́̈́͆̉̽̎̔̈̊̔̑̕̕̚e̷̛̯̼̱͐͊͒̈́́̽͐̏̉̔.̴̧̛̉̈̊͛͐ ̶̨͕̗̱̙͚̗̩͉̖̥͈̠̬̑̉̀Ỹ̷̡͖̪̝̦͈̲͘͝o̵̢͍̗͍̱̪̮̊͛͛͋̂̆̔̒͊́̈͂̾̋ͅû̶̹̳̽͌̊̌̓̑͝.̶̡̢̹̤͚͚̟͇͕͖̦̠̪͆̍̈̉̉̈́͆̑̎̆͘̚͝ ̶̙͈͋̾͊̆̒̌͐̂Ŵ̸̧̺̗̥̲͈̳̟̜͚̜͚̏̽͗̊̾̐̿̉͝ȩ̵̼̪͎͉͇͙̭͎̻͈͗̈́͂̓̈́̒̃̈̔̋̉̂̈̕ͅ.̷̤͔͕̎̎̐̂͆̈́̀ ̸̢̧̻̗̯̥͓̥͕̱̖̬̲̅́̒͌̿̎̔͌̈͌̀͠͠ͅͅÂ̸̛̛̖͕̱̫̲̞̯̫͉͖̻̳͂̂̅̈́̑̓́͐̈̀r̷̢̗̳̗̤͔͓̻̳̳̠̳̬̩̞̆̎̾̈́͋̊̕͝e̴͓͇͙̬͔̼͔͇̋̋̐̐̽͐̈́͘̚.̸͍̞̼͈̖̩̮̹̈́̊̄͠ ̴͓͔̬̟̈́̈W̵͍͍̼̜̤͔̭̻̞̫̹̎̇̿́̀͘ͅa̷̡̡̨̩̙͍͖̜̍̾̈́͊̽̂͂͜t̵̟͚͙͇̫͚̠̭͈̣̘̫͆͒̑͊̀͒̆̉́͑͋̊̕͘ͅç̶̮͉͍̫̋̅̅̓͑͠ḩ̷͕̟̠̩̼̼͓̜̳̦͝ĭ̵̧̢̨̼͓̩͈̮͖͖͓̰͕̈́̈́͂̋̅̐̍̔̎̀́̕n̸̛͚͕̝̐́̿͌͂̊͛̓̂̓̓͑͋͝g̸̞̠̭͖̯̲͕̫̗͖͔͙̀̿̇͜.̸̨̡̢̱͖͙̰͍͙̟͈͓̪͙͊̓̆̃́̀̀̈́');
+        } else {
+            const hour = (new Date()).getHours();
+            if (hour < 5) {
+                alert('Bailey! What are you still doing up!? GO TO BED!');
+            } else if (hour < 12) {
+                alert('Good morning, Bailey! Did you sleep well?');
+            } else if (hour < 18) {
+                alert('Good afternoon, Bailey! We missed you. Enjoy your stay.');
+            } else if (hour < 22) {
+                alert('Good evening, Bailey. How was your day? ');
+            } else {
+                alert('Hello, Bailey. It\'s getting kind of late, perhaps consider retiring to bed soon?');
+            }
+        }
+    }
+};
+
+const loadPreviousFile = (index) => {
+    const file = prevLoadedSaves()[index];
+    if (file) {
+        const decompressed = Util.decompressString(file.data);
+        loadSaveData(decompressed, file.name);
+    }
+};
+
+const isLoaded = ko.pureComputed(() => {
+    return saveData() !== undefined;
+});
+
+const isOlderVersion = ko.pureComputed(() => {
+    const saveVersion = saveData()?.save.update.version;
+    return saveVersion && saveVersion != Companion.package.version;
+});
+
+
+module.exports = {
+    saveData,
+    prevLoadedSaves,
+
+    loadFile,
+    loadPreviousFile,
+
+    isLoaded,
+    isOlderVersion,
+}
+},{}],42:[function(require,module,exports){
 const formatDate = (date) => {
     if (!date) return undefined;
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
@@ -12890,7 +12887,11 @@ const exportToCsv = (headers, data, fileName = 'export') => {
         ...data.map(d => d.join(','))
     ];
 
-    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    downloadFile(rows.join('\n'), fileName, 'text/csv');
+};
+
+const downloadFile = (data, fileName, type = 'text/plain') => {
+    const blob = new Blob([data], { type });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -12898,7 +12899,15 @@ const exportToCsv = (headers, data, fileName = 'export') => {
     a.click();
 };
 
+const lzutf8 = require('lzutf8');
 
+const compressString = (input, outputEncoding = 'Base64') => {
+    return lzutf8.compress(input, { outputEncoding });
+};
+
+const decompressString = (input, inputEncoding = 'Base64') => {
+    return lzutf8.decompress(input, { inputEncoding });
+};
 
 module.exports = {
     formatDate,
@@ -12911,8 +12920,12 @@ module.exports = {
     splitArrayChunked,
 
     exportToCsv,
+    downloadFile,
+
+    compressString,
+    decompressString,
 };
-},{}],42:[function(require,module,exports){
+},{"lzutf8":6}],43:[function(require,module,exports){
 const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
     const attackBonusPercent = (GameConstants.BREEDING_ATTACK_BONUS + vitaminsUsed[GameConstants.VitaminType.Calcium]) / 100;
     const proteinBoost = vitaminsUsed[GameConstants.VitaminType.Protein];
@@ -13007,7 +13020,7 @@ const getVitaminPokemonList = ko.pureComputed(() => {
     }
 
     const region = highestRegion();
-    const saveLoaded = Companion.isSaveLoaded();
+    const saveLoaded = Companion.save.isLoaded();
     const pokemon = getFilteredVitaminList();
     pokemon.forEach((p) => {
         const regionVitamins = p.regionVitamins[region];
@@ -13040,7 +13053,7 @@ const getFilteredVitaminList = () => {
         }
 
         const partyPokemon = Companion.partyList()[pokemon.id];
-        if (Companion.isSaveLoaded() && hideUncaughtPokemon() && !partyPokemon) {
+        if (Companion.save.isLoaded() && hideUncaughtPokemon() && !partyPokemon) {
             return false;
         }
 
@@ -13079,7 +13092,7 @@ const getTotalVitaminsNeeded = ko.pureComputed(() => {
 });
 
 const exportData = () => {
-    const isSaveLoaded = Companion.isSaveLoaded();
+    const isSaveLoaded = Companion.save.isLoaded();
     const headers = [ '#', 'Pokemon', 'Type 1', 'Type 2' ];
     if (isSaveLoaded) {
         headers.push('Caught', 'Shiny');
