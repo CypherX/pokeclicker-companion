@@ -206,10 +206,6 @@ const RouteListOverride = [
     }
 ];
 
-const friendSafariPokemon =
-    pokemonList.filter((p) => PokemonHelper.isObtainableAndNotEvable(p.name)
-        && PokemonHelper.calcNativeRegion(p.name) <= GameConstants.MAX_AVAILABLE_REGION).map((p) => p.name);
-
 const obtainablePokemonList = (() => {
     const unobtainableList = UnobtainablePokemon.filter(p => typeof p === 'string');
     const unobtainableListRegex = UnobtainablePokemon.filter(p => typeof p === 'object').map(p => new RegExp(p));
@@ -297,8 +293,6 @@ module.exports = {
     DungeonListOverride,
     GymListOverride,
     RouteListOverride,
-
-    friendSafariPokemon,
 
     obtainablePokemonList,
     obtainablePokemonMap,

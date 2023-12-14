@@ -11617,7 +11617,7 @@ const hideFromPokemonStatsTable = (partyPokemon) => {
 
         if (filterVal) {
             const isResistant = partyPokemon.pokerus === GameConstants.Pokerus.Resistant;
-            const isFriendSafari = Companion.data.friendSafariPokemon.includes(partyPokemon.name);
+            const isFriendSafari = FriendSafari.isInRotation(partyPokemon.name);
 
             switch (filterVal) {
                 case 'not-shiny':
@@ -11914,35 +11914,6 @@ const hideOtherStatSection = (data) => {
     return false;
 };
 
-const getFriendSafariForecast = ko.pureComputed(() => {
-    if (!Companion.save.isLoaded()) {
-        return [];
-    }
-
-    const trainerId = Companion.save.saveData().player.trainerId || '000000';
-    SeededRand.seed(+trainerId);
-    const shuffledPokemon = new Array(5).fill(SeededRand.shuffleArray(Companion.data.friendSafariPokemon)).flat();
-
-    const batchCount = Math.ceil(shuffledPokemon.length / 5);
-    const date = new Date();
-    let startIndex = (Math.floor((date.getTime() - date.getTimezoneOffset() * 60 * 1000) / (24 * 60 * 60 * 1000)) % batchCount) * 5;
-
-    const data = [];
-    for (let i = 0; i < Math.ceil(Companion.data.friendSafariPokemon.length / 5); i++) {
-        data.push({
-            date: new Date(date),
-            pokemon: shuffledPokemon.slice(startIndex, startIndex + 5)
-        });
-        startIndex += 5;
-        if (startIndex >= shuffledPokemon.length) {
-            startIndex = 0;
-        }
-        date.setDate(date.getDate() + 1);
-    }
-
-    return data;
-});
-
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#main-tab-save');
 
@@ -12061,8 +12032,6 @@ module.exports = {
     getGymData,
     getRouteData,
     hideOtherStatSection,
-
-    getFriendSafariForecast,
 
     tabVisited,
     activeTab,
@@ -12277,10 +12246,6 @@ const RouteListOverride = [
     }
 ];
 
-const friendSafariPokemon =
-    pokemonList.filter((p) => PokemonHelper.isObtainableAndNotEvable(p.name)
-        && PokemonHelper.calcNativeRegion(p.name) <= GameConstants.MAX_AVAILABLE_REGION).map((p) => p.name);
-
 const obtainablePokemonList = (() => {
     const unobtainableList = UnobtainablePokemon.filter(p => typeof p === 'string');
     const unobtainableListRegex = UnobtainablePokemon.filter(p => typeof p === 'object').map(p => new RegExp(p));
@@ -12368,8 +12333,6 @@ module.exports = {
     DungeonListOverride,
     GymListOverride,
     RouteListOverride,
-
-    friendSafariPokemon,
 
     obtainablePokemonList,
     obtainablePokemonMap,
@@ -12628,6 +12591,60 @@ module.exports = {
     getNextOccurrenceUndergroundItems,
 };
 },{}],40:[function(require,module,exports){
+const allSafariPokemon = ko.pureComputed(() => {
+    // List isn't needed until a save is loaded
+    if (!Companion.save.isLoaded()) {
+        return [];
+    }
+
+    return pokemonList
+        .filter((p) => PokemonHelper.isObtainableAndNotEvable(p.name)
+            && PokemonHelper.calcNativeRegion(p.name) <= GameConstants.MAX_AVAILABLE_REGION)
+        .map((p) => p.name);
+});
+
+const getRotation = ko.pureComputed(() => {
+    if (!Companion.save.isLoaded()) {
+        return [];
+    }
+
+    const rotationSize = GameConstants.FRIEND_SAFARI_POKEMON;
+    const trainerId = Companion.save.saveData().player.trainerId || '000000';
+    SeededRand.seed(+trainerId);
+    const shuffledPokemon = new Array(rotationSize).fill(SeededRand.shuffleArray(allSafariPokemon())).flat();
+
+    const batchCount = Math.ceil(shuffledPokemon.length / rotationSize);
+    const date = new Date();
+    let startIndex = (Math.floor((date.getTime() - date.getTimezoneOffset() * 60 * 1000) / (24 * 60 * 60 * 1000)) % batchCount) * rotationSize;
+
+    const data = [];
+    for (let i = 0; i < Math.ceil(allSafariPokemon().length / rotationSize); i++) {
+        data.push({
+            date: new Date(date),
+            pokemon: shuffledPokemon.slice(startIndex, startIndex + rotationSize)
+        });
+        startIndex += rotationSize;
+        if (startIndex >= shuffledPokemon.length) {
+            startIndex = 0;
+        }
+        date.setDate(date.getDate() + 1);
+    }
+
+    return data;
+});
+
+const isInRotation = (pokemonName) => {
+    return allSafariPokemon().includes(pokemonName);
+};
+
+const pokemonCount = () => allSafariPokemon().length;
+
+module.exports = {
+    getRotation,
+    isInRotation,
+    pokemonCount,
+};
+},{}],41:[function(require,module,exports){
 player = new Player();
 player.highestRegion(0);
 const multiplier = new Multiplier();
@@ -12703,7 +12720,7 @@ ko.bindingHandlers.tooltip = {
     }
   }
 };
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 const package = require('../pokeclicker/package.json');
 
 window.Companion = {
@@ -12718,9 +12735,10 @@ window.Companion = {
 window.Forecast = require('./forecast');
 window.VitaminTracker = require('./vitaminTracker');
 window.Enigma = require('./enigma');
+window.FriendSafari = require('./friendSafari');
 window.Util = require('./util');
 
-},{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./enigma":38,"./forecast":39,"./game":40,"./save":42,"./settings":43,"./util":44,"./vitaminTracker":45}],42:[function(require,module,exports){
+},{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./enigma":38,"./forecast":39,"./friendSafari":40,"./game":41,"./save":43,"./settings":44,"./util":45,"./vitaminTracker":46}],43:[function(require,module,exports){
 const saveData = ko.observable();
 const prevLoadedSaves = ko.observableArray();
 
@@ -12818,7 +12836,7 @@ module.exports = {
 
     initialize,
 }
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 const showRequiredOnly = ko.observable(false);
 const showAllRegions = ko.observable(false);
 const defaultTab = ko.observable('tab-my-save');
@@ -12852,7 +12870,7 @@ module.exports = {
 
     initialize,
 };
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 const formatDate = (date) => {
     if (!date) return undefined;
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
@@ -12942,7 +12960,7 @@ module.exports = {
     compressString,
     decompressString,
 };
-},{"lzutf8":6}],45:[function(require,module,exports){
+},{"lzutf8":6}],46:[function(require,module,exports){
 const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
     const attackBonusPercent = (GameConstants.BREEDING_ATTACK_BONUS + vitaminsUsed[GameConstants.VitaminType.Calcium]) / 100;
     const proteinBoost = vitaminsUsed[GameConstants.VitaminType.Protein];
@@ -13242,4 +13260,4 @@ module.exports = {
 
     exportData,
 };
-},{}]},{},[41]);
+},{}]},{},[42]);

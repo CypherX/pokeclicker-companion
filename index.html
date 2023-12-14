@@ -539,29 +539,25 @@
                             <div class="tab-pane h-100" id="save-tab-friend-safari">
                                 <div class="d-flex flex-column h-100">
                                     <div class="alert alert-dark text-center">
-                                        There are currently <span data-bind="text: Companion.data.friendSafariPokemon.length">0</span> Pokémon in the Friend Safari rotation.
-                                        The rotation takes <span data-bind="text: Math.ceil(Companion.data.friendSafariPokemon.length / 5)">0</span> days to complete.
+                                        There are currently <span data-bind="text: FriendSafari.pokemonCount()">0</span> Pokémon in the Friend Safari rotation.
+                                        The rotation takes <span data-bind="text: Math.ceil(FriendSafari.pokemonCount() / GameConstants.FRIEND_SAFARI_POKEMON)">0</span> days to complete.
                                     </div>
                                     <div class="table-responsive flex-grow-1" style="overflow: auto;">
-                                        <table class="table table-bordered table-striped table-hover table-sm table-sticky-header mb-0" style="font-size: 0.9rem;">
+                                        <table class="table table-striped table-hover table-sticky-header table-sm mb-0" style="font-size: 0.9rem;">
                                             <thead>
                                                 <tr class="table-dark">
                                                     <th class="text-center">Date</th>
                                                     <th class="text-center" colspan="5">Pokemon</th>
                                                 </tr>
                                             </thead>
-                                            <tbody data-bind="foreach: Companion.getFriendSafariForecast()">
-                                                <tr>
-                                                    <td class="text-center align-middle" data-bind="text: $data.date.toLocaleDateString()"></td>
-                                                    <!-- ko foreach: $data.pokemon -->
-                                                    <td class="text-center align-middle">
+                                            <tbody data-bind="foreach: FriendSafari.getRotation">
+                                                <tr class="align-middle">
+                                                    <td class="text-center" data-bind="text: date.toLocaleDateString()"></td>
+                                                    <!-- ko foreach: pokemon -->
+                                                    <td class="text-center">
                                                         <div data-bind="text: $data"></div>
-                                                        <!-- ko if: Companion.hasPokerus($data) -->
-                                                        <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data) }" />
-                                                        <!-- /ko -->
-                                                        <!-- ko ifnot: Companion.hasPokerus($data) -->
-                                                        <div class="small">-</div>
-                                                        <!-- /ko -->
+                                                        <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data) }, visible: Companion.hasPokerus($data)" />
+                                                        <div class="small" data-bind="hidden: Companion.hasPokerus($data)">-</div>
                                                     </td>
                                                     <!-- /ko -->
                                                 </tr>

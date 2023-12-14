@@ -125,7 +125,7 @@ const hideFromPokemonStatsTable = (partyPokemon) => {
 
         if (filterVal) {
             const isResistant = partyPokemon.pokerus === GameConstants.Pokerus.Resistant;
-            const isFriendSafari = Companion.data.friendSafariPokemon.includes(partyPokemon.name);
+            const isFriendSafari = FriendSafari.isInRotation(partyPokemon.name);
 
             switch (filterVal) {
                 case 'not-shiny':
@@ -422,35 +422,6 @@ const hideOtherStatSection = (data) => {
     return false;
 };
 
-const getFriendSafariForecast = ko.pureComputed(() => {
-    if (!Companion.save.isLoaded()) {
-        return [];
-    }
-
-    const trainerId = Companion.save.saveData().player.trainerId || '000000';
-    SeededRand.seed(+trainerId);
-    const shuffledPokemon = new Array(5).fill(SeededRand.shuffleArray(Companion.data.friendSafariPokemon)).flat();
-
-    const batchCount = Math.ceil(shuffledPokemon.length / 5);
-    const date = new Date();
-    let startIndex = (Math.floor((date.getTime() - date.getTimezoneOffset() * 60 * 1000) / (24 * 60 * 60 * 1000)) % batchCount) * 5;
-
-    const data = [];
-    for (let i = 0; i < Math.ceil(Companion.data.friendSafariPokemon.length / 5); i++) {
-        data.push({
-            date: new Date(date),
-            pokemon: shuffledPokemon.slice(startIndex, startIndex + 5)
-        });
-        startIndex += 5;
-        if (startIndex >= shuffledPokemon.length) {
-            startIndex = 0;
-        }
-        date.setDate(date.getDate() + 1);
-    }
-
-    return data;
-});
-
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#main-tab-save');
 
@@ -569,8 +540,6 @@ module.exports = {
     getGymData,
     getRouteData,
     hideOtherStatSection,
-
-    getFriendSafariForecast,
 
     tabVisited,
     activeTab,
