@@ -258,7 +258,7 @@ const exportPartyPokemon = () => {
         p.calculateEVAttackBonus(),
     ]);
 
-    Util.exportToCsv(headers, data, `PartyPokemon-${Date.now()}`);
+    Util.exportToCsv(headers, data, `PartyPokemon-${Date.now()}.csv`);
 };
 
 const getDungeonData = ko.pureComputed(() => {

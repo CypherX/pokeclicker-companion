@@ -213,7 +213,7 @@ const exportData = () => {
         data.push(row);
     });
 
-    Util.exportToCsv(headers, data, `VitaminTracker-${Date.now()}`);
+    Util.exportToCsv(headers, data, `VitaminTracker-${Date.now()}.csv`);
 };
 
 function compareBy(sortOption, direction) {

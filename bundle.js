@@ -11750,7 +11750,7 @@ const exportPartyPokemon = () => {
         p.calculateEVAttackBonus(),
     ]);
 
-    Util.exportToCsv(headers, data, `PartyPokemon-${Date.now()}`);
+    Util.exportToCsv(headers, data, `PartyPokemon-${Date.now()}.csv`);
 };
 
 const getDungeonData = ko.pureComputed(() => {
@@ -12737,8 +12737,8 @@ window.VitaminTracker = require('./vitaminTracker');
 window.Enigma = require('./enigma');
 window.FriendSafari = require('./friendSafari');
 window.Util = require('./util');
-
-},{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./enigma":38,"./forecast":39,"./friendSafari":40,"./game":41,"./save":43,"./settings":44,"./util":45,"./vitaminTracker":46}],43:[function(require,module,exports){
+window.SaveFixes = require('./saveFixes');
+},{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./enigma":38,"./forecast":39,"./friendSafari":40,"./game":41,"./save":43,"./saveFixes":44,"./settings":45,"./util":46,"./vitaminTracker":47}],43:[function(require,module,exports){
 const saveData = ko.observable();
 const prevLoadedSaves = ko.observableArray();
 
@@ -12837,6 +12837,86 @@ module.exports = {
     initialize,
 }
 },{}],44:[function(require,module,exports){
+const selectedFix = ko.observable();
+const selectedFile = ko.observable();
+const saveFixError = ko.observable();
+
+const fixList = [
+    {
+        name: 'Anomaly Mewtwo - Castelia City',
+        description: 'Anomaly Mewtwo missing from Castelia City for the An Unrivaled Power quest line.',
+        requireCurrentVersion: true,
+        fixFunction: (playerData, saveData, settingsData) => {
+            const tempBattleIndex = GameConstants.getTemporaryBattlesIndex('Anomaly Mewtwo 5');
+            if (!saveData.statistics.temporaryBattleDefeated[tempBattleIndex]) {
+                saveFixError('Battle is not marked as completed, nothing to fix.');
+                return false;
+            }
+
+            const questState = saveData.quests.questLines.find(ql => ql.name === 'An Unrivaled Power')?.state ?? 0;
+            if (questState === QuestLineState.ended) {
+                saveFixError('Quest line has already been completed.');
+                return false;
+            }
+
+            saveData.statistics.temporaryBattleDefeated[tempBattleIndex] = 0;
+            return true;
+        }
+    },
+];
+
+const canRunFix = ko.pureComputed(() => {
+    return selectedFix() && selectedFile();
+});
+
+const fixSave = async () => {
+    saveFixError(undefined);
+
+    if (!canRunFix()) {
+        saveFixError('Select a fix to apply and a save file.');
+        return;
+    }
+
+    const file = selectedFile();
+    const saveData = await loadFile(file);
+    const fix = selectedFix();
+
+    if (fix.requireCurrentVersion) {
+        const saveVersion = saveData.save.update.version;
+        if (saveVersion != Companion.package.version) {
+            saveFixError(`This fix requires a save file from the current version - ${Companion.package.version}.`);
+            return;
+        }
+    }
+
+    if (fix.fixFunction(saveData.player, saveData.save, saveData.settings)) {
+        const data = btoa(JSON.stringify(saveData));
+        const fixedFileName = file.name.replace('.txt', '_Fixed.txt');
+        Util.downloadFile(data, fixedFileName);
+    }
+};
+
+const loadFile = (file) => {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = JSON.parse(atob(e.target.result));
+            resolve(content);
+        };
+        reader.readAsText(file);
+    });
+}
+
+module.exports = {
+    selectedFix,
+    selectedFile,
+    saveFixError,
+    fixList,
+
+    canRunFix,
+    fixSave,
+};
+},{}],45:[function(require,module,exports){
 const showRequiredOnly = ko.observable(false);
 const showAllRegions = ko.observable(false);
 const defaultTab = ko.observable('tab-my-save');
@@ -12870,7 +12950,7 @@ module.exports = {
 
     initialize,
 };
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 const formatDate = (date) => {
     if (!date) return undefined;
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
@@ -12916,7 +12996,7 @@ const splitArrayChunked = (array, n = 2) => {
     return Array.from({ length: n }, (_, i) => array.slice(j, j += size + (i < remainder)));
 };
 
-const exportToCsv = (headers, data, fileName = 'export') => {
+const exportToCsv = (headers, data, fileName = 'export.csv') => {
     const rows = [
         headers.join(','),
         ...data.map(d => d.join(','))
@@ -12930,7 +13010,7 @@ const downloadFile = (data, fileName, type = 'text/plain') => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.setAttribute('href', url);
-    a.setAttribute('download', `${fileName}.csv`);
+    a.setAttribute('download', `${fileName}`);
     a.click();
 };
 
@@ -12960,7 +13040,7 @@ module.exports = {
     compressString,
     decompressString,
 };
-},{"lzutf8":6}],46:[function(require,module,exports){
+},{"lzutf8":6}],47:[function(require,module,exports){
 const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
     const attackBonusPercent = (GameConstants.BREEDING_ATTACK_BONUS + vitaminsUsed[GameConstants.VitaminType.Calcium]) / 100;
     const proteinBoost = vitaminsUsed[GameConstants.VitaminType.Protein];
@@ -13176,7 +13256,7 @@ const exportData = () => {
         data.push(row);
     });
 
-    Util.exportToCsv(headers, data, `VitaminTracker-${Date.now()}`);
+    Util.exportToCsv(headers, data, `VitaminTracker-${Date.now()}.csv`);
 };
 
 function compareBy(sortOption, direction) {

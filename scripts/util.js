@@ -43,7 +43,7 @@ const splitArrayChunked = (array, n = 2) => {
     return Array.from({ length: n }, (_, i) => array.slice(j, j += size + (i < remainder)));
 };
 
-const exportToCsv = (headers, data, fileName = 'export') => {
+const exportToCsv = (headers, data, fileName = 'export.csv') => {
     const rows = [
         headers.join(','),
         ...data.map(d => d.join(','))
@@ -57,7 +57,7 @@ const downloadFile = (data, fileName, type = 'text/plain') => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.setAttribute('href', url);
-    a.setAttribute('download', `${fileName}.csv`);
+    a.setAttribute('download', `${fileName}`);
     a.click();
 };
 
