@@ -71,6 +71,17 @@ const isOlderVersion = ko.pureComputed(() => {
     return saveVersion && saveVersion != Companion.package.version;
 });
 
+const initialize = () => {
+    const prevSaves = localStorage.getItem('prevLoadedSaves');
+    if (prevSaves) {
+        prevLoadedSaves(JSON.parse(prevSaves));
+    }
+
+    prevLoadedSaves.subscribe((value) => {
+        localStorage.setItem('prevLoadedSaves', JSON.stringify(value));
+    });
+};
+
 
 module.exports = {
     saveData,
@@ -81,4 +92,6 @@ module.exports = {
 
     isLoaded,
     isOlderVersion,
+
+    initialize,
 }

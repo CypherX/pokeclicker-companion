@@ -11490,14 +11490,6 @@ module.exports={
 }
 
 },{}],36:[function(require,module,exports){
-const showRequiredOnly = ko.observable(false);
-const showAllRegions = ko.observable(false);
-const defaultTab = ko.observable('tab-my-save');
-
-showRequiredOnly.subscribe((value) => localStorage.setItem('showRequiredOnly', +value));
-showAllRegions.subscribe((value) => localStorage.setItem('showAllRegions', +value));
-defaultTab.subscribe((value) => localStorage.setItem('defaultTab', value));
-
 const partyList = ko.pureComputed(() => {
     const saveData = Companion.save.saveData();
     const party = saveData?.save.party.caughtPokemon ?? [];
@@ -11564,6 +11556,8 @@ const getMissingPokemon = ko.pureComputed(() => {
     };
 
     const saveData = Companion.save.saveData();
+    const showRequiredOnly = Companion.settings.showRequiredOnly();
+    const showAllRegions = Companion.settings.showAllRegions();
 
     Companion.data.obtainablePokemonList.forEach(p => {
         if (caughtPokemon[p.id]) {
@@ -11571,11 +11565,11 @@ const getMissingPokemon = ko.pureComputed(() => {
         }
 
         const obtainRegion = p.obtainRegion;
-        if (!showAllRegions() && obtainRegion > player.highestRegion()) {
+        if (!showAllRegions && obtainRegion > player.highestRegion()) {
             return;
         }
 
-        if (showRequiredOnly()) {
+        if (showRequiredOnly) {
             if (obtainRegion == -2) {
                 return;
             }
@@ -11599,7 +11593,7 @@ const getMissingRegionPokemonCount = (region) => {
             return 0;
         }
 
-        return showRequiredOnly() ? (new Set(data.pokemon.map(p => Math.floor(p.id)))).size : data.pokemon.length;
+        return Companion.settings.showRequiredOnly() ? (new Set(data.pokemon.map(p => Math.floor(p.id)))).size : data.pokemon.length;
     });
 };
 
@@ -11913,7 +11907,7 @@ const hideOtherStatSection = (data) => {
         return true;
     }
 
-    if (!showAllRegions() && Math.floor(region) > player.highestRegion()) {
+    if (!Companion.settings.showAllRegions() && Math.floor(region) > player.highestRegion()) {
         return true;
     }
 
@@ -12014,32 +12008,10 @@ $(document).ready(() => {
         }
     });
 
-    if (+localStorage.getItem('showRequiredOnly')) {
-        showRequiredOnly(true);
-    }
-    
-    if (+localStorage.getItem('showAllRegions')) {
-        showAllRegions(true);
-    }
-    
-    if (localStorage.getItem('defaultTab')) {
-        const tab = localStorage.getItem('defaultTab');
-        if (document.getElementById(tab)) {
-            defaultTab(tab);
-            (new bootstrap.Tab(document.getElementById(tab))).show();
-        }
-    }
+    Companion.settings.initialize();
+    Companion.save.initialize();
 
     Forecast.generateForecasts();
-
-    const prevSaves = localStorage.getItem('prevLoadedSaves');
-    if (prevSaves) {
-        Companion.save.prevLoadedSaves(JSON.parse(prevSaves));
-    }
-
-    Companion.save.prevLoadedSaves.subscribe((value) => {
-        localStorage.setItem('prevLoadedSaves', JSON.stringify(value));
-    });
 });
 
 function compareBy(sortOption, direction) {
@@ -12094,9 +12066,6 @@ function getSortValue(sortOption, partyPokemon) {
 }
 
 module.exports = {
-    showRequiredOnly,
-    showAllRegions,
-
     getMissingPokemon,
     getTotalMissingPokemonCount,
     getMissingRegionPokemonCount,
@@ -12138,7 +12107,6 @@ module.exports = {
 
     tabVisited,
     activeTab,
-    defaultTab,
 };
 
 },{}],37:[function(require,module,exports){
@@ -12744,13 +12712,14 @@ window.Companion = {
     ...require('./app'),
     data: require('./data'),
     save: require('./save'),
+    settings: require('./settings'),
 }
 
 window.Forecast = require('./forecast');
 window.VitaminTracker = require('./vitaminTracker');
 window.Util = require('./util');
 
-},{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./forecast":38,"./game":39,"./save":41,"./util":42,"./vitaminTracker":43}],41:[function(require,module,exports){
+},{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./forecast":38,"./game":39,"./save":41,"./settings":42,"./util":43,"./vitaminTracker":44}],41:[function(require,module,exports){
 const saveData = ko.observable();
 const prevLoadedSaves = ko.observableArray();
 
@@ -12824,6 +12793,17 @@ const isOlderVersion = ko.pureComputed(() => {
     return saveVersion && saveVersion != Companion.package.version;
 });
 
+const initialize = () => {
+    const prevSaves = localStorage.getItem('prevLoadedSaves');
+    if (prevSaves) {
+        prevLoadedSaves(JSON.parse(prevSaves));
+    }
+
+    prevLoadedSaves.subscribe((value) => {
+        localStorage.setItem('prevLoadedSaves', JSON.stringify(value));
+    });
+};
+
 
 module.exports = {
     saveData,
@@ -12834,8 +12814,44 @@ module.exports = {
 
     isLoaded,
     isOlderVersion,
+
+    initialize,
 }
 },{}],42:[function(require,module,exports){
+const showRequiredOnly = ko.observable(false);
+const showAllRegions = ko.observable(false);
+const defaultTab = ko.observable('tab-my-save');
+
+showRequiredOnly.subscribe((value) => localStorage.setItem('showRequiredOnly', +value));
+showAllRegions.subscribe((value) => localStorage.setItem('showAllRegions', +value));
+defaultTab.subscribe((value) => localStorage.setItem('defaultTab', value));
+
+const initialize = () => {
+    if (+localStorage.getItem('showRequiredOnly')) {
+        showRequiredOnly(true);
+    }
+    
+    if (+localStorage.getItem('showAllRegions')) {
+        showAllRegions(true);
+    }
+    
+    if (localStorage.getItem('defaultTab')) {
+        const tab = localStorage.getItem('defaultTab');
+        if (document.getElementById(tab)) {
+            defaultTab(tab);
+            (new bootstrap.Tab(document.getElementById(tab))).show();
+        }
+    }
+};
+
+module.exports = {
+    showRequiredOnly,
+    showAllRegions,
+    defaultTab,
+
+    initialize,
+};
+},{}],43:[function(require,module,exports){
 const formatDate = (date) => {
     if (!date) return undefined;
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
@@ -12925,7 +12941,7 @@ module.exports = {
     compressString,
     decompressString,
 };
-},{"lzutf8":6}],43:[function(require,module,exports){
+},{"lzutf8":6}],44:[function(require,module,exports){
 const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
     const attackBonusPercent = (GameConstants.BREEDING_ATTACK_BONUS + vitaminsUsed[GameConstants.VitaminType.Calcium]) / 100;
     const proteinBoost = vitaminsUsed[GameConstants.VitaminType.Protein];

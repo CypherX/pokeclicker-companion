@@ -1,11 +1,3 @@
-const showRequiredOnly = ko.observable(false);
-const showAllRegions = ko.observable(false);
-const defaultTab = ko.observable('tab-my-save');
-
-showRequiredOnly.subscribe((value) => localStorage.setItem('showRequiredOnly', +value));
-showAllRegions.subscribe((value) => localStorage.setItem('showAllRegions', +value));
-defaultTab.subscribe((value) => localStorage.setItem('defaultTab', value));
-
 const partyList = ko.pureComputed(() => {
     const saveData = Companion.save.saveData();
     const party = saveData?.save.party.caughtPokemon ?? [];
@@ -72,6 +64,8 @@ const getMissingPokemon = ko.pureComputed(() => {
     };
 
     const saveData = Companion.save.saveData();
+    const showRequiredOnly = Companion.settings.showRequiredOnly();
+    const showAllRegions = Companion.settings.showAllRegions();
 
     Companion.data.obtainablePokemonList.forEach(p => {
         if (caughtPokemon[p.id]) {
@@ -79,11 +73,11 @@ const getMissingPokemon = ko.pureComputed(() => {
         }
 
         const obtainRegion = p.obtainRegion;
-        if (!showAllRegions() && obtainRegion > player.highestRegion()) {
+        if (!showAllRegions && obtainRegion > player.highestRegion()) {
             return;
         }
 
-        if (showRequiredOnly()) {
+        if (showRequiredOnly) {
             if (obtainRegion == -2) {
                 return;
             }
@@ -107,7 +101,7 @@ const getMissingRegionPokemonCount = (region) => {
             return 0;
         }
 
-        return showRequiredOnly() ? (new Set(data.pokemon.map(p => Math.floor(p.id)))).size : data.pokemon.length;
+        return Companion.settings.showRequiredOnly() ? (new Set(data.pokemon.map(p => Math.floor(p.id)))).size : data.pokemon.length;
     });
 };
 
@@ -421,7 +415,7 @@ const hideOtherStatSection = (data) => {
         return true;
     }
 
-    if (!showAllRegions() && Math.floor(region) > player.highestRegion()) {
+    if (!Companion.settings.showAllRegions() && Math.floor(region) > player.highestRegion()) {
         return true;
     }
 
@@ -522,32 +516,10 @@ $(document).ready(() => {
         }
     });
 
-    if (+localStorage.getItem('showRequiredOnly')) {
-        showRequiredOnly(true);
-    }
-    
-    if (+localStorage.getItem('showAllRegions')) {
-        showAllRegions(true);
-    }
-    
-    if (localStorage.getItem('defaultTab')) {
-        const tab = localStorage.getItem('defaultTab');
-        if (document.getElementById(tab)) {
-            defaultTab(tab);
-            (new bootstrap.Tab(document.getElementById(tab))).show();
-        }
-    }
+    Companion.settings.initialize();
+    Companion.save.initialize();
 
     Forecast.generateForecasts();
-
-    const prevSaves = localStorage.getItem('prevLoadedSaves');
-    if (prevSaves) {
-        Companion.save.prevLoadedSaves(JSON.parse(prevSaves));
-    }
-
-    Companion.save.prevLoadedSaves.subscribe((value) => {
-        localStorage.setItem('prevLoadedSaves', JSON.stringify(value));
-    });
 });
 
 function compareBy(sortOption, direction) {
@@ -602,9 +574,6 @@ function getSortValue(sortOption, partyPokemon) {
 }
 
 module.exports = {
-    showRequiredOnly,
-    showAllRegions,
-
     getMissingPokemon,
     getTotalMissingPokemonCount,
     getMissingRegionPokemonCount,
@@ -646,5 +615,4 @@ module.exports = {
 
     tabVisited,
     activeTab,
-    defaultTab,
 };

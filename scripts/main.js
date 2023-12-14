@@ -6,6 +6,7 @@ window.Companion = {
     ...require('./app'),
     data: require('./data'),
     save: require('./save'),
+    settings: require('./settings'),
 }
 
 window.Forecast = require('./forecast');
