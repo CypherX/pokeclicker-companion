@@ -422,6 +422,78 @@ const hideOtherStatSection = (data) => {
     return false;
 };
 
+const typeDamageDistribution = ko.observable();
+const includeXAttack = ko.observable(true);
+const includeYellowFlute = ko.observable(true);
+const includeGems = ko.observable(true);
+
+const calculateTypeDamageDistribution = () => {
+    // load shit
+    if (!typeDamageDistribution()) {
+        player.effectList = Save.initializeEffects(Companion.save.saveData().player.effectList);
+        const itemList = Companion.save.saveData().player._itemList;
+        player.itemList = Save.initializeItemlist();
+        if (itemList) {
+            for (const key in itemList) {
+                if (player.itemList[key]) {
+                    player.itemList[key](itemList[key]);
+                }
+            }
+        }
+        
+        EffectEngineRunner.initialize(App.game.multiplier, GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]));
+        FluteEffectRunner.initialize(App.game.multiplier);
+
+        Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
+            const saveKey = App.game[key].saveKey;
+            App.game[key].fromJSON(Companion.save.saveData().save[saveKey]);
+        });
+
+        Companion.save.saveData().save.achievements?.forEach((achievementName) => {
+            const achievement = AchievementHandler.findByName(achievementName);
+            if (achievement) {
+                achievement.unlocked(true);
+            }
+        });
+
+        AchievementHandler.preCheckAchievements();
+        AchievementHandler.calculateMaxBonus();
+
+        // disable flute effects
+        GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
+            if (FluteEffectRunner.isActive(flute)()) {
+                FluteEffectRunner.toggleEffect(flute);
+            }
+        });
+    }
+
+    player.effectList['xAttack'](includeXAttack() ? 1 : 0);
+    App.game.challenges.list.disableGems.active(!includeGems());
+    if (includeYellowFlute() != FluteEffectRunner.isActive('Yellow_Flute')()) {
+        FluteEffectRunner.toggleEffect('Yellow_Flute');
+    }
+
+    const result = {};
+    let max = 0;
+    let min = Number.MAX_SAFE_INTEGER;
+
+    for (let type1 = 0; type1 <= 17; ++type1) {
+        result[PokemonType[type1]] = {};
+        for (let type2 = 0; type2 <= 17; ++type2) {
+            let dmg = App.game.party.calculatePokemonAttack(type1, type2, true, GameConstants.Region.none, true, false, WeatherType.Clear, true, true);
+            result[PokemonType[type1]][PokemonType[type2]] = dmg.toLocaleString();
+            max = Math.max(max, dmg);
+            min = Math.min(min, dmg);
+        }
+    }
+
+    typeDamageDistribution({
+        distribution: result,
+        max,
+        min,
+    });
+};
+
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#main-tab-save');
 
@@ -509,6 +581,19 @@ function getSortValue(sortOption, partyPokemon) {
     }
 }
 
+$(document).on('mouseover', '.table-column-row-hover tbody td', (e) => {
+    const cell = e.target;
+    $(cell).closest('tr').find('td').css('background-color', 'rgba(100, 100, 60, 0.1)');
+    $(cell).closest('tbody').find(`td:nth-child(${cell.cellIndex + 1})`).css('background-color', 'rgba(100, 100, 60, 0.1)');
+    cell.style.backgroundColor = 'rgba(100, 100, 60, 0.25)';
+});
+
+$(document).on('mouseout', '.table-column-row-hover tbody td', (e) => {
+    const cell = e.target;
+    $(cell).closest('tr').find('td').css('background-color', '');
+    $(cell).closest('tbody').find(`td:nth-child(${cell.cellIndex + 1})`).css('background-color', '');
+});
+
 module.exports = {
     getMissingPokemon,
     getTotalMissingPokemonCount,
@@ -540,6 +625,12 @@ module.exports = {
     getGymData,
     getRouteData,
     hideOtherStatSection,
+
+    typeDamageDistribution,
+    calculateTypeDamageDistribution,
+    includeXAttack,
+    includeYellowFlute,
+    includeGems,
 
     tabVisited,
     activeTab,

@@ -11914,6 +11914,78 @@ const hideOtherStatSection = (data) => {
     return false;
 };
 
+const typeDamageDistribution = ko.observable();
+const includeXAttack = ko.observable(true);
+const includeYellowFlute = ko.observable(true);
+const includeGems = ko.observable(true);
+
+const calculateTypeDamageDistribution = () => {
+    // load shit
+    if (!typeDamageDistribution()) {
+        player.effectList = Save.initializeEffects(Companion.save.saveData().player.effectList);
+        const itemList = Companion.save.saveData().player._itemList;
+        player.itemList = Save.initializeItemlist();
+        if (itemList) {
+            for (const key in itemList) {
+                if (player.itemList[key]) {
+                    player.itemList[key](itemList[key]);
+                }
+            }
+        }
+        
+        EffectEngineRunner.initialize(App.game.multiplier, GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]));
+        FluteEffectRunner.initialize(App.game.multiplier);
+
+        Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
+            const saveKey = App.game[key].saveKey;
+            App.game[key].fromJSON(Companion.save.saveData().save[saveKey]);
+        });
+
+        Companion.save.saveData().save.achievements?.forEach((achievementName) => {
+            const achievement = AchievementHandler.findByName(achievementName);
+            if (achievement) {
+                achievement.unlocked(true);
+            }
+        });
+
+        AchievementHandler.preCheckAchievements();
+        AchievementHandler.calculateMaxBonus();
+
+        // disable flute effects
+        GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
+            if (FluteEffectRunner.isActive(flute)()) {
+                FluteEffectRunner.toggleEffect(flute);
+            }
+        });
+    }
+
+    player.effectList['xAttack'](includeXAttack() ? 1 : 0);
+    App.game.challenges.list.disableGems.active(!includeGems());
+    if (includeYellowFlute() != FluteEffectRunner.isActive('Yellow_Flute')()) {
+        FluteEffectRunner.toggleEffect('Yellow_Flute');
+    }
+
+    const result = {};
+    let max = 0;
+    let min = Number.MAX_SAFE_INTEGER;
+
+    for (let type1 = 0; type1 <= 17; ++type1) {
+        result[PokemonType[type1]] = {};
+        for (let type2 = 0; type2 <= 17; ++type2) {
+            let dmg = App.game.party.calculatePokemonAttack(type1, type2, true, GameConstants.Region.none, true, false, WeatherType.Clear, true, true);
+            result[PokemonType[type1]][PokemonType[type2]] = dmg.toLocaleString();
+            max = Math.max(max, dmg);
+            min = Math.min(min, dmg);
+        }
+    }
+
+    typeDamageDistribution({
+        distribution: result,
+        max,
+        min,
+    });
+};
+
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#main-tab-save');
 
@@ -12001,6 +12073,19 @@ function getSortValue(sortOption, partyPokemon) {
     }
 }
 
+$(document).on('mouseover', '.table-column-row-hover tbody td', (e) => {
+    const cell = e.target;
+    $(cell).closest('tr').find('td').css('background-color', 'rgba(100, 100, 60, 0.1)');
+    $(cell).closest('tbody').find(`td:nth-child(${cell.cellIndex + 1})`).css('background-color', 'rgba(100, 100, 60, 0.1)');
+    cell.style.backgroundColor = 'rgba(100, 100, 60, 0.25)';
+});
+
+$(document).on('mouseout', '.table-column-row-hover tbody td', (e) => {
+    const cell = e.target;
+    $(cell).closest('tr').find('td').css('background-color', '');
+    $(cell).closest('tbody').find(`td:nth-child(${cell.cellIndex + 1})`).css('background-color', '');
+});
+
 module.exports = {
     getMissingPokemon,
     getTotalMissingPokemonCount,
@@ -12032,6 +12117,12 @@ module.exports = {
     getGymData,
     getRouteData,
     hideOtherStatSection,
+
+    typeDamageDistribution,
+    calculateTypeDamageDistribution,
+    includeXAttack,
+    includeYellowFlute,
+    includeGems,
 
     tabVisited,
     activeTab,
@@ -12645,43 +12736,56 @@ module.exports = {
     pokemonCount,
 };
 },{}],41:[function(require,module,exports){
-player = new Player();
-player.highestRegion(0);
-const multiplier = new Multiplier();
-App.game = new Game(
-  new Update(),
-  new Profile(),
-  new Breeding(multiplier),
-  new Pokeballs(),
-  new PokeballFilters(),
-  new Wallet(multiplier),
-  new KeyItems(),
-  new BadgeCase(),
-  new OakItems([20, 50, 100], multiplier),
-  new OakItemLoadouts(),
-  new PokemonCategories(),
-  new Party(multiplier),
-  new Gems(),
-  new Underground(),
-  new Farming(multiplier),
-  new LogBook(),
-  new RedeemableCodes(),
-  new Statistics(),
-  new Quests(),
-  new SpecialEvents(),
-  new Discord(),
-  new AchievementTracker(),
-  new Challenges(),
-  new BattleFrontier(),
-  multiplier,
-  new SaveReminder(),
-  new BattleCafeSaveObject(),
-  new DreamOrbController()
-);
-App.game.farming.initialize();
-App.game.breeding.initialize();
-QuestLineHelper.loadQuestLines();
+const initGame = () => {
+  player = new Player();
+  player.highestRegion(0);
+  const multiplier = new Multiplier();
+  App.game = new Game(
+    new Update(),
+    new Profile(),
+    new Breeding(multiplier),
+    new Pokeballs(),
+    new PokeballFilters(),
+    new Wallet(multiplier),
+    new KeyItems(),
+    new BadgeCase(),
+    new OakItems([20, 50, 100], multiplier),
+    new OakItemLoadouts(),
+    new PokemonCategories(),
+    new Party(multiplier),
+    new Gems(),
+    new Underground(),
+    new Farming(multiplier),
+    new LogBook(),
+    new RedeemableCodes(),
+    new Statistics(),
+    new Quests(),
+    new SpecialEvents(),
+    new Discord(),
+    new AchievementTracker(),
+    new Challenges(),
+    new BattleFrontier(),
+    multiplier,
+    new SaveReminder(),
+    new BattleCafeSaveObject(),
+    new DreamOrbController(),
+    new PurifyChamber(),
+    new WeatherApp(),
+    new ZMoves(),
+  );
+  App.game.farming.initialize();
+  App.game.breeding.initialize();
+  App.game.pokeballs.initialize();
+  App.game.keyItems.initialize();
+  App.game.oakItems.initialize();
+  App.game.underground.initialize();
+  App.game.farming.initialize();
+};
 
+initGame();
+
+AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
+QuestLineHelper.loadQuestLines();
 
 // Knockout tooltip bindings
 ko.bindingHandlers.tooltip = {
@@ -12720,6 +12824,10 @@ ko.bindingHandlers.tooltip = {
     }
   }
 };
+
+module.exports = {
+  initGame,
+};
 },{}],42:[function(require,module,exports){
 const package = require('../pokeclicker/package.json');
 
@@ -12754,13 +12862,18 @@ const loadFile = (file) => {
 
 const loadSaveData = (saveString, fileName) => {
     const saveFile = JSON.parse(saveString);
+
+    if (saveData() !== undefined) {
+        Companion.initGame();
+    }
+
     player.highestRegion(saveFile.player.highestRegion);
     player.trainerId = saveFile.player.trainerId;
     App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
 
     Enigma.revealHintsCounter(0);
-
     VitaminTracker.highestRegion(player.highestRegion());
+    Companion.typeDamageDistribution(undefined);
 
     saveData(saveFile);
 

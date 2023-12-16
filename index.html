@@ -40,7 +40,7 @@
             .table-sticky-header thead {
                 position: sticky;
                 top: 0;
-                z-index: 99;
+                z-index: 999;
             }
             .table-sticky-header th {
                 border-top: 1px solid #444;
@@ -54,6 +54,10 @@
             .table-sticky-header th:first-child,
             .table-sticky-header td:first-child {
                 border-left: 1px solid #444;
+            }
+
+            .table-black-bg tbody td {
+                background-color: #000;
             }
 
             td.bg-vitamin-0 { background: rgba(52, 152, 219, 0.1); }
@@ -211,8 +215,8 @@
                     <div class="tab-pane active h-100" id="main-tab-save">
                         <div data-bind="template: { name: 'load-save-template' }"></div>
                         <!-- ko if: Companion.save.isLoaded -->
-                        <div class="tab-content container-xxl h-100"> <!-- bg-dark -->
-                            <div class="tab-pane h-100 show active" id="save-tab-missing">
+                        <div class="tab-content h-100">
+                            <div class="tab-pane h-100 container-xxl show active" id="save-tab-missing">
                                 <div class="d-flex flex-column" data-bind="with: Companion.getMissingPokemon">
                                     <div data-bind="visible: !$data.length">
                                         <p class="text-warning text-center h4 mt-5">Congratulations!<br/>You've caught 'em all!</p>
@@ -251,7 +255,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="tab-pane h-100" id="save-tab-party">
+                            <div class="tab-pane h-100 container-xxl" id="save-tab-party">
                                 <div class="d-flex flex-column h-100">
                                     <div class="d-flex flex-row flex-wrap row mb-1">
                                         <div class="col-md-3 col-5">
@@ -341,7 +345,7 @@
                             </div>
                             <div class="tab-pane h-100" id="save-tab-stats">
                                 <div class="d-flex flex-column h-100">
-                                    <ul class="nav nav-tabs mb-4" role="tablist">
+                                    <ul class="nav nav-tabs container-xxl mb-4" role="tablist">
                                         <li class="nav-item" role="presentation">
                                             <button class="nav-link active" id="dungeon-clears-tab" data-bs-toggle="pill" data-bs-target="#dungeon-clears" type="button" role="tab" aria-controls="dungeon-clears" aria-selected="true">
                                                 Dungeon Clears
@@ -362,9 +366,14 @@
                                                 Enigma Berry
                                             </button>
                                         </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="type-damage-tab" data-bs-toggle="pill" data-bs-target="#type-damage" type="button" role="tab" aria-controls="type-damage" aria-selected="false">
+                                                Type Damage
+                                            </button>
+                                        </li>
                                     </ul>
-                                    <div class="tab-content flex-grow-1 px-2" style="overflow: auto;">
-                                        <div class="tab-pane active" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
+                                    <div class="tab-content flex-grow-1" style="overflow: auto;">
+                                        <div class="tab-pane active container-xxl" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
                                             <div class="card border-0 mb-3">
                                                 <div class="card-header bg-dark rounded-0 px-2">Totals</div>
                                                 <div class="card-body p-0 collapse show" style="transition: none;">
@@ -459,7 +468,7 @@
                                             <!-- /ko -->
                                         </div>
     
-                                        <div class="tab-pane" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
+                                        <div class="tab-pane container-xxl" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
                                             <div class="text-end small"><span class="text-danger">⚹</span> Incomplete gym (fewer than 1,000 clears)</div>
                                             <!-- ko foreach: Companion.getGymData() -->
                                             <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
@@ -493,7 +502,7 @@
                                             <!-- /ko -->
                                         </div>
     
-                                        <div class="tab-pane" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
+                                        <div class="tab-pane container-xxl" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
                                             <div class="text-end small"><span class="text-danger">⚹</span> Incomplete route (fewer than 10,000 defeats)</div>
                                             <!-- ko foreach: Companion.getRouteData() -->
                                             <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
@@ -527,7 +536,7 @@
                                             <!-- /ko -->
                                         </div>
     
-                                        <div class="tab-pane" id="enigma-berry" role="tabpanel" aria-labelledby="enigma-berry-tab">
+                                        <div class="tab-pane container-xxl" id="enigma-berry" role="tabpanel" aria-labelledby="enigma-berry-tab">
                                             <div class="container text-center">
                                                 <div class="row" data-bind="foreach: Enigma.getBerries">
                                                     <div class="col-6 col-sm-3 mb-5">
@@ -551,10 +560,63 @@
                                             <div class="text-center text-muted mt-5">Impatient (or unlucky) little shit, ain't ye?</div>
                                             <!-- /ko -->
                                         </div>
+
+                                        <div class="tab-pane h-100 container-xxl" id="type-damage" role="tabpanel" aria-labelledby="type-damage-tab">
+                                            <div class="d-flex flex-column h-100">
+                                                <div class="control-row">
+                                                    <div class="align-items-center">
+                                                        <button type="button" class="btn btn-primary me-3"
+                                                            data-bind="click: () => Companion.calculateTypeDamageDistribution()">
+                                                            Calculate
+                                                        </button>
+                                                        <div class="form-check form-check-inline form-switch me-3">
+                                                            <input class="form-check-input" type="checkbox" role="switch" id="typeDamageXAttack" data-bind="checked: Companion.includeXAttack">
+                                                            <label class="form-check-label" for="typeDamageXAttack">xAttack</label>
+                                                        </div>
+                                                        <div class="form-check form-check-inline form-switch me-3">
+                                                            <input class="form-check-input" type="checkbox" role="switch" id="typeDamageYellowFlute" data-bind="checked: Companion.includeYellowFlute">
+                                                            <label class="form-check-label" for="typeDamageYellowFlute">Yellow Flute</label>
+                                                        </div>
+                                                        <div class="form-check form-check-inline form-switch me-3">
+                                                            <input class="form-check-input" type="checkbox" role="switch" id="typeDamageGems" data-bind="checked: Companion.includeGems">
+                                                            <label class="form-check-label" for="typeDamageGems">Gems</label>
+                                                        </div>
+                                                    </div>
+                                                    <p class="mt-1 small">First calculate will be slower. You must re-calculate after adjusting the above settings.</p>
+                                                </div>
+                                                <div class="table-responsive mt-2" data-bind="if: Companion.typeDamageDistribution">
+                                                    <!-- ko let: { types: Object.keys(Companion.typeDamageDistribution().distribution) } -->
+                                                    <table class="table table-column-row-hover table-black-bg table-sticky-header table-sm mb-0" style="font-size: 0.9rem;">
+                                                        <thead>
+                                                            <tr class="table-dark text-center">
+                                                                <th style="position: sticky; left: 0; z-index: 99;">
+                                                                    <ko style="cursor: pointer;" title="Full Width / Normal Width" data-bind="click: (_, e) => {
+                                                                        $(e.target).closest('.tab-pane').toggleClass('container-xxl');
+                                                                        $(e.target).closest('.tab-pane').find('.control-row').toggleClass('container-xxl');
+                                                                    }">↔</ko>
+                                                                </th>
+                                                                <!-- ko foreach: types -->
+                                                                <th class="text-center small" data-bind="text: $data"></th>
+                                                                <!-- /ko -->
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody data-bind="foreach: Object.values(Companion.typeDamageDistribution().distribution)">
+                                                            <tr class="align-middle text-center">
+                                                                <th class="table-dark small px-2" style="position: sticky; left: 0; z-index: 99;" data-bind="text: types[$index()]"></th>
+                                                                <!-- ko foreach: Object.values($data) -->
+                                                                <td class="font-monospace small px-2" data-bind="text: $data"></td>
+                                                                <!-- /ko -->
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <!-- /ko -->
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="tab-pane h-100" id="save-tab-friend-safari">
+                            <div class="tab-pane h-100 container-xxl" id="save-tab-friend-safari">
                                 <div class="d-flex flex-column h-100">
                                     <div class="alert alert-dark text-center">
                                         There are currently <span data-bind="text: FriendSafari.pokemonCount()">0</span> Pokémon in the Friend Safari rotation.
@@ -1180,7 +1242,7 @@
             </symbol>
         </svg>
 
-        <script src="bundle.js?v=20231214b"></script>
+        <script src="bundle.js?v=20231216"></script>
     </body>
 </html>
 

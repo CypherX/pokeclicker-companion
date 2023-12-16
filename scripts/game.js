@@ -1,40 +1,53 @@
-player = new Player();
-player.highestRegion(0);
-const multiplier = new Multiplier();
-App.game = new Game(
-  new Update(),
-  new Profile(),
-  new Breeding(multiplier),
-  new Pokeballs(),
-  new PokeballFilters(),
-  new Wallet(multiplier),
-  new KeyItems(),
-  new BadgeCase(),
-  new OakItems([20, 50, 100], multiplier),
-  new OakItemLoadouts(),
-  new PokemonCategories(),
-  new Party(multiplier),
-  new Gems(),
-  new Underground(),
-  new Farming(multiplier),
-  new LogBook(),
-  new RedeemableCodes(),
-  new Statistics(),
-  new Quests(),
-  new SpecialEvents(),
-  new Discord(),
-  new AchievementTracker(),
-  new Challenges(),
-  new BattleFrontier(),
-  multiplier,
-  new SaveReminder(),
-  new BattleCafeSaveObject(),
-  new DreamOrbController()
-);
-App.game.farming.initialize();
-App.game.breeding.initialize();
-QuestLineHelper.loadQuestLines();
+const initGame = () => {
+  player = new Player();
+  player.highestRegion(0);
+  const multiplier = new Multiplier();
+  App.game = new Game(
+    new Update(),
+    new Profile(),
+    new Breeding(multiplier),
+    new Pokeballs(),
+    new PokeballFilters(),
+    new Wallet(multiplier),
+    new KeyItems(),
+    new BadgeCase(),
+    new OakItems([20, 50, 100], multiplier),
+    new OakItemLoadouts(),
+    new PokemonCategories(),
+    new Party(multiplier),
+    new Gems(),
+    new Underground(),
+    new Farming(multiplier),
+    new LogBook(),
+    new RedeemableCodes(),
+    new Statistics(),
+    new Quests(),
+    new SpecialEvents(),
+    new Discord(),
+    new AchievementTracker(),
+    new Challenges(),
+    new BattleFrontier(),
+    multiplier,
+    new SaveReminder(),
+    new BattleCafeSaveObject(),
+    new DreamOrbController(),
+    new PurifyChamber(),
+    new WeatherApp(),
+    new ZMoves(),
+  );
+  App.game.farming.initialize();
+  App.game.breeding.initialize();
+  App.game.pokeballs.initialize();
+  App.game.keyItems.initialize();
+  App.game.oakItems.initialize();
+  App.game.underground.initialize();
+  App.game.farming.initialize();
+};
 
+initGame();
+
+AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
+QuestLineHelper.loadQuestLines();
 
 // Knockout tooltip bindings
 ko.bindingHandlers.tooltip = {
@@ -72,4 +85,8 @@ ko.bindingHandlers.tooltip = {
         }
     }
   }
+};
+
+module.exports = {
+  initGame,
 };

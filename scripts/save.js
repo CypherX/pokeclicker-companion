@@ -13,13 +13,18 @@ const loadFile = (file) => {
 
 const loadSaveData = (saveString, fileName) => {
     const saveFile = JSON.parse(saveString);
+
+    if (saveData() !== undefined) {
+        Companion.initGame();
+    }
+
     player.highestRegion(saveFile.player.highestRegion);
     player.trainerId = saveFile.player.trainerId;
     App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
 
     Enigma.revealHintsCounter(0);
-
     VitaminTracker.highestRegion(player.highestRegion());
+    Companion.typeDamageDistribution(undefined);
 
     saveData(saveFile);
 
