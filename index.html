@@ -10,11 +10,11 @@
         <title>PokéClicker Companion</title>
         <link href="./styles/bootstrap.min.css" rel="stylesheet">
 
-        <script src="./pokeclicker/docs/libs/jquery.min.js"></script>
-        <script src="./pokeclicker/docs/libs/knockout-latest.js"></script>
-        <script src="./pokeclicker/docs/scripts/modules.min.js?v=0.10.17"></script>
-        <script src="./pokeclicker/docs/scripts/script.min.js?v=0.10.17"></script>
-        <script type="text/javascript" src="./scripts/bootstrap.bundle.min.js"></script>
+        <script src="./pokeclicker/libs/jquery.min.js"></script>
+        <script src="./pokeclicker/libs/knockout-latest.js"></script>
+        <script src="./pokeclicker/scripts/modules.min.js?v=0.10.17"></script>
+        <script src="./pokeclicker/scripts/script.min.js?v=0.10.17"></script>
+        <script type="text/javascript" src="./libs/bootstrap.bundle.min.js"></script>
 
         <style type="text/css">
             a { text-decoration: none; }
@@ -542,7 +542,7 @@
                                                     <div class="col-6 col-sm-3 mb-5">
                                                         <div class="h4 text-decoration-underline" data-bind="text: $data.direction"></div>
                                                         <!-- ko if: $data.berry -->
-                                                        <img width="64px" data-bind="attr: { src: `./pokeclicker/docs/assets/images/items/berry/${$data.berry}.png` }"/>
+                                                        <img width="64px" data-bind="attr: { src: `assets/images/items/berry/${$data.berry}.png` }"/>
                                                         <!-- /ko -->
                                                         <div data-bind="text: $data.berry || '???'"></div>
                                                     </div>
@@ -1242,7 +1242,7 @@
             </symbol>
         </svg>
 
-        <script src="bundle.js?v=20231216"></script>
+        <script src="./bundle.js?123"></script>
     </body>
 </html>
 
