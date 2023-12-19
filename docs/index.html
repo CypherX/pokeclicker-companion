@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Companion utility to PokéClicker. Track your progress, see forecasts, view optimal vitamin spreads, and more!"> 
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
+        <title>PokéClicker Companion</title>
+        <link href="./styles/bootstrap.min.css" rel="stylesheet">
+        <link href="./styles/styles.css" rel="stylesheet">
+
+        <script src="./pokeclicker/libs/jquery.min.js"></script>
+        <script src="./pokeclicker/libs/knockout-latest.js"></script>
+        <script src="./pokeclicker/scripts/modules.min.js?v=0.10.17"></script>
+        <script src="./pokeclicker/scripts/script.min.js?v=0.10.17"></script>
+        <script type="text/javascript" src="./libs/bootstrap.bundle.min.js"></script>
+    </head>
+    <body>
+        <input type="file" id="file-selector" accept=".txt" class="d-none" onchange="Companion.save.loadFile(this.files[0])">
+        <div id="container" class="d-none">
+            <div class="d-flex flex-column" style="height: 100vh;">
+                <div id="header" class="mb-4">
+                    <!-- import "mainNavigation.html" -->
+<nav class="navbar navbar-expand-md bg-dark" data-bs-theme="dark">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="float-end ml-auto d-md-none">
+            <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
+        </div>
+        <div class="collapse navbar-collapse justify-content-xl-center" id="main-nav">
+            <ul class="navbar-nav fs-5" id="mainNavbar" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="tab-my-save" data-bs-toggle="pill" data-bs-target="#mySaveContent" type="button" role="tab">
+                        My Save
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-forecasts" data-bs-toggle="pill" data-bs-target="#forecastContent" type="button" role="tab">
+                        Forecasts
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-vitamintracker" data-bs-toggle="pill" data-bs-target="#vitaminTracker" type="button" role="tab">
+                        Vitamin Tracker
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#toolsContent" type="button" role="tab">
+                        Tools
+                    </button>
+                </li>
+                <li class="nav-item d-md-none"> <!-- display in menu on mobile only -->
+                    <button class="nav-link" data-bs-toggle="modal" data-bs-target="#settingsModal" type="button" role="tab">
+                        Settings
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="d-none d-md-block position-absolute end-0 me-2">
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                <img src="assets/gear-solid.svg" class="d-flex my-1 align-self-center"
+                    style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />
+            </button>
+            <div class="btn-group">
+                <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
+                <!-- ko if: Companion.save.prevLoadedSaves().length -->
+                <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li class="small"><a class="dropdown-item disabled" href="#">Previously Loaded Saves</a></li>
+                    <!-- ko foreach: Companion.save.prevLoadedSaves -->
+                    <li class="small">
+                        <div class="d-flex align-items-center">
+                            <a class="dropdown-item flex-grow-1 pe-2" href="#" data-bind="text: $data.name, click: () => { Companion.save.loadPreviousFile($index()) }"></a>
+                            <div class="text-danger ms-2 me-3" style="cursor: pointer;"
+                                data-bind="click: (_, e) => { Companion.save.prevLoadedSaves.splice($index(), 1); e.stopPropagation(); }">x</div>
+                        </div>
+                    </li>
+                    <!-- /ko -->
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="small"><a class="dropdown-item" href="#" data-bind="click: () => { Companion.save.prevLoadedSaves([]); }">Remove All</a></li>
+                </ul>
+                <!-- /ko -->
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- import "mySaveNavigation.html" -->
+<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#mySaveContent' && Companion.save.isLoaded">
+    <div class="container-fluid justify-content-xl-center g-0">
+        <ul class="navbar-nav" role="tablist">
+            <li class="nav-item mx-1">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#mySaveMissingPokemon" type="button" role="tab">
+                    Missing Pokémon
+                    <!-- ko with: Companion.getTotalMissingPokemonCount -->
+                    <span data-bind="text: `(${$data.toLocaleString()})`"></span>
+                    <!-- /ko -->
+                </button>
+            </li>
+            <li class="nav-item mx-1">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#mySaveParty" type="button" role="tab">
+                    Party Pokémon
+                </button>
+            </li>
+            <li class="nav-item mx-1">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#mySaveStats" type="button" role="tab">
+                    Statistics & More
+                </button>
+            </li>
+            <li class="nav-item mx-1">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#mySaveFriendSafari" type="button" role="tab">
+                    Friend Safari
+                </button>
+            </li>
+        </ul>
+    </div>
+</nav>
+<!-- import end -->
+
+<!-- import "forecastNavigation.html" -->
+<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#forecastContent'">
+    <div class="container-fluid justify-content-xl-center g-0">
+        <ul class="navbar-nav" role="tablist">
+            <li class="nav-item mx-1">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#forecastUnown" type="button" role="tab">
+                    Unown
+                </button>
+            </li>
+            <li class="nav-item mx-1">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecastWeather" type="button" role="tab">
+                    Weather
+                </button>
+            </li>
+            <li class="nav-item mx-1">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecastBoostedRoute" type="button" role="tab">
+                    Boosted Routes
+                </button>
+            </li>
+            <li class="nav-item mx-1">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecastBerryMaster" type="button" role="tab">
+                    Berry Masters
+                </button>
+            </li>
+            <li class="nav-item mx-1">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecastDailyDeal" type="button" role="tab">
+                    Daily Deals
+                </button>
+            </li>
+        </ul>
+    </div>
+</nav>
+<!-- import end -->
+
+<!-- import "toolsNavigation.html" -->
+<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#main-tab-tools'">
+    <div class="container-fluid justify-content-xl-center g-0">
+        <ul class="navbar-nav" role="tablist">
+            <li class="nav-item mx-1">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tools-save-fixes" type="button" role="tab">
+                    Save Fixes
+                </button>
+            </li>
+        </ul>
+    </div>
+</nav>
+<!-- import end -->
+<!-- import end -->
+
+                    <div class="alert alert-danger rounded-0 p-2 text-center" data-bind="visible: Companion.save.isOlderVersion">
+                        The loaded save is from an older version of PokéClicker and may result in incorrect data and statistics.
+                    </div>
+                </div>
+
+                <div id="main-content" class="tab-content flex-grow-1" style="overflow: auto;">
+                    
+                    <!-- import "mySaveContent.html" -->
+<div class="tab-pane active h-100" id="mySaveContent">
+    <div data-bind="template: { name: 'load-save-template' }"></div>
+
+    <div class="tab-content h-100" data-bind="if: Companion.save.isLoaded">
+        <!-- import "mySaveMissingPokemon.html" -->
+<div class="tab-pane h-100 container-xxl show active" id="mySaveMissingPokemon">
+    <div class="d-flex flex-column" data-bind="with: Companion.getMissingPokemon">
+        <div data-bind="visible: !$data.length">
+            <p class="text-warning text-center h4 mt-5">Congratulations!<br/>You've caught 'em all!</p>
+        </div>
+        <div class="col-12 col-lg-8 mx-auto" data-bind="visible: $data.length">
+            <!-- ko foreach: $data -->
+            <div class="card mb-3">
+                <div class="card-header bg-dark rounded-0 sticky-top"
+                    data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`"></div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 0.9rem;">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 0;">#</th>
+                                <th class="">Pokémon</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: $data.pokemon">
+                            <tr>
+                                <td class="text-center" data-bind="text: $data.id"></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <knockout class="flex-grow-1" data-bind="text: $data.name"></knockout>
+                                        <a class="small" href="#" target="_blank"
+                                            data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pok%C3%A9mon/${$data.name}` }">wiki</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /ko -->
+        </div>
+    </div>
+</div>
+<!-- import end -->
+
+        <!-- import "mySaveParty.html" -->
+<div class="tab-pane h-100 container-xxl" id="mySaveParty">
+    <div class="d-flex flex-column h-100">
+        <div class="d-flex flex-row flex-wrap row mb-1">
+            <div class="col-md-3 col-5">
+                <input class="form-control w-100" type="text" placeholder="Search for # or Name" id="pokemonStatTableSearch"
+                    autocomplete="off" style="width: 250px;" data-bind="textInput: Companion.pokemonStatTableSearch">
+            </div>
+            <div class="col-md-3 col-5">
+                <select class="form-select w-100" id="pokemonStatTableFilter" style="width: 250px;" autocomplete="off"
+                    onchange="Companion.pokemonStatTableFilter(this.value)">
+                    <option value="none">No Filter</option>
+                    <option value="not-shiny">Not Shiny</option>
+                    <option value="not-resistant">Not Resistant</option>
+                    <option value="not-resistant-not-friend-safari">Not Resistant & Not Friend Safari</option>
+                    <option value="not-resistant-friend-safari">Not Resistant & Friend Safari Only</option>
+                    <option value="resistant">Resistant</option>
+                    <option value="infected">Infected</option>
+                    <option value="missing-shadow">Missing Shadow</option>
+                    <option value="missing-purified">Missing Purified</option>
+                    <option value="shadow">Shadow</option>
+                    <option value="purified">Purified</option>
+                </select>
+            </div>
+            <div class="col-md-6 col-2 text-end">
+                <button type="button" class="btn btn-secondary" data-bind="click: () => Companion.exportPartyPokemon(), tooltip: {
+                    title: 'Export Party Pokemon table to CSV file.<br /><br />Pokerus<br/>0 = Not infected, 1 = Infected, 2 = Contagious, 3 = Resistant<br /><br />Shadow Status<br />-1 = No shadow form, 0 = Shadow not obtained, 1 = Shadow, 2 = Purified',
+                    html: true,
+                }">Export</button>
+            </div>
+        </div>
+        <div class="ms-1 mb-2">
+            <knockout class="small" data-bind="text: `Showing ${Companion.getPokemonStatsTableCount().toLocaleString()} Pokémon`"></knockout>
+            <span class="float-end small d-none d-md-block">* Click a column header to sort</span>
+        </div>
+        <div class="flex-grow-1" style="overflow: auto;">
+            <div class="table-responsive h-100" style="overflow: auto;">
+                <table class="table table-striped table-hover table-sticky-header mb-0" style="font-size: 0.9rem;" id="partyPokemonTable">
+                    <thead>
+                        <tr class="table-dark fw-normal border-top-0">
+                            <th class="text-center sortable" data-sort="id" style="width: 5%;">#</th>
+                            <th class="sortable" colspan="2" data-sort="name">Pokémon</th>
+                            <th class="text-center sortable" data-sort="attack" style="width: 5%;">Attack</th>
+                            <th class="text-center sortable text-nowrap" data-sort="base-breeding-eff" style="width: 5%;"
+                                data-bind="tooltip: { title: 'Base Breeding Efficiency - includes vitamins' }">Base BE</th>
+                            <th class="text-center sortable text-nowrap" data-sort="breeding-eff" style="width: 5%;"
+                                data-bind="tooltip: { title: 'Calculated Breeding Efficiency - includes vitamins, EVs, held item, and shadow/purification' }">BE</th>
+                            <th class="text-center sortable" data-sort="obtained" style="width: 5%;">Obtained</th>
+                            <th class="text-center sortable" data-sort="hatched" style="width: 5%;">Hatched</th>
+                            <th class="text-center sortable" data-sort="shiny-obtained" style="width: 5%; white-space: nowrap;">&#10024; Obtained</th>
+                            <th class="text-center sortable" data-sort="shiny-hatched" style="width: 5%; white-space: nowrap;">&#10024; Hatched</th>
+                            <th class="text-center sortable" data-sort="defeated" style="width: 5%;">Defeated</th>
+                            <th class="text-center sortable" data-sort="evs" style="width: 5%;">EVs</th>
+                            <th class="text-center sortable" data-sort="ev-bonus" style="width: 5%; white-space: nowrap;">EV Bonus</th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: Companion.getSortedPartyList">
+                        <tr data-bind="hidden: Companion.hideFromPokemonStatsTable($data)">
+                            <td class="text-center" data-bind="text: $data.id"></td>
+                            <td class="border-end-0">
+                                <span data-bind="text: $data.name"></span>
+                                <knockout data-bind="if: Companion.isEventDiscordClientPokemon($data.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
+                            </td>
+                            <td class="text-end text-nowrap align-middle px-1" style="width: 1px;">
+                                <knockout data-bind="if: $data.shadow">
+                                    <img height="18px" data-bind="attr: { src: Companion.getShadowStatusImage($data.shadow) }" />
+                                </knockout>
+                                <knockout data-bind="if: $data.pokerus">
+                                    <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data.name) }" />
+                                </knockout>
+                                <img width="18px" data-bind="attr: { src: Companion.getCaughtPokeballImage($data.name) }" />
+                            </td>
+                            <td class="text-center" data-bind="text: $data.totalAttack.toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.baseBreedingEff.toFixed(3).toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.breedingEff.toFixed(3).toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.statistics.totalObtained.toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.statistics.totalHatched.toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.statistics.totalShinyObtained.toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.statistics.totalShinyHatched.toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.statistics.totalDefeated.toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.evs().toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: `x${$data.calculateEVAttackBonus().toLocaleString()}`"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- import end -->
+        
+        <!-- import "mySaveStats.html" -->
+<div class="tab-pane h-100" id="mySaveStats">
+    <div class="d-flex flex-column h-100">
+        <ul class="nav nav-tabs container-xxl mb-4" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="dungeon-clears-tab" data-bs-toggle="pill" data-bs-target="#dungeon-clears" type="button" role="tab" aria-controls="dungeon-clears" aria-selected="true">
+                    Dungeon Clears
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="gym-clears-tab" data-bs-toggle="pill" data-bs-target="#gym-clears" type="button" role="tab" aria-controls="gym-clears" aria-selected="false">
+                    Gym Clears
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="route-defeats-tab" data-bs-toggle="pill" data-bs-target="#route-defeats" type="button" role="tab" aria-controls="route-defeats" aria-selected="false">
+                    Route Defeats
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="enigma-berry-tab" data-bs-toggle="pill" data-bs-target="#enigma-berry" type="button" role="tab" aria-controls="enigma-berry" aria-selected="false">
+                    Enigma Berry
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="type-damage-tab" data-bs-toggle="pill" data-bs-target="#type-damage" type="button" role="tab" aria-controls="type-damage" aria-selected="false">
+                    Type Damage
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content flex-grow-1" style="overflow: auto;">
+            <div class="tab-pane active container-xxl" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
+                <div class="card border-0 mb-3">
+                    <div class="card-header bg-dark rounded-0 px-2">Totals</div>
+                    <div class="card-body p-0 collapse show" style="transition: none;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
+                                <tbody>
+                                    <tr>
+                                        <td class="align-middle" style="width: 40%;">Dungeon Clears</td>
+                                        <td class="text-center align-middle" data-bind="text: Companion.totalDungeonClears().toLocaleString()"></td>
+                                        <td class="align-middle" style="width: 40%; border-left-width: 3px;">DT For All Dungeon Achievements</td>
+                                        <td class="text-center align-middle" data-bind="text: Companion.totalDungeonCost500Clears().toLocaleString()"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-middle" style="width: 40%;">Dungeon Tokens Spent</td>
+                                        <td class="text-center align-middle" data-bind="text: Companion.totalDungeonTokensSpent().toLocaleString()"></td>
+                                        <td class="align-middle" style="width: 40%; border-left-width: 3px;">Remaining DT For All Dungeon Achievements</td>
+                                        <td class="text-center align-middle" data-bind="text: Companion.remainingDungeonCost500Clears().toLocaleString()"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-middle" style="width: 40%;">Most Cleared Dungeons</td>
+                                        <td class="text-center align-middle" colspan="3">
+                                            <table class="table table-sm">
+                                                <tbody>
+                                                    <tr data-bind="foreach: Companion.getMostClearedDungeons">
+                                                        <td class="border-bottom-0 p-0 px-1" data-bind="text: $data.name"></td>
+                                                    </tr>
+                                                    <tr data-bind="foreach: Companion.getMostClearedDungeons">
+                                                        <td class="small border-bottom-0 p-0 pt-1 px-1" data-bind="text: $data.clears.toLocaleString()"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end small"><span class="text-danger">⚹</span> Incomplete dungeon (fewer than 500 clears)</div>
+                <!-- ko foreach: Companion.getDungeonData() -->
+                <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
+                    <div class="card-header bg-dark rounded-0 px-2">
+                        <span data-bind="text: $data.name ?? GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
+                        <div class="position-absolute" style="top: 4px; right: 0;">
+                            <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
+                                style="text-decoration: none; font-size: 0.9rem;"
+                                data-bind="attr: { 'data-bs-target': `#dungeon-clears-collapse-${$index()}` }">[ Collapse ]</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0 collapse show" style="transition: none;" data-bind="attr: { id: `dungeon-clears-collapse-${$index()}` }">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th class="text-center w-auto">Total Clears</th>
+                                        <th class="text-center w-auto">Cost</th>
+                                        <th class="text-center w-auto">500 Clears Cost</th>
+                                        <th class="text-center w-auto">Remaining Cost</th>
+                                        <th class="text-center w-auto">Total Spent</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- ko foreach: $data.dungeons -->
+                                    <tr class="dungeon-clears-row">
+                                        <td class="align-middle">
+                                            <div class="position-relative">
+                                                <span data-bind="text: $data.name"></span>
+                                                <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
+                                                    data-bind="visible: $data.clears < 500">⚹</div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center align-middle w-auto" data-bind="text: $data.clears.toLocaleString()"></td>
+                                        <td class="text-center align-middle w-auto" data-bind="text: $data.cost.toLocaleString()"></td>
+                                        <td class="text-center align-middle w-auto" data-bind="text: ($data.cost * 500).toLocaleString()"></td>
+                                        <td class="text-center align-middle w-auto" data-bind="text: $data.remaining.toLocaleString()"></td>
+                                        <td class="text-center align-middle w-auto" data-bind="text: ($data.clears * $data.cost).toLocaleString()"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                    <tr class="table-dark">
+                                        <td colspan="3"></td>
+                                        <td class="text-center" data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.cost, 0) * 500).toLocaleString()"></td>
+                                        <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.remaining, 0).toLocaleString()"></td>
+                                        <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.clears * dungeon.cost, 0).toLocaleString()"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+
+            <div class="tab-pane container-xxl" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
+                <div class="text-end small"><span class="text-danger">⚹</span> Incomplete gym (fewer than 1,000 clears)</div>
+                <!-- ko foreach: Companion.getGymData() -->
+                <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
+                    <div class="card-header bg-dark rounded-0 px-2">
+                        <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
+                        <div class="position-absolute" style="top: 4px; right: 0;">
+                            <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
+                                style="text-decoration: none; font-size: 0.9rem;"
+                                data-bind="attr: { 'data-bs-target': `#gyms-clears-collapse-${$index()}` }">[ Collapse ]</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-bordered table-striped table-hover table-sm mb-0">
+                            <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `gyms-clears-collapse-${$index()}` }">
+                                <!-- ko foreach: Util.arrayToWhatever($data.gyms) -->
+                                <tr class="dungeon-clears-row" data-bind="foreach: $data">
+                                    <td class="align-middle">
+                                        <div class="position-relative">
+                                            <span data-bind="text: GymList[$data?.name]?.displayName || $data?.name"></span>
+                                            <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
+                                                data-bind="visible: $data?.clears < 1000">⚹</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle" data-bind="text: $data?.clears.toLocaleString()"></td>
+                                </tr>
+                                <!-- /ko -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+
+            <div class="tab-pane container-xxl" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
+                <div class="text-end small"><span class="text-danger">⚹</span> Incomplete route (fewer than 10,000 defeats)</div>
+                <!-- ko foreach: Companion.getRouteData() -->
+                <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
+                    <div class="card-header bg-dark rounded-0 px-2">
+                        <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
+                        <div class="position-absolute" style="top: 4px; right: 0;">
+                            <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
+                                style="text-decoration: none; font-size: 0.9rem;"
+                                data-bind="attr: { 'data-bs-target': `#route-defeats-collapse-${$index()}` }">[ Collapse ]</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-bordered table-striped table-hover table-sm mb-0">
+                            <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `route-defeats-collapse-${$index()}` }">
+                                <!-- ko foreach: Util.arrayToWhatever($data.routes) -->
+                                <tr class="dungeon-clears-row" data-bind="foreach: $data">
+                                    <td class="align-middle">
+                                        <div class="position-relative">
+                                            <span data-bind="text: $data?.routeName"></span>
+                                            <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
+                                                data-bind="visible: $data?.defeats < 10000">⚹</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle" data-bind="text: $data?.defeats.toLocaleString()"></td>
+                                </tr>
+                                <!-- /ko -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+
+            <div class="tab-pane container-xxl" id="enigma-berry" role="tabpanel" aria-labelledby="enigma-berry-tab">
+                <div class="container text-center">
+                    <div class="row" data-bind="foreach: Enigma.getBerries">
+                        <div class="col-6 col-sm-3 mb-5">
+                            <div class="h4 text-decoration-underline" data-bind="text: $data.direction"></div>
+                            <!-- ko if: $data.berry -->
+                            <img width="64px" data-bind="attr: { src: `assets/images/items/berry/${$data.berry}.png` }"/>
+                            <!-- /ko -->
+                            <div data-bind="text: $data.berry || '???'"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ko if: !Enigma.revealHints() && Enigma.getBerries().every(b => b.berry) -->
+                <div class="text-center text-success mt-5">Impressive. You got all the hints on your own 👏. You're pretty neat.</div>
+                <!-- /ko -->
+                <!-- ko if: Enigma.getBerries().some(b => !b.berry) -->
+                <div class="text-center mt-5">
+                    <button type="button" class="btn btn-primary" data-bind="text: Enigma.buttonText, click: () => Enigma.revealHintsButtonClick()"></button>
+                </div>
+                <!-- /ko -->
+                <!-- ko if: Enigma.revealHints -->
+                <div class="text-center text-muted mt-5">Impatient (or unlucky) little shit, ain't ye?</div>
+                <!-- /ko -->
+            </div>
+
+            <div class="tab-pane h-100 container-xxl" id="type-damage" role="tabpanel" aria-labelledby="type-damage-tab">
+                <div class="d-flex flex-column h-100">
+                    <div class="control-row">
+                        <div class="align-items-center">
+                            <button type="button" class="btn btn-primary me-3"
+                                data-bind="click: () => Companion.calculateTypeDamageDistribution()">
+                                Calculate
+                            </button>
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageXAttack" data-bind="checked: Companion.includeXAttack">
+                                <label class="form-check-label" for="typeDamageXAttack">xAttack</label>
+                            </div>
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageYellowFlute" data-bind="checked: Companion.includeYellowFlute">
+                                <label class="form-check-label" for="typeDamageYellowFlute">Yellow Flute</label>
+                            </div>
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageGems" data-bind="checked: Companion.includeGems">
+                                <label class="form-check-label" for="typeDamageGems">Gems</label>
+                            </div>
+                        </div>
+                        <p class="mt-1 small">First calculate will be slower. You must re-calculate after adjusting the above settings.</p>
+                    </div>
+                    <div class="table-responsive mt-2" data-bind="if: Companion.typeDamageDistribution">
+                        <!-- ko let: { types: Object.keys(Companion.typeDamageDistribution().distribution) } -->
+                        <table class="table table-column-row-hover table-black-bg table-sticky-header table-sm mb-0" style="font-size: 0.9rem;">
+                            <thead>
+                                <tr class="table-dark text-center">
+                                    <th style="position: sticky; left: 0; z-index: 99;">
+                                        <ko style="cursor: pointer;" title="Full Width / Normal Width" data-bind="click: (_, e) => {
+                                            $(e.target).closest('.tab-pane').toggleClass('container-xxl');
+                                            $(e.target).closest('.tab-pane').find('.control-row').toggleClass('container-xxl');
+                                        }">↔</ko>
+                                    </th>
+                                    <!-- ko foreach: types -->
+                                    <th class="text-center small" data-bind="text: $data"></th>
+                                    <!-- /ko -->
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: Object.values(Companion.typeDamageDistribution().distribution)">
+                                <tr class="align-middle text-center">
+                                    <th class="table-dark small px-2" style="position: sticky; left: 0; z-index: 99;" data-bind="text: types[$index()]"></th>
+                                    <!-- ko foreach: Object.values($data) -->
+                                    <td class="font-monospace small px-2" data-bind="text: $data"></td>
+                                    <!-- /ko -->
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- /ko -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- import end -->
+
+        <!-- import "mySaveFriendSafari.html" -->
+<div class="tab-pane h-100 container-xxl" id="mySaveFriendSafari">
+    <div class="d-flex flex-column h-100">
+        <div class="alert alert-dark text-center">
+            There are currently <span data-bind="text: FriendSafari.pokemonCount()">0</span> Pokémon in the Friend Safari rotation.
+            The rotation takes <span data-bind="text: Math.ceil(FriendSafari.pokemonCount() / GameConstants.FRIEND_SAFARI_POKEMON)">0</span> days to complete.
+        </div>
+        <div class="table-responsive flex-grow-1" style="overflow: auto;">
+            <table class="table table-striped table-hover table-sticky-header table-sm mb-0" style="font-size: 0.9rem;">
+                <thead>
+                    <tr class="table-dark">
+                        <th class="text-center">Date</th>
+                        <th class="text-center" colspan="5">Pokemon</th>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: FriendSafari.getRotation">
+                    <tr class="align-middle">
+                        <td class="text-center" data-bind="text: date.toLocaleDateString()"></td>
+                        <!-- ko foreach: pokemon -->
+                        <td class="text-center">
+                            <div data-bind="text: $data"></div>
+                            <img width="32px" data-bind="attr: { src: Companion.getPokerusImage($data) }, visible: Companion.hasPokerus($data)" />
+                            <div class="small" data-bind="hidden: Companion.hasPokerus($data)">-</div>
+                        </td>
+                        <!-- /ko -->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- import end -->
+    </div>
+</div>
+<!-- import end -->
+
+                    <!-- import "forecastContent.html" -->
+<div class="tab-pane h-100" id="forecastContent">
+    <div class="tab-content container-xxl h-100">
+        
+        <!-- import "forecastUnown.html" -->
+<div class="tab-pane show active" id="forecastUnown">
+    <h4 class="mb-2">Current & Upcoming</h4>
+    <div class="table-responsive mb-4">
+        <table class="table table-bordered table-hover table-sm small" data-bind="with: Forecast.unownForecast().slice(0, 8)">
+            <thead>
+                <tr>
+                    <th class="table-dark"></th>
+                    <!-- ko foreach: $data -->
+                    <th class="table-dark text-center" data-bind="text: Util.formatDate($data.startDate)"></th>
+                    <!-- /ko -->
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: Companion.data.unownDungeonList">
+                <tr>
+                    <td class="table-dark" data-bind="text: $data"></td>
+                    <!-- ko foreach: $parent -->
+                    <td class="text-center align-middle" data-bind="text: $data.unowns[$parentContext.$index()]"></td>
+                    <!-- /ko -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="container-xxl g-0">
+        <div class="row">
+            <div class="col-12 col-md-6 mb-3">
+                <h5 class="mb-2">Next Appearence Anywhere</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover table-sm small">
+                        <thead>
+                            <tr class="table-dark">
+                                <th class="text-center">Unown</th>
+                                <th class="text-center">When</th>
+                                <th class="text-center">Where</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: Companion.data.unownList">
+                            <tr>
+                                <td class="text-center" data-bind="text: $data"></td>
+                                <!-- ko with: Forecast.unownForecast().find(f => f.unowns.some(u => u == $data)) -->
+                                <td class="text-center" data-bind="text: Util.formatDate($data.startDate)"></td>
+                                <td class="text-center" data-bind="text: Companion.data.unownDungeonList[$data.unowns.findIndex(u => u == $parent)]"></td>
+                                <!-- /ko -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 mb-3">
+                <h5 class="mb-2">Next Appearence In Each Dungeon</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover table-sm small">
+                        <thead>
+                            <tr class="table-dark">
+                                <th class="text-center">Unown</th>
+                                <!-- ko foreach: Companion.data.unownDungeonList -->
+                                <th class="text-center" data-bind="text: $data"></th>
+                                <!-- /ko -->
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: Companion.data.unownList">
+                            <tr>
+                                <td class="text-center" data-bind="text: $data"></td>
+                                <!-- ko foreach: Companion.data.unownDungeonList -->
+                                <td class="text-center" data-bind="
+                                    text: Util.formatDate(Forecast.unownForecast().find(f => f.unowns[$index()] == $parent)?.startDate) || '-'"></td>
+                                <!-- /ko -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- import end -->
+
+        <!-- import "forecastWeather.html" -->
+<div class="tab-pane" id="forecastWeather">
+    <h4 class="mb-2">Current & Upcoming</h4>
+    <div class="table-responsive mb-3">
+        <table class="table table-bordered table-sm small">
+            <thead>
+                <tr class="table-dark">
+                    <th class="text-center">Date</th>
+                    <th class="text-center">Time</th>
+                    <!-- ko foreach: Companion.data.validRegionNames -->
+                    <th class="text-center" data-bind="text: $data"></th>
+                    <!-- /ko -->
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: Object.values(Forecast.weatherForecast.slice(0, 18).reduce((map, wf) => {
+                map[wf.startDate.getDate()] = map[wf.startDate.getDate()] || [];
+                map[wf.startDate.getDate()].push(wf);
+                return map;
+            }, {}))">
+                <!-- ko foreach: $data -->
+                <tr>
+                    <!-- ko if: $index() == 0 -->
+                    <td class="text-center align-middle" data-bind="text: Util.formatDate($data.startDate), attr: { rowspan: $parent.length }"></td>
+                    <!-- /ko -->
+                    <td class="text-center text-nowrap" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, Weather.period))}`"></td>
+                    <!-- ko foreach: Companion.data.validRegions -->
+                    <td class="text-center text-dark" data-bind="text: WeatherType[$parent.regionalWeather[$data]], style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
+                    <!-- /ko -->
+                </tr>
+                <!-- /ko -->
+            </tbody>
+        </table>
+    </div>
+    <h4 class="mb-2">Next Occurrence</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-sm small">
+            <thead>
+                <tr class="table-dark">
+                    <th></th>
+                    <!-- ko foreach: Companion.data.validRegionNames -->
+                    <th class="text-center" data-bind="text: $data"></th>
+                    <!-- /ko -->
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: GameHelper.enumNumbers(WeatherType)">
+                <tr>
+                    <td class="align-middle text-dark" data-bind="text: WeatherType[$data], style: { 'background-color': Weather.weatherConditions[$data].color }"></td>
+                    <!-- ko foreach: Companion.data.validRegions -->
+                    <td class="text-center align-middle" data-bind="text: Util.formatDateTime(Forecast.getNextWeatherDate($data, $parent)) || '-'"></td>
+                    <!-- /ko -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- import end -->
+
+        <!-- import "forecastBoostedRoute.html" -->
+<div class="tab-pane" id="forecastBoostedRoute">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover table-sm small">
+            <thead>
+                <tr>
+                    <th rowspan="2"></th>
+                    <!-- ko foreach: Forecast.boostedRoutes -->
+                    <th class="text-center table-dark" data-bind="text: Util.formatDate($data.startDate)"></th>
+                    <!-- /ko -->
+                </tr>
+                <tr class="table-dark small">
+                    <!-- ko foreach: Forecast.boostedRoutes -->
+                    <th class="text-center" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, RoamingPokemonList.period))}`"></th>
+                    <!-- /ko -->
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: Companion.data.roamerGroups">
+                <tr>
+                    <td class="align-middle" data-bind="text: $data.name"></td>
+                    <!-- ko foreach: Forecast.boostedRoutes -->
+                    <td class="text-center align-middle" data-bind="text: $data.regionalRoutes[$parentContext.$index()]"></td>
+                    <!-- /ko -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- import end -->
+
+        <!-- import "forecastBerryMaster.html" -->
+<div class="tab-pane h-100" id="forecastBerryMaster">
+    <div class="d-flex flex-column h-100">
+        <ul class="nav nav-tabs mb-4" role="tablist" data-bind="foreach: GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None')">
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
+                    data-bind="text: $data, css: { active: $index() == 0 },
+                        attr: { id: `berrymaster-${$index()}-tab`, 'data-bs-target': `#berrymaster-${$index()}` }"></button>
+            </li>
+        </ul>
+        <div class="tab-content flex-grow-1" style="overflow: auto;" data-bind="foreach: GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None')">
+            <div class="tab-pane" role="tabpanel" data-bind="css: { active: $index() == 0 }, attr: { id: `berrymaster-${$index()}` }">
+                <div class="container-xxl">
+                    <!-- ko if: Forecast.berryMasters().length -->
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <h4 class="mb-2">Current & Upcoming</h4>
+                            <div class="table-responsive">
+                                <table class="table table-sm small">
+                                    <thead>
+                                        <tr class="table-dark">
+                                            <th>Date</th>
+                                            <th>Give</th>
+                                            <th>Receive</th>
+                                        </tr>
+                                    </thead>
+                                    <!-- ko foreach: { data: Forecast.getBerryMasterDeals($index(), 7), as: 'date' } -->
+                                    <tbody data-bind="foreach: { data: deals, as: 'deal' }">
+                                        <!-- ko foreach: { data: deal.berries, as: 'berry' } -->
+                                        <tr data-bind="">
+                                            <!-- ko if: $parentContext.$index() == 0 && $index() == 0 -->
+                                            <td class="align-middle" data-bind="text: Util.formatDate(date.date), attr: { rowspan: date.deals.reduce((sum, d) => sum += d.berries.length, 0) }"></td>
+                                            <!-- /ko -->
+                                            
+                                            <td data-bind="text: `${berry.amount} × ${BerryType[berry.berryType]}`, css: { 'border-bottom-0': $index() < deal.berries.length - 1 }"></td>
+
+                                            <!-- ko if: $index() == 0 -->
+                                            <td class="align-middle" data-bind="text: `${$parent.item.amount} × ${$parent.item.itemType._displayName ?? $parent.item.itemType.name}`, attr: { rowspan: deal.berries.length }"></td>
+                                            <!-- /ko -->
+                                        </tr>
+                                        <!-- /ko -->
+                                    </tbody>
+                                    <!-- /ko -->
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <!-- ko ifnot: Companion.data.berryMasterPokemonLocations.includes($index())  -->
+                            <h4 class="mb-2">Next Occurrence</h4>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover table-striped table-sm small">
+                                    <thead>
+                                        <tr class="table-dark">
+                                            <th>Item</th>
+                                            <th class="text-center">Date</th>
+                                            <th class="text-center">Cost</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-bind="foreach: Forecast.getBerryMasterNextItemDate($index())">
+                                        <tr>
+                                            <td class="align-middle" data-bind="text: `${item} × ${amount}`"></td>
+                                            <td class="text-center align-middle" data-bind="text: Util.formatDate(date)"></td>
+                                            <td class="align-middle">
+                                                <div class="d-flex justify-content-evenly text-center" data-bind="foreach: berries">
+                                                    <div class="px-2" data-bind="text: `${amount} × ${BerryType[berryType]}`"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /ko -->
+                            <!-- ko if: Companion.data.berryMasterPokemonLocations.includes($index()) -->
+                            <div data-bind="with: Forecast.getBerryMasterPokemonMinMaxCost($index())">
+                                <h4 class="mb-2">Next Minimum Cost</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover table-striped table-sm small">
+                                        <thead>
+                                            <tr class="table-dark">
+                                                <th>Pokémon</th>
+                                                <th class="text-center">Date</th>
+                                                <th class="text-center">Cost</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody data-bind="foreach: $data">
+                                            <tr>
+                                                <td data-bind="text: pokemon"></td>
+                                                <td class="text-center" data-bind="text: Util.formatDate(minDate) || '-'"></td>
+                                                <td class="text-center" data-bind="text: minCost"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <h4 class="mt-3 mb-2">Next Maximum Cost</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover table-striped table-sm small">
+                                        <thead>
+                                            <tr class="table-dark">
+                                                <th>Pokémon</th>
+                                                <th class="text-center">Date</th>
+                                                <th class="text-center">Cost</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody data-bind="foreach: $data">
+                                            <tr>
+                                                <td data-bind="text: pokemon"></td>
+                                                <td class="text-center" data-bind="text: Util.formatDate(maxDate) || '-'"></td>
+                                                <td class="text-center" data-bind="text: maxCost"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- /ko -->
+                        </div>
+                    </div>
+                    <!-- /ko -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- import end -->
+
+        <!-- import "forecastDailyDeal.html" -->
+<div class="tab-pane h-100" id="forecastDailyDeal">
+    <div class="d-flex flex-column h-100">
+        <ul class="nav nav-tabs mb-4" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#dailydeals-next" type="button" role="tab">
+                    Next Occurrence
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" id="tab-dailydeals-item" data-bs-target="#dailydeals-item" type="button" role="tab">
+                    Specific Item
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content h-100 flex-grow-1" style="overflow: auto;">
+            <div class="tab-pane h-100 active" role="tabpanel" id="dailydeals-next">
+                <div class="d-flex flex-column h-100">
+                    <p class="small m-0 p-0">* Click an item name to see more trades</p>
+                    <div class="table-responsive flex-grow-1">
+                        <table class="table table-bordered table-hover table-striped table-sticky-header table-sm small">
+                            <thead>
+                                <tr class="table-dark align-middle">
+                                    <th rowspan="2">Item</th>
+                                    <th colspan="2" class="text-center">Next Give Trade</th>
+                                    <th colspan="2" class="text-center">Next Receive Trade</th>
+                                </tr>
+                                <tr class="table-dark">
+                                    <th class="text-center">Date</th>
+                                    <th class="text-center">Trade</th>
+                                    <th class="text-center">Date</th>
+                                    <th class="text-center">Trade</th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: Object.entries(Forecast.getNextOccurrenceUndergroundItems())">
+                                <tr>
+                                    <td>
+                                        <ko style="cursor: pointer;" data-bind="text: $data[0],
+                                            click: () => { Forecast.selectedDailyDealItem($data[0]); $('#tab-dailydeals-item').tab('show'); }"></ko>
+                                    </td>
+                                    <!-- ko if: $data[1].give -->
+                                    <td class="text-center"
+                                        data-bind="text: Util.formatDate($data[1].give.date)"></td>
+                                    <td class="text-center"
+                                        data-bind="text: `${$data[1].give.amount1} × ${$data[1].give.item1.name} → ${$data[1].give.amount2} × ${$data[1].give.item2.name}`"></td>
+                                    <!-- /ko -->
+                                    <!-- ko ifnot: $data[1].give -->
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <!-- /ko -->
+
+                                    <!-- ko if: $data[1].receive -->
+                                    <td class="text-center"
+                                        data-bind="text: Util.formatDate($data[1].receive.date)"></td>
+                                    <td class="text-center"
+                                        data-bind="text: `${$data[1].receive.amount1} × ${$data[1].receive.item1.name} → ${$data[1].receive.amount2} × ${$data[1].receive.item2.name}`"></td>
+                                    <!-- /ko -->
+                                    <!-- ko ifnot: $data[1].receive -->
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">-</td>
+                                    <!-- /ko -->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane h-100" role="tabpanel" id="dailydeals-item">
+                <div class="d-flex flex-column h-100">
+                    <div class="form col-12 col-lg-4 col-md-6">
+                        <select class="form-select" data-bind="
+                            options: Forecast.getUndergroundItemList(),
+                            optionsCaption: 'Select an item..',
+                            value: Forecast.selectedDailyDealItem">
+                        </select>
+                    </div>
+                    <div class="mt-3 flex-grow-1 table-responsive" data-bind="visible: Forecast.selectedDailyDealItem">
+                        <table class="table table-bordered table-hover table-striped table-sticky-header table-sm small">
+                            <thead>
+                                <tr class="table-dark">
+                                    <th class="text-center">Date</th>
+                                    <th class="text-center">Trade</th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: Forecast.selectedDailyDealItemNextTrades">
+                                <tr>
+                                    <td class="text-center" data-bind="text: Util.formatDate(date)"></td>
+                                    <td class="text-center" data-bind="
+                                        html: (item1.name == Forecast.selectedDailyDealItem()
+                                            ? `<strong class='text-success'>${amount1} × ${item1.name}</strong> → ${amount2} × ${item2.name}`
+                                            : `${amount1} × ${item1.name} → <strong class='text-success'>${amount2} × ${item2.name}</strong>`)
+                                    "></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- import end -->
+
+        
+    </div>
+</div>
+<!-- import end -->
+
+                    <!-- import "vitaminTracker.html" -->
+<div class="tab-pane h-100 container-xxl" id="vitaminTracker">
+    <div class="d-flex flex-column h-100">
+        <div class="row align-items-center">
+            <div class="col-12 col-lg-8 col-sm-6">
+                <div class="row mb-2">
+                    <div class="col-6 col-lg-4 col-sm-6">
+                        <label class="form-label">Highest Region</label>
+                        <select class="form-select" data-bind="
+                            options: Companion.data.validRegions,
+                            value: VitaminTracker.highestRegion,
+                            optionsText: (item) => GameConstants.camelCaseToString(GameConstants.Region[item])"></select>
+                    </div>
+                    <div class="col-6 col-lg-4 col-sm-6">
+                        <label class="form-label">Search</label>
+                        <input class="form-control" type="text" placeholder="Enter # or Name" autocomplete="off"
+                            data-bind="textInput: VitaminTracker.searchValue">
+                    </div>
+                    <div class="col-3 col-lg-2 col-sm-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-secondary" data-bind="click: () => VitaminTracker.exportData(), tooltip: {
+                            title: 'Export Vitamin Tracker table data to CSV file.'
+                        }">Export</button>
+                    </div>
+                </div>
+                <div class="row mb-1" data-bind="visible: Companion.save.isLoaded">
+                    <div class="col-12">
+                        <div class="form-check form-switch form-check-inline">
+                            <input class="form-check-input" type="checkbox" role="switch" id="hidePokemonOptimalVitamins" autocomplete="off" data-bind="checked: VitaminTracker.hidePokemonOptimalVitamins">
+                            <label class="form-check-label" for="hidePokemonOptimalVitamins">Hide Pokémon w/ Optimal Vitamins</label>
+                        </div>
+                        <div class="form-check form-switch form-check-inline">
+                            <input class="form-check-input" type="checkbox" role="switch" id="hideUncaughtPokemon" autocomplete="off" data-bind="checked: VitaminTracker.hideUncaughtPokemon">
+                            <label class="form-check-label" for="hideUncaughtPokemon">Hide Uncaught Pokémon</label>
+                        </div>
+                        <div class="form-check form-switch form-check-inline">
+                            <input class="form-check-input" type="checkbox" role="switch" id="hideShinyPokemon" autocomplete="off" data-bind="checked: VitaminTracker.hideShinyPokemon">
+                            <label class="form-check-label" for="hideShinyPokemon">Hide Shiny Pokémon</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 col-sm-6 text-center">
+                <label class="form-label mb-0">Total Vitamins Needed</label>
+                <table class="table table-bordered table-sm mb-0" style="font-size: 0.9rem;">
+                    <thead>
+                        <tr class="table-dark">
+                            <th class="text-center">Protein</th>
+                            <th class="text-center">Calcium</th>
+                            <th class="text-center">Carbos</th>
+                            <th class="text-center">Total Coins</th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="with: VitaminTracker.getTotalVitaminsNeeded">
+                        <tr>
+                            <td class="text-center" data-bind="text: vitaminCount[0].toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: vitaminCount[1].toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: vitaminCount[2].toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: totalCost.toLocaleString()"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- ko ifnot: Companion.save.isLoaded -->
+                <div class="text-end small mt-2">* Load a save file to view the vitamins your Pokémon currently have</div>
+                <!-- /ko -->
+                <!-- ko if: Companion.save.isLoaded -->
+                <div class="text-end small mt-2">* Above totals do not include vitamins you have already purchased</div>
+                <!-- /ko -->
+            </div>
+        </div>
+        <!-- ko if: Companion.tabVisited()['#vitaminTracker'] -->
+        <div class="flex-grow-1 mt-2" style="overflow: auto;">
+            <div class="table-responsive h-100" style="overflow: auto;">
+                <table class="table table-striped table-hover table-sticky-header mb-0" style="font-size: 0.9rem;" id="vitaminTrackerTable">
+                    <thead>
+                        <tr class="table-dark fw-normal border-top-0 align-middle">
+                            <th class="text-center sortable" data-sort="id" style="width: 0;"
+                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">#</th>
+                            <th class="sortable" data-sort="name"
+                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Pokémon</th>
+                            <th class="text-center" style="width: 10%;"
+                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Native Region</th>
+                            <th class="text-center sortable" data-sort="base-attack" style="width: 5%;"
+                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Base Attack</th>
+                            <th class="text-center sortable" data-sort="base-bonus" style="width: 5%;"
+                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 },
+                                    tooltip: { title: 'Attack gained each breeding cycle with no vitamins.' }">Attack Bonus</th>
+                            <th class="text-center sortable" data-sort="base-steps" style="width: 5%;"
+                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Egg Steps</th>
+                            <!-- ko foreach: GameHelper.enumNumbers(GameConstants.VitaminType) -->
+                            <th class="text-center" style="width: 5%;" data-bind="text: `${GameConstants.VitaminType[$data]}`, tooltip: {
+                                title: `Optimal amount of ${GameConstants.VitaminType[$data]} to give this Pokémon based on the selected Highest Region. Loading a save file will display the current amount of vitamins alongside the optimal amount.`
+                            }"></th>
+                            <!-- /ko -->
+                            <th class="text-center sortable" data-sort="vitamin-bonus" style="width: 5%;"
+                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 },
+                                    tooltip: { title: 'Attack gained each breeding cycle with optimal vitamins.' }">
+                                <span class="text-nowrap">Bonus w/</span> Vitamins
+                            </th>
+                            <th class="text-center sortable" data-sort="vitamin-steps" style="width: 5%;"
+                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Steps w/ Vitamins</th>
+                            <th class="text-center sortable" data-sort="breeding-efficiency" style="width: 5%;"
+                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Breeding Efficiency</th>
+                        </tr>
+                        <!-- ko if: Companion.save.isLoaded -->
+                        <tr class="table-dark fw-normal border-top-0 align-middle">
+                            <th colspan="3" class="text-center p-1 border-top-0 border-start-0">Current | Optimal</th>
+                        </tr>
+                        <!-- /ko -->
+                    </thead>
+                    <!-- ko with: VitaminTracker.getSortedVitaminList -->
+                    <tbody data-bind="foreach: $data">
+                        <tr>
+                            <td class="text-center" data-bind="text: $data.id"></td>
+                            <td data-bind="text: $data.name"></td>
+                            <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[$data.nativeRegion])"></td>
+                            <td class="text-center" data-bind="text: $data.attack"></td>
+                            <td class="text-center" data-bind="text: $data.baseAttackBonus.toFixed(2).toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.baseEggSteps.toLocaleString()"></td>
+                            <td class="text-center bg-vitamin-0" data-bind="text: $data.vitaminText[0]"></td>
+                            <td class="text-center bg-vitamin-1" data-bind="text: $data.vitaminText[1]"></td>
+                            <td class="text-center bg-vitamin-2" data-bind="text: $data.vitaminText[2]"></td>
+                            <td class="text-center" data-bind="text: $data.attackBonus.toFixed(2).toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.vitaminEggSteps.toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: $data.breedingEfficiency.toFixed(2).toLocaleString()"></td>
+                        </tr>
+                    </tbody>
+                    <!-- /ko -->
+                </table>
+            </div>
+        </div>
+        <!-- /ko -->
+    </div>
+</div>
+<!-- import end -->
+                    
+                    <!-- import "toolsContent.html" -->
+<div class="tab-pane" id="toolsContent">
+    <div class="tab-content container-xxl h-100">
+        <div class="tab-pane show active" id="tools-save-fixes">
+            <div class="form col-12 col-lg-6 mx-auto">
+                <p>Fix common issues with your save file. After a fix is applied a fixed copy of the selected save file will be downloaded. Import the fixed file over your existing file in PokéClicker.</p>
+                <hr />
+                <div class="mb-3">
+                    <select class="form-select" data-bind="options: SaveFixes.fixList, optionsText: 'name',
+                        optionsCaption: 'Select fix to apply', value: SaveFixes.selectedFix"></select>
+                    <span class="form-text" data-bind="text: SaveFixes.selectedFix()?.description"></span>
+                </div>
+                <div class="mb-3">
+                    <input type="file" id="fix-save-file" accept=".txt" class="d-none" onchange="SaveFixes.selectedFile(this.files[0])">
+                    <button type="button" class="btn btn-secondary" data-bind="click: () => document.getElementById('fix-save-file').click()">
+                        Select save file to fix
+                    </button>
+                    <div class="form-text" data-bind="visible: SaveFixes.selectedFile() !== undefined">
+                        <div data-bind="text: SaveFixes.selectedFile()?.name"></div>
+                    </div>
+                </div>
+                <hr />
+                <div class="d-grid gap-2" data-bind="tooltip: {
+                    title: !SaveFixes.canRunFix() ? 'Select a fix to apply and a save file.' : '',
+                    trigger: 'hover',
+                }">
+                    <button class="btn btn-primary" type="button" data-bind="enable: SaveFixes.canRunFix, click: () => SaveFixes.fixSave()">Fix</button>
+                </div>
+                <div class="small" data-bind="visible: SaveFixes.saveFixError()">
+                    <span class="text-danger">Error: </span>
+                    <ko data-bind="text: SaveFixes.saveFixError"></ko>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- import end -->
+
+                </div>
+            </div>
+
+            <!-- import "settingsModal.html" -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form">
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="hideAlternateCheck" autocomplete="off"
+                                data-bind="checked: Companion.settings.showRequiredOnly">
+                            <label class="form-check-label" for="hideAlternateCheck">Show Required Pokémon Only</label>
+                        </div>
+                        <div class="form-text">Limit the Missing Pokémon section to show what is required to complete each regional Pokédex.</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="showAllRegionsCheck" autocomplete="off"
+                                data-bind="checked: Companion.settings.showAllRegions">
+                            <label class="form-check-label" for="showAllRegionsCheck">Show All Regions / Pokémon</label>
+                        </div>
+                        <div class="form-text">Show Pokémon and locations from regions you have not yet reached.</div>
+                    </div>
+                    <div class="mb-4">
+                        <select class="form-select form-select-sm" autocomplete="off" data-bind="value: Companion.settings.defaultTab">
+                            <option value="tab-my-save">My Save</option>
+                            <option value="tab-forecasts">Forecasts</option>
+                            <option value="tab-vitamintracker">Vitamin Tracker</option>
+                        </select>
+                        <div class="form-text">Choose the default tab to display when opening the Companion.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- import end -->
+
+        </div>
+
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+            <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+            </symbol>
+        </svg>
+
+        <script src="./bundle.js"></script>
+    </body>
+</html>
+
+<script type="text/html" id="load-save-template">
+    <!-- ko ifnot: Companion.save.isLoaded -->
+    <div class="position-absolute top-50 start-50 translate-middle" style="z-index: -1;">
+        <h1 class="display-6 mb-0">Select a save file or check out the other pages.</h1>
+        <small class="font-monospace">PokéClicker <code data-bind="text: `v${Companion.package.version}`"></code></small>
+    </div>
+    <!-- /ko -->
+</script>
