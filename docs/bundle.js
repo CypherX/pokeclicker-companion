@@ -11987,7 +11987,7 @@ const calculateTypeDamageDistribution = () => {
 };
 
 const tabVisited = ko.observable({});
-const activeTab = ko.observable('#main-tab-save');
+const activeTab = ko.observable('#mySaveContent');
 
 $(document).ready(() => {
     const container = document.getElementById('container');
