@@ -1,0 +1,35 @@
+<div class="tab-pane" id="toolsContent">
+    <div class="tab-content container-xxl h-100">
+        <div class="tab-pane show active" id="tools-save-fixes">
+            <div class="form col-12 col-lg-6 mx-auto">
+                <p>Fix common issues with your save file. After a fix is applied a fixed copy of the selected save file will be downloaded. Import the fixed file over your existing file in PokéClicker.</p>
+                <hr />
+                <div class="mb-3">
+                    <select class="form-select" data-bind="options: SaveFixes.fixList, optionsText: 'name',
+                        optionsCaption: 'Select fix to apply', value: SaveFixes.selectedFix"></select>
+                    <span class="form-text" data-bind="text: SaveFixes.selectedFix()?.description"></span>
+                </div>
+                <div class="mb-3">
+                    <input type="file" id="fix-save-file" accept=".txt" class="d-none" onchange="SaveFixes.selectedFile(this.files[0])">
+                    <button type="button" class="btn btn-secondary" data-bind="click: () => document.getElementById('fix-save-file').click()">
+                        Select save file to fix
+                    </button>
+                    <div class="form-text" data-bind="visible: SaveFixes.selectedFile() !== undefined">
+                        <div data-bind="text: SaveFixes.selectedFile()?.name"></div>
+                    </div>
+                </div>
+                <hr />
+                <div class="d-grid gap-2" data-bind="tooltip: {
+                    title: !SaveFixes.canRunFix() ? 'Select a fix to apply and a save file.' : '',
+                    trigger: 'hover',
+                }">
+                    <button class="btn btn-primary" type="button" data-bind="enable: SaveFixes.canRunFix, click: () => SaveFixes.fixSave()">Fix</button>
+                </div>
+                <div class="small" data-bind="visible: SaveFixes.saveFixError()">
+                    <span class="text-danger">Error: </span>
+                    <ko data-bind="text: SaveFixes.saveFixError"></ko>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

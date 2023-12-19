@@ -1,0 +1,41 @@
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form">
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="hideAlternateCheck" autocomplete="off"
+                                data-bind="checked: Companion.settings.showRequiredOnly">
+                            <label class="form-check-label" for="hideAlternateCheck">Show Required Pokémon Only</label>
+                        </div>
+                        <div class="form-text">Limit the Missing Pokémon section to show what is required to complete each regional Pokédex.</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="showAllRegionsCheck" autocomplete="off"
+                                data-bind="checked: Companion.settings.showAllRegions">
+                            <label class="form-check-label" for="showAllRegionsCheck">Show All Regions / Pokémon</label>
+                        </div>
+                        <div class="form-text">Show Pokémon and locations from regions you have not yet reached.</div>
+                    </div>
+                    <div class="mb-4">
+                        <select class="form-select form-select-sm" autocomplete="off" data-bind="value: Companion.settings.defaultTab">
+                            <option value="tab-my-save">My Save</option>
+                            <option value="tab-forecasts">Forecasts</option>
+                            <option value="tab-vitamintracker">Vitamin Tracker</option>
+                        </select>
+                        <div class="form-text">Choose the default tab to display when opening the Companion.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -41,7 +41,10 @@ gulp.task('assets', () => gulp.src(srcs.assets)
 
 gulp.task('html_imports', (done) => {
     gulp.src('./index.html')
-      .pipe(htmlImport('./components/'))
+      .pipe(htmlImport({
+        componentsPath: './components/',
+        nestedIncludes: true,
+      }))
       .pipe(gulp.dest(dests.base))
       .pipe(browserSync.reload({stream: true}));
     done();

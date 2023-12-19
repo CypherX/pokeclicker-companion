@@ -200,7 +200,7 @@ const isPokemonCaught = (pokemonName) => {
 const getCaughtPokeballImage = (pokemonName) => {
     const partyPokemon = partyList()[PokemonHelper.getPokemonByName(pokemonName).id];
     if (partyPokemon) {
-        return `/assets/images/pokeball/Pokeball${partyPokemon.shiny ? '-shiny' : ''}.svg`;
+        return `assets/images/pokeball/Pokeball${partyPokemon.shiny ? '-shiny' : ''}.svg`;
     } else {
         return '';
     }
@@ -495,7 +495,7 @@ const calculateTypeDamageDistribution = () => {
 };
 
 const tabVisited = ko.observable({});
-const activeTab = ko.observable('#main-tab-save');
+const activeTab = ko.observable('#mySaveContent');
 
 $(document).ready(() => {
     const container = document.getElementById('container');
