@@ -11692,7 +11692,7 @@ const isPokemonCaught = (pokemonName) => {
 const getCaughtPokeballImage = (pokemonName) => {
     const partyPokemon = partyList()[PokemonHelper.getPokemonByName(pokemonName).id];
     if (partyPokemon) {
-        return `/assets/images/pokeball/Pokeball${partyPokemon.shiny ? '-shiny' : ''}.svg`;
+        return `assets/images/pokeball/Pokeball${partyPokemon.shiny ? '-shiny' : ''}.svg`;
     } else {
         return '';
     }
