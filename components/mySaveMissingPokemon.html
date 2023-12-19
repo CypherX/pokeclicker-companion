@@ -1,0 +1,37 @@
+<div class="tab-pane h-100 container-xxl show active" id="mySaveMissingPokemon">
+    <div class="d-flex flex-column" data-bind="with: Companion.getMissingPokemon">
+        <div data-bind="visible: !$data.length">
+            <p class="text-warning text-center h4 mt-5">Congratulations!<br/>You've caught 'em all!</p>
+        </div>
+        <div class="col-12 col-lg-8 mx-auto" data-bind="visible: $data.length">
+            <!-- ko foreach: $data -->
+            <div class="card mb-3">
+                <div class="card-header bg-dark rounded-0 sticky-top"
+                    data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`"></div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 0.9rem;">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 0;">#</th>
+                                <th class="">Pokémon</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: $data.pokemon">
+                            <tr>
+                                <td class="text-center" data-bind="text: $data.id"></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <knockout class="flex-grow-1" data-bind="text: $data.name"></knockout>
+                                        <a class="small" href="#" target="_blank"
+                                            data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pok%C3%A9mon/${$data.name}` }">wiki</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /ko -->
+        </div>
+    </div>
+</div>

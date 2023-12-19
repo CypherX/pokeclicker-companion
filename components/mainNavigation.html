@@ -1,0 +1,73 @@
+<nav class="navbar navbar-expand-md bg-dark" data-bs-theme="dark">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="float-end ml-auto d-md-none">
+            <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
+        </div>
+        <div class="collapse navbar-collapse justify-content-xl-center" id="main-nav">
+            <ul class="navbar-nav fs-5" id="mainNavbar" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="tab-my-save" data-bs-toggle="pill" data-bs-target="#mySaveContent" type="button" role="tab">
+                        My Save
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-forecasts" data-bs-toggle="pill" data-bs-target="#forecastContent" type="button" role="tab">
+                        Forecasts
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-vitamintracker" data-bs-toggle="pill" data-bs-target="#vitaminTracker" type="button" role="tab">
+                        Vitamin Tracker
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#toolsContent" type="button" role="tab">
+                        Tools
+                    </button>
+                </li>
+                <li class="nav-item d-md-none"> <!-- display in menu on mobile only -->
+                    <button class="nav-link" data-bs-toggle="modal" data-bs-target="#settingsModal" type="button" role="tab">
+                        Settings
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="d-none d-md-block position-absolute end-0 me-2">
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                <img src="assets/gear-solid.svg" class="d-flex my-1 align-self-center"
+                    style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />
+            </button>
+            <div class="btn-group">
+                <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
+                <!-- ko if: Companion.save.prevLoadedSaves().length -->
+                <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li class="small"><a class="dropdown-item disabled" href="#">Previously Loaded Saves</a></li>
+                    <!-- ko foreach: Companion.save.prevLoadedSaves -->
+                    <li class="small">
+                        <div class="d-flex align-items-center">
+                            <a class="dropdown-item flex-grow-1 pe-2" href="#" data-bind="text: $data.name, click: () => { Companion.save.loadPreviousFile($index()) }"></a>
+                            <div class="text-danger ms-2 me-3" style="cursor: pointer;"
+                                data-bind="click: (_, e) => { Companion.save.prevLoadedSaves.splice($index(), 1); e.stopPropagation(); }">x</div>
+                        </div>
+                    </li>
+                    <!-- /ko -->
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="small"><a class="dropdown-item" href="#" data-bind="click: () => { Companion.save.prevLoadedSaves([]); }">Remove All</a></li>
+                </ul>
+                <!-- /ko -->
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- @import "mySaveNavigation.html" -->
+
+<!-- @import "forecastNavigation.html" -->
+
+<!-- @import "toolsNavigation.html" -->

@@ -1,0 +1,273 @@
+<div class="tab-pane h-100" id="mySaveStats">
+    <div class="d-flex flex-column h-100">
+        <ul class="nav nav-tabs container-xxl mb-4" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="dungeon-clears-tab" data-bs-toggle="pill" data-bs-target="#dungeon-clears" type="button" role="tab" aria-controls="dungeon-clears" aria-selected="true">
+                    Dungeon Clears
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="gym-clears-tab" data-bs-toggle="pill" data-bs-target="#gym-clears" type="button" role="tab" aria-controls="gym-clears" aria-selected="false">
+                    Gym Clears
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="route-defeats-tab" data-bs-toggle="pill" data-bs-target="#route-defeats" type="button" role="tab" aria-controls="route-defeats" aria-selected="false">
+                    Route Defeats
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="enigma-berry-tab" data-bs-toggle="pill" data-bs-target="#enigma-berry" type="button" role="tab" aria-controls="enigma-berry" aria-selected="false">
+                    Enigma Berry
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="type-damage-tab" data-bs-toggle="pill" data-bs-target="#type-damage" type="button" role="tab" aria-controls="type-damage" aria-selected="false">
+                    Type Damage
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content flex-grow-1" style="overflow: auto;">
+            <div class="tab-pane active container-xxl" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
+                <div class="card border-0 mb-3">
+                    <div class="card-header bg-dark rounded-0 px-2">Totals</div>
+                    <div class="card-body p-0 collapse show" style="transition: none;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
+                                <tbody>
+                                    <tr>
+                                        <td class="align-middle" style="width: 40%;">Dungeon Clears</td>
+                                        <td class="text-center align-middle" data-bind="text: Companion.totalDungeonClears().toLocaleString()"></td>
+                                        <td class="align-middle" style="width: 40%; border-left-width: 3px;">DT For All Dungeon Achievements</td>
+                                        <td class="text-center align-middle" data-bind="text: Companion.totalDungeonCost500Clears().toLocaleString()"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-middle" style="width: 40%;">Dungeon Tokens Spent</td>
+                                        <td class="text-center align-middle" data-bind="text: Companion.totalDungeonTokensSpent().toLocaleString()"></td>
+                                        <td class="align-middle" style="width: 40%; border-left-width: 3px;">Remaining DT For All Dungeon Achievements</td>
+                                        <td class="text-center align-middle" data-bind="text: Companion.remainingDungeonCost500Clears().toLocaleString()"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-middle" style="width: 40%;">Most Cleared Dungeons</td>
+                                        <td class="text-center align-middle" colspan="3">
+                                            <table class="table table-sm">
+                                                <tbody>
+                                                    <tr data-bind="foreach: Companion.getMostClearedDungeons">
+                                                        <td class="border-bottom-0 p-0 px-1" data-bind="text: $data.name"></td>
+                                                    </tr>
+                                                    <tr data-bind="foreach: Companion.getMostClearedDungeons">
+                                                        <td class="small border-bottom-0 p-0 pt-1 px-1" data-bind="text: $data.clears.toLocaleString()"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end small"><span class="text-danger">⚹</span> Incomplete dungeon (fewer than 500 clears)</div>
+                <!-- ko foreach: Companion.getDungeonData() -->
+                <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
+                    <div class="card-header bg-dark rounded-0 px-2">
+                        <span data-bind="text: $data.name ?? GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
+                        <div class="position-absolute" style="top: 4px; right: 0;">
+                            <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
+                                style="text-decoration: none; font-size: 0.9rem;"
+                                data-bind="attr: { 'data-bs-target': `#dungeon-clears-collapse-${$index()}` }">[ Collapse ]</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0 collapse show" style="transition: none;" data-bind="attr: { id: `dungeon-clears-collapse-${$index()}` }">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th class="text-center w-auto">Total Clears</th>
+                                        <th class="text-center w-auto">Cost</th>
+                                        <th class="text-center w-auto">500 Clears Cost</th>
+                                        <th class="text-center w-auto">Remaining Cost</th>
+                                        <th class="text-center w-auto">Total Spent</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- ko foreach: $data.dungeons -->
+                                    <tr class="dungeon-clears-row">
+                                        <td class="align-middle">
+                                            <div class="position-relative">
+                                                <span data-bind="text: $data.name"></span>
+                                                <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
+                                                    data-bind="visible: $data.clears < 500">⚹</div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center align-middle w-auto" data-bind="text: $data.clears.toLocaleString()"></td>
+                                        <td class="text-center align-middle w-auto" data-bind="text: $data.cost.toLocaleString()"></td>
+                                        <td class="text-center align-middle w-auto" data-bind="text: ($data.cost * 500).toLocaleString()"></td>
+                                        <td class="text-center align-middle w-auto" data-bind="text: $data.remaining.toLocaleString()"></td>
+                                        <td class="text-center align-middle w-auto" data-bind="text: ($data.clears * $data.cost).toLocaleString()"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                    <tr class="table-dark">
+                                        <td colspan="3"></td>
+                                        <td class="text-center" data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.cost, 0) * 500).toLocaleString()"></td>
+                                        <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.remaining, 0).toLocaleString()"></td>
+                                        <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.clears * dungeon.cost, 0).toLocaleString()"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+
+            <div class="tab-pane container-xxl" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
+                <div class="text-end small"><span class="text-danger">⚹</span> Incomplete gym (fewer than 1,000 clears)</div>
+                <!-- ko foreach: Companion.getGymData() -->
+                <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
+                    <div class="card-header bg-dark rounded-0 px-2">
+                        <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
+                        <div class="position-absolute" style="top: 4px; right: 0;">
+                            <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
+                                style="text-decoration: none; font-size: 0.9rem;"
+                                data-bind="attr: { 'data-bs-target': `#gyms-clears-collapse-${$index()}` }">[ Collapse ]</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-bordered table-striped table-hover table-sm mb-0">
+                            <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `gyms-clears-collapse-${$index()}` }">
+                                <!-- ko foreach: Util.arrayToWhatever($data.gyms) -->
+                                <tr class="dungeon-clears-row" data-bind="foreach: $data">
+                                    <td class="align-middle">
+                                        <div class="position-relative">
+                                            <span data-bind="text: GymList[$data?.name]?.displayName || $data?.name"></span>
+                                            <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
+                                                data-bind="visible: $data?.clears < 1000">⚹</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle" data-bind="text: $data?.clears.toLocaleString()"></td>
+                                </tr>
+                                <!-- /ko -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+
+            <div class="tab-pane container-xxl" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
+                <div class="text-end small"><span class="text-danger">⚹</span> Incomplete route (fewer than 10,000 defeats)</div>
+                <!-- ko foreach: Companion.getRouteData() -->
+                <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
+                    <div class="card-header bg-dark rounded-0 px-2">
+                        <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
+                        <div class="position-absolute" style="top: 4px; right: 0;">
+                            <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
+                                style="text-decoration: none; font-size: 0.9rem;"
+                                data-bind="attr: { 'data-bs-target': `#route-defeats-collapse-${$index()}` }">[ Collapse ]</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-bordered table-striped table-hover table-sm mb-0">
+                            <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `route-defeats-collapse-${$index()}` }">
+                                <!-- ko foreach: Util.arrayToWhatever($data.routes) -->
+                                <tr class="dungeon-clears-row" data-bind="foreach: $data">
+                                    <td class="align-middle">
+                                        <div class="position-relative">
+                                            <span data-bind="text: $data?.routeName"></span>
+                                            <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
+                                                data-bind="visible: $data?.defeats < 10000">⚹</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle" data-bind="text: $data?.defeats.toLocaleString()"></td>
+                                </tr>
+                                <!-- /ko -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+
+            <div class="tab-pane container-xxl" id="enigma-berry" role="tabpanel" aria-labelledby="enigma-berry-tab">
+                <div class="container text-center">
+                    <div class="row" data-bind="foreach: Enigma.getBerries">
+                        <div class="col-6 col-sm-3 mb-5">
+                            <div class="h4 text-decoration-underline" data-bind="text: $data.direction"></div>
+                            <!-- ko if: $data.berry -->
+                            <img width="64px" data-bind="attr: { src: `assets/images/items/berry/${$data.berry}.png` }"/>
+                            <!-- /ko -->
+                            <div data-bind="text: $data.berry || '???'"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ko if: !Enigma.revealHints() && Enigma.getBerries().every(b => b.berry) -->
+                <div class="text-center text-success mt-5">Impressive. You got all the hints on your own 👏. You're pretty neat.</div>
+                <!-- /ko -->
+                <!-- ko if: Enigma.getBerries().some(b => !b.berry) -->
+                <div class="text-center mt-5">
+                    <button type="button" class="btn btn-primary" data-bind="text: Enigma.buttonText, click: () => Enigma.revealHintsButtonClick()"></button>
+                </div>
+                <!-- /ko -->
+                <!-- ko if: Enigma.revealHints -->
+                <div class="text-center text-muted mt-5">Impatient (or unlucky) little shit, ain't ye?</div>
+                <!-- /ko -->
+            </div>
+
+            <div class="tab-pane h-100 container-xxl" id="type-damage" role="tabpanel" aria-labelledby="type-damage-tab">
+                <div class="d-flex flex-column h-100">
+                    <div class="control-row">
+                        <div class="align-items-center">
+                            <button type="button" class="btn btn-primary me-3"
+                                data-bind="click: () => Companion.calculateTypeDamageDistribution()">
+                                Calculate
+                            </button>
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageXAttack" data-bind="checked: Companion.includeXAttack">
+                                <label class="form-check-label" for="typeDamageXAttack">xAttack</label>
+                            </div>
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageYellowFlute" data-bind="checked: Companion.includeYellowFlute">
+                                <label class="form-check-label" for="typeDamageYellowFlute">Yellow Flute</label>
+                            </div>
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageGems" data-bind="checked: Companion.includeGems">
+                                <label class="form-check-label" for="typeDamageGems">Gems</label>
+                            </div>
+                        </div>
+                        <p class="mt-1 small">First calculate will be slower. You must re-calculate after adjusting the above settings.</p>
+                    </div>
+                    <div class="table-responsive mt-2" data-bind="if: Companion.typeDamageDistribution">
+                        <!-- ko let: { types: Object.keys(Companion.typeDamageDistribution().distribution) } -->
+                        <table class="table table-column-row-hover table-black-bg table-sticky-header table-sm mb-0" style="font-size: 0.9rem;">
+                            <thead>
+                                <tr class="table-dark text-center">
+                                    <th style="position: sticky; left: 0; z-index: 99;">
+                                        <ko style="cursor: pointer;" title="Full Width / Normal Width" data-bind="click: (_, e) => {
+                                            $(e.target).closest('.tab-pane').toggleClass('container-xxl');
+                                            $(e.target).closest('.tab-pane').find('.control-row').toggleClass('container-xxl');
+                                        }">↔</ko>
+                                    </th>
+                                    <!-- ko foreach: types -->
+                                    <th class="text-center small" data-bind="text: $data"></th>
+                                    <!-- /ko -->
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: Object.values(Companion.typeDamageDistribution().distribution)">
+                                <tr class="align-middle text-center">
+                                    <th class="table-dark small px-2" style="position: sticky; left: 0; z-index: 99;" data-bind="text: types[$index()]"></th>
+                                    <!-- ko foreach: Object.values($data) -->
+                                    <td class="font-monospace small px-2" data-bind="text: $data"></td>
+                                    <!-- /ko -->
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- /ko -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

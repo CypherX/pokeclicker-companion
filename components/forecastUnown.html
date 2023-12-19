@@ -1,0 +1,74 @@
+<div class="tab-pane show active" id="forecastUnown">
+    <h4 class="mb-2">Current & Upcoming</h4>
+    <div class="table-responsive mb-4">
+        <table class="table table-bordered table-hover table-sm small" data-bind="with: Forecast.unownForecast().slice(0, 8)">
+            <thead>
+                <tr>
+                    <th class="table-dark"></th>
+                    <!-- ko foreach: $data -->
+                    <th class="table-dark text-center" data-bind="text: Util.formatDate($data.startDate)"></th>
+                    <!-- /ko -->
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: Companion.data.unownDungeonList">
+                <tr>
+                    <td class="table-dark" data-bind="text: $data"></td>
+                    <!-- ko foreach: $parent -->
+                    <td class="text-center align-middle" data-bind="text: $data.unowns[$parentContext.$index()]"></td>
+                    <!-- /ko -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="container-xxl g-0">
+        <div class="row">
+            <div class="col-12 col-md-6 mb-3">
+                <h5 class="mb-2">Next Appearence Anywhere</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover table-sm small">
+                        <thead>
+                            <tr class="table-dark">
+                                <th class="text-center">Unown</th>
+                                <th class="text-center">When</th>
+                                <th class="text-center">Where</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: Companion.data.unownList">
+                            <tr>
+                                <td class="text-center" data-bind="text: $data"></td>
+                                <!-- ko with: Forecast.unownForecast().find(f => f.unowns.some(u => u == $data)) -->
+                                <td class="text-center" data-bind="text: Util.formatDate($data.startDate)"></td>
+                                <td class="text-center" data-bind="text: Companion.data.unownDungeonList[$data.unowns.findIndex(u => u == $parent)]"></td>
+                                <!-- /ko -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 mb-3">
+                <h5 class="mb-2">Next Appearence In Each Dungeon</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover table-sm small">
+                        <thead>
+                            <tr class="table-dark">
+                                <th class="text-center">Unown</th>
+                                <!-- ko foreach: Companion.data.unownDungeonList -->
+                                <th class="text-center" data-bind="text: $data"></th>
+                                <!-- /ko -->
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: Companion.data.unownList">
+                            <tr>
+                                <td class="text-center" data-bind="text: $data"></td>
+                                <!-- ko foreach: Companion.data.unownDungeonList -->
+                                <td class="text-center" data-bind="
+                                    text: Util.formatDate(Forecast.unownForecast().find(f => f.unowns[$index()] == $parent)?.startDate) || '-'"></td>
+                                <!-- /ko -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

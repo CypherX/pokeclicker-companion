@@ -1,0 +1,54 @@
+<div class="tab-pane" id="forecastWeather">
+    <h4 class="mb-2">Current & Upcoming</h4>
+    <div class="table-responsive mb-3">
+        <table class="table table-bordered table-sm small">
+            <thead>
+                <tr class="table-dark">
+                    <th class="text-center">Date</th>
+                    <th class="text-center">Time</th>
+                    <!-- ko foreach: Companion.data.validRegionNames -->
+                    <th class="text-center" data-bind="text: $data"></th>
+                    <!-- /ko -->
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: Object.values(Forecast.weatherForecast.slice(0, 18).reduce((map, wf) => {
+                map[wf.startDate.getDate()] = map[wf.startDate.getDate()] || [];
+                map[wf.startDate.getDate()].push(wf);
+                return map;
+            }, {}))">
+                <!-- ko foreach: $data -->
+                <tr>
+                    <!-- ko if: $index() == 0 -->
+                    <td class="text-center align-middle" data-bind="text: Util.formatDate($data.startDate), attr: { rowspan: $parent.length }"></td>
+                    <!-- /ko -->
+                    <td class="text-center text-nowrap" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, Weather.period))}`"></td>
+                    <!-- ko foreach: Companion.data.validRegions -->
+                    <td class="text-center text-dark" data-bind="text: WeatherType[$parent.regionalWeather[$data]], style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
+                    <!-- /ko -->
+                </tr>
+                <!-- /ko -->
+            </tbody>
+        </table>
+    </div>
+    <h4 class="mb-2">Next Occurrence</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-sm small">
+            <thead>
+                <tr class="table-dark">
+                    <th></th>
+                    <!-- ko foreach: Companion.data.validRegionNames -->
+                    <th class="text-center" data-bind="text: $data"></th>
+                    <!-- /ko -->
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: GameHelper.enumNumbers(WeatherType)">
+                <tr>
+                    <td class="align-middle text-dark" data-bind="text: WeatherType[$data], style: { 'background-color': Weather.weatherConditions[$data].color }"></td>
+                    <!-- ko foreach: Companion.data.validRegions -->
+                    <td class="text-center align-middle" data-bind="text: Util.formatDateTime(Forecast.getNextWeatherDate($data, $parent)) || '-'"></td>
+                    <!-- /ko -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

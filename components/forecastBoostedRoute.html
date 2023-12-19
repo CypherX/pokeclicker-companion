@@ -1,0 +1,27 @@
+<div class="tab-pane" id="forecastBoostedRoute">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover table-sm small">
+            <thead>
+                <tr>
+                    <th rowspan="2"></th>
+                    <!-- ko foreach: Forecast.boostedRoutes -->
+                    <th class="text-center table-dark" data-bind="text: Util.formatDate($data.startDate)"></th>
+                    <!-- /ko -->
+                </tr>
+                <tr class="table-dark small">
+                    <!-- ko foreach: Forecast.boostedRoutes -->
+                    <th class="text-center" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, RoamingPokemonList.period))}`"></th>
+                    <!-- /ko -->
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: Companion.data.roamerGroups">
+                <tr>
+                    <td class="align-middle" data-bind="text: $data.name"></td>
+                    <!-- ko foreach: Forecast.boostedRoutes -->
+                    <td class="text-center align-middle" data-bind="text: $data.regionalRoutes[$parentContext.$index()]"></td>
+                    <!-- /ko -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

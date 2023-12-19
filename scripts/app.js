@@ -200,7 +200,7 @@ const isPokemonCaught = (pokemonName) => {
 const getCaughtPokeballImage = (pokemonName) => {
     const partyPokemon = partyList()[PokemonHelper.getPokemonByName(pokemonName).id];
     if (partyPokemon) {
-        return `./pokeclicker/docs/assets/images/pokeball/Pokeball${partyPokemon.shiny ? '-shiny' : ''}.svg`;
+        return `assets/images/pokeball/Pokeball${partyPokemon.shiny ? '-shiny' : ''}.svg`;
     } else {
         return '';
     }
@@ -217,7 +217,7 @@ const getPokerusImage = (pokemonName) => {
         return '//:0';
     }
 
-    return `./pokeclicker/docs/assets/images/breeding/pokerus/${GameConstants.Pokerus[partyPokemon.pokerus]}.png`;
+    return `assets/images/breeding/pokerus/${GameConstants.Pokerus[partyPokemon.pokerus]}.png`;
 };
 
 const getShadowStatusImage = (shadowStatus) => {
@@ -225,7 +225,7 @@ const getShadowStatusImage = (shadowStatus) => {
         return '//:0';
     }
 
-    return `./pokeclicker/docs/assets/images/status/${shadowStatus == GameConstants.ShadowStatus.Shadow ? 'shadow' : 'purified'}.svg`;
+    return `assets/images/status/${shadowStatus == GameConstants.ShadowStatus.Shadow ? 'shadow' : 'purified'}.svg`;
 };
 
 const exportPartyPokemon = () => {
@@ -495,7 +495,7 @@ const calculateTypeDamageDistribution = () => {
 };
 
 const tabVisited = ko.observable({});
-const activeTab = ko.observable('#main-tab-save');
+const activeTab = ko.observable('#mySaveContent');
 
 $(document).ready(() => {
     const container = document.getElementById('container');
