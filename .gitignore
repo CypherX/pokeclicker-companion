@@ -5,4 +5,3 @@ node_modules/
 *.pem
 fiveserver.config.js
 build/
-docs/
