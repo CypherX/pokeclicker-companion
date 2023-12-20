@@ -49,7 +49,7 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#toolsContent" type="button" role="tab">
+                    <button class="nav-link" id="tab-tools" data-bs-toggle="pill" data-bs-target="#toolsContent" type="button" role="tab">
                         Tools
                     </button>
                 </li>
@@ -158,7 +158,7 @@
 <!-- import end -->
 
 <!-- import "toolsNavigation.html" -->
-<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#main-tab-tools'">
+<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#toolsContent'">
     <div class="container-fluid justify-content-xl-center g-0">
         <ul class="navbar-nav" role="tablist">
             <li class="nav-item mx-1">
