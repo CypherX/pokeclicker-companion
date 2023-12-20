@@ -670,9 +670,9 @@
                         <tbody data-bind="foreach: Companion.data.unownList">
                             <tr>
                                 <td class="text-center" data-bind="text: $data"></td>
-                                <!-- ko with: Forecast.unownForecast().find(f => f.unowns.some(u => u == $data)) -->
-                                <td class="text-center" data-bind="text: Util.formatDate($data.startDate)"></td>
-                                <td class="text-center" data-bind="text: Companion.data.unownDungeonList[$data.unowns.findIndex(u => u == $parent)]"></td>
+                                <!-- ko let: { day: Forecast.unownForecast().find(f => f.unowns.some(u => u == $data)) } -->
+                                <td class="text-center" data-bind="text: Util.formatDate(day?.startDate) || '-'"></td>
+                                <td class="text-center" data-bind="text: Companion.data.unownDungeonList[day?.unowns.findIndex(u => u == $data)] || '-'"></td>
                                 <!-- /ko -->
                             </tr>
                         </tbody>
