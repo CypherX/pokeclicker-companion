@@ -1,0 +1,46 @@
+a { text-decoration: none; }
+.card-header .nav-pills .nav-item .nav-link { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.card-header .nav-pills .nav-item:not(:last-child) .nav-link { border-top-right-radius: 0; }
+.card-header .nav-pills .nav-item:not(:first-child) .nav-link { border-top-left-radius: 0; }
+.table-group-divider { border-top-color: #444; }
+.dungeon-clears-row td:nth-child(odd) { width: 42%; }
+.dungeon-clears-row td:nth-child(even) { width: 8%; }
+th.sortable { cursor: pointer; }
+.search-hidden, .filter-hidden { display: none; }
+.table-responsive table { margin-bottom: 0; }
+
+.navbar-nav li.nav-item {
+    margin-left: .5rem;
+    margin-right: .5rem;
+}
+
+.table-sticky-header {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.table-sticky-header thead {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+.table-sticky-header th {
+    border-top: 1px solid #444;
+    border-bottom: 1px solid #444;
+    border-right: 1px solid #444;
+}
+.table-sticky-header td {
+    border-bottom: 1px solid #444;
+    border-right: 1px solid #444;
+}
+.table-sticky-header th:first-child,
+.table-sticky-header td:first-child {
+    border-left: 1px solid #444;
+}
+
+.table-black-bg tbody td {
+    background-color: #000;
+}
+
+td.bg-vitamin-0 { background: rgba(52, 152, 219, 0.1); }
+td.bg-vitamin-1 { background: rgba(231, 76, 60, 0.1); }
+td.bg-vitamin-2 { background: rgba(0, 188, 140, 0.1); }

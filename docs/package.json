@@ -1,0 +1,43 @@
+{
+  "name": "pokeclicker-companion",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "gulp",
+    "build": "browserify scripts/main.js -o bundle.js",
+    "watch": "watchify scripts/main.js -o bundle.js",
+    "update": "git submodule update --init && git submodule update --remote && node update.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "website": "gulp website",
+    "publish": "node publish.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CypherX/pokeclicker-companion.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CypherX/pokeclicker-companion/issues"
+  },
+  "homepage": "https://github.com/CypherX/pokeclicker-companion#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-register": "^6.26.0",
+    "browser-sync": "^2.29.3",
+    "browserify": "^17.0.0",
+    "del": "^5.1.0",
+    "five-server": "^0.1.9",
+    "gh-pages": "^6.1.0",
+    "gulp": "^4.0.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-html-imports": "^1.0.6",
+    "vinyl-source-stream": "^2.0.0",
+    "watchify": "^4.0.0"
+  },
+  "dependencies": {
+    "lzutf8": "^0.6.3"
+  }
+}
