@@ -426,6 +426,8 @@ const typeDamageDistribution = ko.observable();
 const includeXAttack = ko.observable(true);
 const includeYellowFlute = ko.observable(true);
 const includeGems = ko.observable(true);
+const typeDamageWeather = ko.observable(WeatherType.Clear);
+const typeDamageRegion = ko.observable(GameConstants.Region.none);
 
 const calculateTypeDamageDistribution = () => {
     // load shit
@@ -473,6 +475,8 @@ const calculateTypeDamageDistribution = () => {
         FluteEffectRunner.toggleEffect('Yellow_Flute');
     }
 
+    const ignoreRegionMultiplier = typeDamageRegion() == GameConstants.Region.none;
+
     const result = {};
     let max = 0;
     let min = Number.MAX_SAFE_INTEGER;
@@ -480,7 +484,7 @@ const calculateTypeDamageDistribution = () => {
     for (let type1 = 0; type1 <= 17; ++type1) {
         result[PokemonType[type1]] = {};
         for (let type2 = 0; type2 <= 17; ++type2) {
-            let dmg = App.game.party.calculatePokemonAttack(type1, type2, true, GameConstants.Region.none, true, false, WeatherType.Clear, true, true);
+            let dmg = App.game.party.calculatePokemonAttack(type1, type2, ignoreRegionMultiplier, typeDamageRegion(), true, false, typeDamageWeather(), true, true);
             result[PokemonType[type1]][PokemonType[type2]] = dmg.toLocaleString();
             max = Math.max(max, dmg);
             min = Math.min(min, dmg);
@@ -631,6 +635,8 @@ module.exports = {
     includeXAttack,
     includeYellowFlute,
     includeGems,
+    typeDamageWeather,
+    typeDamageRegion,
 
     tabVisited,
     activeTab,
