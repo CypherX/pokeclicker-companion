@@ -537,27 +537,52 @@
             <div class="tab-pane h-100 container-xxl" id="type-damage" role="tabpanel" aria-labelledby="type-damage-tab">
                 <div class="d-flex flex-column h-100">
                     <div class="control-row">
-                        <div class="align-items-center">
-                            <button type="button" class="btn btn-primary me-3"
-                                data-bind="click: () => Companion.calculateTypeDamageDistribution()">
-                                Calculate
-                            </button>
-                            <div class="form-check form-check-inline form-switch me-3">
-                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageXAttack" data-bind="checked: Companion.includeXAttack">
-                                <label class="form-check-label" for="typeDamageXAttack">xAttack</label>
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-primary me-3"
+                                    data-bind="click: () => Companion.calculateTypeDamageDistribution()">
+                                    Calculate
+                                </button>
                             </div>
-                            <div class="form-check form-check-inline form-switch me-3">
-                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageYellowFlute" data-bind="checked: Companion.includeYellowFlute">
-                                <label class="form-check-label" for="typeDamageYellowFlute">Yellow Flute</label>
+                            <div class="col-auto">
+                                <div class="form-check form-check-inline form-switch me-3">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="typeDamageXAttack" data-bind="checked: Companion.includeXAttack">
+                                    <label class="form-check-label" for="typeDamageXAttack">xAttack</label>
+                                </div>
                             </div>
-                            <div class="form-check form-check-inline form-switch me-3">
-                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageGems" data-bind="checked: Companion.includeGems">
-                                <label class="form-check-label" for="typeDamageGems">Gems</label>
+                            <div class="col-auto">
+                                <div class="form-check form-check-inline form-switch me-3">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="typeDamageYellowFlute" data-bind="checked: Companion.includeYellowFlute">
+                                    <label class="form-check-label" for="typeDamageYellowFlute">Yellow Flute</label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-check form-check-inline form-switch me-3">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="typeDamageGems" data-bind="checked: Companion.includeGems">
+                                    <label class="form-check-label" for="typeDamageGems">Gems</label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group">
+                                    <div class="input-group-text">Weather</div>
+                                    <select class="form-select form-select-sm"
+                                        data-bind="options: GameHelper.enumSelectOption(WeatherType), optionsText: 'name', optionsValue: 'value', value: Companion.typeDamageWeather">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group">
+                                    <div class="input-group-text">Region</div>
+                                    <select class="form-select form-select-sm"
+                                        data-bind="options: GameHelper.enumSelectOption(GameConstants.Region).filter(o => o.value <= GameConstants.MAX_AVAILABLE_REGION),
+                                            optionsText: (item) => GameConstants.camelCaseToString(item.name), optionsValue: 'value', value: Companion.typeDamageRegion">
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                        <p class="mt-1 small">First calculate will be slower. You must re-calculate after adjusting the above settings.</p>
+                        <p class="mt-2 small">First calculate will be slower. You must re-calculate after adjusting the above settings.</p>
                     </div>
-                    <div class="table-responsive mt-2" data-bind="if: Companion.typeDamageDistribution">
+                    <div class="table-responsive mt-1" data-bind="if: Companion.typeDamageDistribution">
                         <!-- ko let: { types: Object.keys(Companion.typeDamageDistribution().distribution) } -->
                         <table class="table table-column-row-hover table-black-bg table-sticky-header table-sm mb-0" style="font-size: 0.9rem;">
                             <thead>
