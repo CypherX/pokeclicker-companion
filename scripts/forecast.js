@@ -4,8 +4,7 @@ const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
 const dailyDeals = ko.observableArray();
 
-const generateForecasts = () => {
-    const date = new Date();
+const generateForecasts = (date = new Date()) => {
     const currentHour = date.getHours();
     const unownData = [];
     const weatherData = [];
@@ -13,7 +12,7 @@ const generateForecasts = () => {
     const berryMasterData = [];
     const dailyDealData = [];
 
-    for (let day = 0; day < 120; day++) {
+    for (let day = 0; day < 365; day++) {
         const saveDate = new Date(date);
 
         // Unown
