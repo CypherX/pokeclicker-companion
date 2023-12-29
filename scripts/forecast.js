@@ -81,6 +81,17 @@ const generateForecasts = (date = new Date()) => {
     dailyDeals(dailyDealData);
 };
 
+const getUpcomingWeather = () => {
+    const dayForecast = weatherForecast.slice(0, 18).reduce((map, wf) => {
+        const date = Util.formatDate(wf.startDate);
+        map[date] = map[date] || [];
+        map[date].push(wf);
+        return map;
+    }, {});
+
+    return Object.entries(dayForecast).map(([date, forecast]) => ({ date, forecast }));
+};
+
 const getNextWeatherDate = (region, weather) => {
     return weatherForecast().find(wf => wf.regionalWeather[region] === weather)?.startDate;
 };
@@ -193,6 +204,7 @@ module.exports = {
     selectedDailyDealItemNextTrades,
 
     generateForecasts,
+    getUpcomingWeather,
     getNextWeatherDate,
     getBerryMasterDeals,
     getBerryMasterNextItemDate,
