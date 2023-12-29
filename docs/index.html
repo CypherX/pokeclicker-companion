@@ -754,19 +754,15 @@
                     <!-- /ko -->
                 </tr>
             </thead>
-            <tbody data-bind="foreach: Object.values(Forecast.weatherForecast.slice(0, 18).reduce((map, wf) => {
-                map[wf.startDate.getDate()] = map[wf.startDate.getDate()] || [];
-                map[wf.startDate.getDate()].push(wf);
-                return map;
-            }, {}))">
-                <!-- ko foreach: $data -->
-                <tr>
+            <tbody class="text-center" data-bind="foreach: Forecast.getUpcomingWeather()">
+                <!-- ko foreach: $data.forecast -->
+                <tr class="align-middle">
                     <!-- ko if: $index() == 0 -->
-                    <td class="text-center align-middle" data-bind="text: Util.formatDate($data.startDate), attr: { rowspan: $parent.length }"></td>
+                    <td data-bind="text: $parent.date, attr: { rowspan: $parent.forecast.length }"></td>
                     <!-- /ko -->
-                    <td class="text-center text-nowrap" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, Weather.period))}`"></td>
+                    <td class="text-nowrap" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, Weather.period))}`"></td>
                     <!-- ko foreach: Companion.data.validRegions -->
-                    <td class="text-center text-dark" data-bind="text: WeatherType[$parent.regionalWeather[$data]], style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
+                    <td class="text-dark" data-bind="text: WeatherType[$parent.regionalWeather[$data]], style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
                     <!-- /ko -->
                 </tr>
                 <!-- /ko -->
