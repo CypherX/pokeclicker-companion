@@ -24,6 +24,27 @@ const fixList = [
             return true;
         }
     },
+    {
+        name: 'A New World - Distortion World',
+        description: 'The A New World quest line is softlocked because Distortion World is unavailable.',
+        requireCurrentVersion: true,
+        fixFunction: (playerData, saveData, settingsData) => {
+            const dungeonIndex = GameConstants.getDungeonIndex('Distortion World');
+            if (!saveData.statistics.dungeonsCleared[dungeonIndex]) {
+                saveFixError('Distortion World has not been previously cleared, nothing to fix.');
+                return false;
+            }
+
+            const questState = saveData.quests.questLines.find(ql => ql.name === 'A New World')?.state ?? 0;
+            if (questState !== QuestLineState.started) {
+                saveFixError('Quest line has already been completed or is not started.');
+                return false;
+            }
+
+            saveData.statistics.dungeonsCleared[dungeonIndex] = 0;
+            return true;
+        }
+    },
 ];
 
 const canRunFix = ko.pureComputed(() => {
