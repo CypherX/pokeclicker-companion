@@ -71,6 +71,39 @@ const decompressString = (input, inputEncoding = 'Base64') => {
     return lzutf8.decompress(input, { inputEncoding });
 };
 
+const notify = ({
+    message,
+    type = 'primary',
+    timeout = 5000,
+    title = '',
+}) => {
+    const toastId = Rand.string(7);
+    const toastHtml =
+    `<div id="${toastId}" class="toast bg-${type}" data-bs-autohide="false">
+        ${title ? `<div class="toast-header">
+            <strong class="me-auto">${title}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>` : ''}
+        <div class="toast-body d-flex">
+            <span class="flex-grow-1">${message.replace(/\n/g, '<br/>')}</span>
+            ${title ? '' : '<button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>'}
+        </div>
+    </div>`;
+
+    $('#toaster').prepend(toastHtml);
+    $(`#${toastId}`)?.toast('show');
+
+    $(`#${toastId}`).on('shown.bs.toast', () => {
+        setTimeout(() => {
+            $(`#${toastId}`).toast('hide');
+        }, timeout);
+    });
+
+    $(`#${toastId}`).on('hidden.bs.toast', () => {
+        document.getElementById(toastId).remove();
+    });
+};
+
 module.exports = {
     formatDate,
     formatDateTime,
@@ -86,4 +119,6 @@ module.exports = {
 
     compressString,
     decompressString,
+
+    notify,
 };
