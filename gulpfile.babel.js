@@ -4,6 +4,7 @@ const browserSync = require('browser-sync');
 const htmlImport = require('gulp-html-imports');
 const del = require('del');
 const source = require('vinyl-source-stream');
+const fs = require('fs');
 
 const srcs = {
     buildArtefacts: 'build/**/*',
@@ -104,8 +105,12 @@ gulp.task('copyWebsite', () => {
     return gulp.src(srcs.buildArtefacts).pipe(gulp.dest(dests.githubPages));
 });
 
+gulp.task('cname', (done) => {
+    fs.writeFile(`${dests.githubPages}CNAME`, 'companion.pokeclicker.com', done);
+});
+
 gulp.task('website', done => {
-    gulp.series('clean', 'build', 'cleanWebsite', 'copyWebsite')(done);
+    gulp.series('clean', 'build', 'cleanWebsite', 'copyWebsite', 'cname')(done);
 });
 
 gulp.task('default', done => {
