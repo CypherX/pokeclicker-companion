@@ -1,10 +1,16 @@
 <div class="tab-pane h-100 container-xxl show active" id="mySaveMissingPokemon">
-    <div class="d-flex flex-column" data-bind="with: Companion.getMissingPokemon">
-        <div data-bind="visible: !$data.length">
-            <p class="text-warning text-center h4 mt-5">Congratulations!<br/>You've caught 'em all!</p>
+    <!-- ko with: Companion.getMissingPokemon -->
+    <div data-bind="if: !$data.length">
+        <p class="text-warning text-center h4 mt-5">
+            Congratulations!<br/>
+            You've caught all <span data-bind="text: Companion.data.obtainablePokemonList.length.toLocaleString()">0</span> Pokémon!
+        </p>
+    </div>
+    <div class="d-flex flex-column h-100 col-12 col-lg-8 mx-auto" data-bind="if: $data.length">
+        <div class="mb-1">
+            <span data-bind="text: `Caught Pokémon: ${Companion.save.saveData().save.party.caughtPokemon.length.toLocaleString()} / ${Companion.data.obtainablePokemonList.length.toLocaleString()}`"></span>
         </div>
-        <div class="col-12 col-lg-8 mx-auto" data-bind="visible: $data.length">
-            <!-- ko foreach: $data -->
+        <div class="flex-grow-1" style="overflow: auto;" data-bind="foreach: $data">
             <div class="card mb-3">
                 <div class="card-header bg-dark rounded-0 sticky-top"
                     data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`"></div>
@@ -31,7 +37,7 @@
                     </table>
                 </div>
             </div>
-            <!-- /ko -->
         </div>
     </div>
+    <!-- /ko -->
 </div>
