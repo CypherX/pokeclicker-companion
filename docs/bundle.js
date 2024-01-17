@@ -11603,6 +11603,15 @@ const getTotalMissingPokemonCount = ko.pureComputed(() => {
     }, 0);
 });
 
+const caughtPokemonCount = ko.pureComputed(() => {
+    if (!Companion.save.isLoaded()) {
+        return 0;
+    }
+
+    return Companion.save.saveData().save.party.caughtPokemon
+        .filter(p => Companion.data.obtainablePokemonMap[p.id]).length;
+});
+
 const hideFromPokemonStatsTable = (partyPokemon) => {
     return ko.pureComputed(() => {
         const searchVal = pokemonStatTableSearch();
@@ -12097,6 +12106,7 @@ module.exports = {
 
     partyList,
     getSortedPartyList,
+    caughtPokemonCount,
 
     hideFromPokemonStatsTable,
     getPokemonStatsTableCount,
