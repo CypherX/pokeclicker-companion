@@ -11617,7 +11617,7 @@ const hideFromPokemonStatsTable = (partyPokemon) => {
         const searchVal = pokemonStatTableSearch();
         if (searchVal) {
             if (!partyPokemon.id.toString().includes(searchVal)
-                && !partyPokemon.name.toLowerCase().includes(searchVal)) {
+                && !partyPokemon.name.toLowerCase().includes(searchVal.toLowerCase())) {
                 return true;
             }
         }
