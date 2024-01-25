@@ -88,10 +88,20 @@ const pokemonRegionOverride = {
     ...Object.fromEntries(
         pokemonList.filter(p => Math.floor(p.id) == 25 && p.id > 25).map(p => [p.name, GameConstants.Region.alola])
     ),
-    'Pikachu (Clone)': GameConstants.Region.kanto,
-    'Pinkan Pikachu': GameConstants.Region.kalos,
-    'Detective Pikachu': GameConstants.Region.kanto,
+    'Detective Pikachu': GameConstants.Region.kalos,
+    'Detective Raichu': GameConstants.Region.kalos,
     'Pikachu (World Cap)': GameConstants.Region.galar,
+
+    // Valencian and Pinkan
+    ...Object.fromEntries(
+        pokemonList.filter(p => p.name.startsWith('Pinkan ') || p.name.startsWith('Valencian '))
+            .map(p => [p.name, GameConstants.Region.hoenn])
+    ),
+    'Pink Butterfree': GameConstants.Region.hoenn,
+    "Ash's Butterfree": GameConstants.Region.hoenn,
+    'Pinkan Pikachu': GameConstants.Region.kalos,
+    'Crystal Onix': GameConstants.Region.hoenn,
+    'Crystal Steelix': GameConstants.Region.hoenn,
 
     // Mega and Primal
     ...Object.fromEntries(
@@ -105,6 +115,9 @@ const pokemonRegionOverride = {
             .map(p => [p.name, GameConstants.Region.galar])
     ),
 
+    'Unown (E)': GameConstants.Region.sinnoh,
+    'Unown (!)': GameConstants.Region.hoenn,
+    'Unown (?)': GameConstants.Region.hoenn,
     'XD001': GameConstants.Region.hoenn,
     'Hoppip (Chimecho)': GameConstants.Region.hoenn,
     'Meltan': GameConstants.Region.alola,
