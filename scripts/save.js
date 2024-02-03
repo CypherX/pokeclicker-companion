@@ -39,10 +39,18 @@ const loadSaveData = (saveString, fileName) => {
         prevLoadedSaves(arr);
     }
 
+    if (!saveFile.save.party.caughtPokemon?.length) {
+        Util.notify({
+            message: 'Why don\'t you come back after catching some pokémon? Not a very good trainer, this one.',
+            type: 'danger',
+            timeout: 30000
+        });
+    }
+
     const monoType = getMonoType(saveFile.save.party.caughtPokemon);
     if (monoType) {
         Util.notify({
-            message: `Haha, look, they only have ${monoType.map(t => PokemonType[t]).join('/')} pokemon!`,
+            message: `Haha, look, they only have ${monoType.map(t => PokemonType[t]).join('/')} pokémon!`,
             type: 'danger',
             timeout: 30000
         });
@@ -77,6 +85,10 @@ const loadSaveData = (saveString, fileName) => {
 };
 
 const getMonoType = (party) => {
+    if (!party?.length) {
+        return undefined;
+    }
+
     let types = pokemonMap[party[0].id].type;
     for (let i = 1; i < party.length; i++) {
         const ptypes = pokemonMap[party[i].id].type;
