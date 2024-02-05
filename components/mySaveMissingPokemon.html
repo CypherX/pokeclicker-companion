@@ -1,17 +1,19 @@
 <div class="tab-pane h-100 container-xxl show active" id="mySaveMissingPokemon" data-bind="with: Companion.getMissingPokemon" style="overflow: auto;">
     <!-- ko ifnot: $data.length -->
-    <p class="text-warning text-center h4 mt-5">
-        Congratulations!<br/>
-        You've caught all <span data-bind="text: Companion.data.obtainablePokemonList.length.toLocaleString()">0</span> Pokémon!
-    </p>
-    <p class="text-info text-center h4 mt-5" data-bind="visible: Companion.caughtShinyCount() === Companion.data.obtainablePokemonList.length">
-        &#10024; Impressive! &#10024;<br/>
-        &#10024; All of your Pokémon are shiny! &#10024;
-    </p>
-    <p class="text-danger text-center h4 mt-5" data-bind="visible: Companion.caughtResistantCount() === Companion.data.obtainablePokemonList.length">
-        Magnificent!<br />
-        Your entire party is Resistant!
-    </p>
+    <div class="d-flex flex-wrap justify-content-center gap-5 mt-5">
+        <p class="text-warning text-center h4">
+            Congratulations!<br/>
+            You've caught all <span data-bind="text: Companion.data.obtainablePokemonList.length.toLocaleString()">0</span> Pokémon!
+        </p>
+        <p class="text-info text-center h4" data-bind="visible: Companion.caughtShinyCount() === Companion.data.obtainablePokemonList.length">
+            &#10024; Impressive! &#10024;<br/>
+            &#10024; All of your Pokémon are shiny! &#10024;
+        </p>
+        <p class="text-danger text-center h4" data-bind="visible: Companion.caughtResistantCount() === Companion.data.obtainablePokemonList.length">
+            Magnificent!<br />
+            Your entire party is Resistant!
+        </p>
+    </div>
     <!-- /ko -->
     <!-- ko if: $data.length -->
     <div class="d-flex flex-column h-100 col-12 col-lg-8 mx-auto">
