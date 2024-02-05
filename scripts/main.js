@@ -5,13 +5,15 @@ window.Companion = {
     ...require('./game'),
     ...require('./app'),
     data: require('./data'),
-    save: require('./save'),
     settings: require('./settings'),
 }
 
-window.Forecast = require('./forecast');
-window.VitaminTracker = require('./vitaminTracker');
-window.Enigma = require('./enigma');
-window.FriendSafari = require('./friendSafari');
-window.Util = require('./util');
-window.SaveFixes = require('./saveFixes');
+Object.assign(window, {
+    SaveData: require('./save'),
+    Forecast: require('./forecast'),
+    VitaminTracker: require('./vitaminTracker'),
+    Enigma: require('./enigma'),
+    FriendSafari: require('./friendSafari'),
+    SaveFixes: require('./saveFixes'),
+    Util: require('./util'),
+});

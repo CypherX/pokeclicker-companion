@@ -19,13 +19,13 @@
     </head>
     <body>
         <div id="toaster"></div>
-        <input type="file" id="file-selector" accept=".txt" class="d-none" onchange="Companion.save.loadFile(this.files[0])">
+        <input type="file" id="file-selector" accept=".txt" class="d-none" onchange="SaveData.loadFile(this.files[0])">
         <div id="container" class="d-none">
             <div class="d-flex flex-column" style="height: 100vh;">
                 <div id="header" class="mb-4">
                     <!-- @import "mainNavigation.html" -->
 
-                    <div class="alert alert-danger rounded-0 p-2 text-center" data-bind="visible: Companion.save.isOlderVersion">
+                    <div class="alert alert-danger rounded-0 p-2 text-center" data-bind="visible: SaveData.isOlderVersion">
                         The loaded save is from an older version of PokéClicker and may result in incorrect data and statistics.
                     </div>
                 </div>
@@ -58,7 +58,7 @@
 </html>
 
 <script type="text/html" id="load-save-template">
-    <!-- ko ifnot: Companion.save.isLoaded -->
+    <!-- ko ifnot: SaveData.isLoaded -->
     <div class="position-absolute top-50 start-50 translate-middle" style="z-index: -1;">
         <h1 class="display-6 mb-0">Select a save file or check out the other pages.</h1>
         <small class="font-monospace">PokéClicker <code data-bind="text: `v${Companion.package.version}`"></code></small>

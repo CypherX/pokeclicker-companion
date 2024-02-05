@@ -21,7 +21,7 @@
                         }">Export</button>
                     </div>
                 </div>
-                <div class="row mb-1" data-bind="visible: Companion.save.isLoaded">
+                <div class="row mb-1" data-bind="visible: SaveData.isLoaded">
                     <div class="col-12">
                         <div class="form-check form-switch form-check-inline">
                             <input class="form-check-input" type="checkbox" role="switch" id="hidePokemonOptimalVitamins" autocomplete="off" data-bind="checked: VitaminTracker.hidePokemonOptimalVitamins">
@@ -58,10 +58,10 @@
                         </tr>
                     </tbody>
                 </table>
-                <!-- ko ifnot: Companion.save.isLoaded -->
+                <!-- ko ifnot: SaveData.isLoaded -->
                 <div class="text-end small mt-2">* Load a save file to view the vitamins your Pokémon currently have</div>
                 <!-- /ko -->
-                <!-- ko if: Companion.save.isLoaded -->
+                <!-- ko if: SaveData.isLoaded -->
                 <div class="text-end small mt-2">* Above totals do not include vitamins you have already purchased</div>
                 <!-- /ko -->
             </div>
@@ -73,34 +73,34 @@
                     <thead>
                         <tr class="table-dark fw-normal border-top-0 align-middle">
                             <th class="text-center sortable" data-sort="id" style="width: 0;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">#</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">#</th>
                             <th class="sortable" data-sort="name"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Pokémon</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Pokémon</th>
                             <th class="text-center" style="width: 10%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Native Region</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Native Region</th>
                             <th class="text-center sortable" data-sort="base-attack" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Base Attack</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Base Attack</th>
                             <th class="text-center sortable" data-sort="base-bonus" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 },
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 },
                                     tooltip: { title: 'Attack gained each breeding cycle with no vitamins.' }">Attack Bonus</th>
                             <th class="text-center sortable" data-sort="base-steps" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Egg Steps</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Egg Steps</th>
                             <!-- ko foreach: GameHelper.enumNumbers(GameConstants.VitaminType) -->
                             <th class="text-center" style="width: 5%;" data-bind="text: `${GameConstants.VitaminType[$data]}`, tooltip: {
                                 title: `Optimal amount of ${GameConstants.VitaminType[$data]} to give this Pokémon based on the selected Highest Region. Loading a save file will display the current amount of vitamins alongside the optimal amount.`
                             }"></th>
                             <!-- /ko -->
                             <th class="text-center sortable" data-sort="vitamin-bonus" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 },
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 },
                                     tooltip: { title: 'Attack gained each breeding cycle with optimal vitamins.' }">
                                 <span class="text-nowrap">Bonus w/</span> Vitamins
                             </th>
                             <th class="text-center sortable" data-sort="vitamin-steps" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Steps w/ Vitamins</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Steps w/ Vitamins</th>
                             <th class="text-center sortable" data-sort="breeding-efficiency" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Breeding Efficiency</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Breeding Efficiency</th>
                         </tr>
-                        <!-- ko if: Companion.save.isLoaded -->
+                        <!-- ko if: SaveData.isLoaded -->
                         <tr class="table-dark fw-normal border-top-0 align-middle">
                             <th colspan="3" class="text-center p-1 border-top-0 border-start-0">Current | Optimal</th>
                         </tr>

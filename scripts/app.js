@@ -1,5 +1,5 @@
 const partyList = ko.pureComputed(() => {
-    const saveData = Companion.save.saveData();
+    const saveData = SaveData.file();
     const party = saveData?.save.party.caughtPokemon ?? [];
     const statistics = saveData?.save.statistics;
 
@@ -40,7 +40,7 @@ const getSortedPartyList = ko.pureComputed(() => {
 }).extend({ rateLimit: 100 });
 
 const getMissingPokemon = ko.pureComputed(() => {
-    if (!Companion.save.isLoaded()) {
+    if (!SaveData.isLoaded()) {
         return [];
     }
 
@@ -63,7 +63,7 @@ const getMissingPokemon = ko.pureComputed(() => {
         pokemon: []
     };
 
-    const saveData = Companion.save.saveData();
+    const saveData = SaveData.file();
     const showRequiredOnly = Companion.settings.showRequiredOnly();
     const showAllRegions = Companion.settings.showAllRegions();
 
@@ -112,29 +112,29 @@ const getTotalMissingPokemonCount = ko.pureComputed(() => {
 });
 
 const caughtPokemonCount = ko.pureComputed(() => {
-    if (!Companion.save.isLoaded()) {
+    if (!SaveData.isLoaded()) {
         return 0;
     }
 
-    return Companion.save.saveData().save.party.caughtPokemon
+    return SaveData.file().save.party.caughtPokemon
         .filter(p => Companion.data.obtainablePokemonMap[p.id]).length;
 });
 
 const caughtShinyCount = ko.pureComputed(() => {
-    if (!Companion.save.isLoaded()) {
+    if (!SaveData.isLoaded()) {
         return 0;
     }
 
-    return Companion.save.saveData().save.party.caughtPokemon
+    return SaveData.file().save.party.caughtPokemon
         .filter(p => p[PartyPokemonSaveKeys.shiny] === true).length;
 });
 
 const caughtResistantCount = ko.pureComputed(() => {
-    if (!Companion.save.isLoaded()) {
+    if (!SaveData.isLoaded()) {
         return 0;
     }
 
-    return Companion.save.saveData().save.party.caughtPokemon
+    return SaveData.file().save.party.caughtPokemon
         .filter(p => p[PartyPokemonSaveKeys.pokerus] === GameConstants.Pokerus.Resistant).length;
 });
 
@@ -321,12 +321,12 @@ const getDungeonData = ko.pureComputed(() => {
 const getDungeonDataFlat = ko.pureComputed(() => getDungeonData().flatMap(d => d.dungeons));
 
 const getDungeonClearCount = (dungeon) => {
-    if (!Companion.save.isLoaded()) {
+    if (!SaveData.isLoaded()) {
         return 0;
     }
 
     const dungeonIndex = GameConstants.getDungeonIndex(dungeon);
-    return Companion.save.saveData().save.statistics.dungeonsCleared[dungeonIndex] || 0;
+    return SaveData.file().save.statistics.dungeonsCleared[dungeonIndex] || 0;
 };
 
 const totalDungeonClears = ko.pureComputed(() => {
@@ -380,12 +380,12 @@ const getGymData = ko.pureComputed(() => {
 });
 
 const getGymClearCount = (gym) => {
-    if (!Companion.save.isLoaded()) {
+    if (!SaveData.isLoaded()) {
         return 0;
     }
 
     const gymIndex = GameConstants.getGymIndex(gym);
-    return Companion.save.saveData().save.statistics.gymsDefeated[gymIndex] || 0;
+    return SaveData.file().save.statistics.gymsDefeated[gymIndex] || 0;
 };
 
 const getRouteData = ko.pureComputed(() => {
@@ -424,12 +424,12 @@ const getRouteData = ko.pureComputed(() => {
 });
 
 const getRouteDefeatCount = (region, routeNumber) => {
-    if (!Companion.save.isLoaded()) {
+    if (!SaveData.isLoaded()) {
         return 0;
     }
 
     const regionName = GameConstants.Region[region];
-    return Companion.save.saveData().save.statistics.routeKills[regionName][routeNumber] || 0;
+    return SaveData.file().save.statistics.routeKills[regionName][routeNumber] || 0;
 };
 
 const hideOtherStatSection = (data) => {
@@ -459,8 +459,8 @@ const typeDamageRegion = ko.observable(GameConstants.Region.none);
 const calculateTypeDamageDistribution = () => {
     // load shit
     if (!typeDamageDistribution()) {
-        player.effectList = Save.initializeEffects(Companion.save.saveData().player.effectList);
-        const itemList = Companion.save.saveData().player._itemList;
+        player.effectList = Save.initializeEffects(SaveData.file().player.effectList);
+        const itemList = SaveData.file().player._itemList;
         player.itemList = Save.initializeItemlist();
         if (itemList) {
             for (const key in itemList) {
@@ -475,10 +475,10 @@ const calculateTypeDamageDistribution = () => {
 
         Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
             const saveKey = App.game[key].saveKey;
-            App.game[key].fromJSON(Companion.save.saveData().save[saveKey]);
+            App.game[key].fromJSON(SaveData.file().save[saveKey]);
         });
 
-        Companion.save.saveData().save.achievements?.forEach((achievementName) => {
+        SaveData.file().save.achievements?.forEach((achievementName) => {
             const achievement = AchievementHandler.findByName(achievementName);
             if (achievement) {
                 achievement.unlocked(true);
@@ -556,7 +556,7 @@ $(document).ready(() => {
     });
 
     Companion.settings.initialize();
-    Companion.save.initialize();
+    SaveData.initialize();
 
     Forecast.generateForecasts();
 });

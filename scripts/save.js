@@ -1,4 +1,4 @@
-const saveData = ko.observable();
+const file = ko.observable();
 const prevLoadedSaves = ko.observableArray();
 
 const loadFile = (file) => {
@@ -14,7 +14,7 @@ const loadFile = (file) => {
 const loadSaveData = (saveString, fileName) => {
     const saveFile = JSON.parse(saveString);
 
-    if (saveData() !== undefined) {
+    if (file() !== undefined) {
         Companion.initGame();
     }
 
@@ -26,7 +26,7 @@ const loadSaveData = (saveString, fileName) => {
     VitaminTracker.highestRegion(player.highestRegion());
     Companion.typeDamageDistribution(undefined);
 
-    saveData(saveFile);
+    file(saveFile);
 
     const prevDataIndex = prevLoadedSaves().findIndex((save) => save.name == fileName);
     if (prevDataIndex > 0) {
@@ -110,11 +110,11 @@ const loadPreviousFile = (index) => {
 };
 
 const isLoaded = ko.pureComputed(() => {
-    return saveData() !== undefined;
+    return file() !== undefined;
 });
 
 const isOlderVersion = ko.pureComputed(() => {
-    const saveVersion = saveData()?.save.update.version;
+    const saveVersion = file()?.save.update.version;
     return saveVersion && saveVersion != Companion.package.version;
 });
 
@@ -131,7 +131,7 @@ const initialize = () => {
 
 
 module.exports = {
-    saveData,
+    file,
     prevLoadedSaves,
 
     loadFile,

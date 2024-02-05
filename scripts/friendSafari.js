@@ -1,6 +1,6 @@
 const allSafariPokemon = ko.pureComputed(() => {
     // List isn't needed until a save is loaded
-    if (!Companion.save.isLoaded()) {
+    if (!SaveData.isLoaded()) {
         return [];
     }
 
@@ -11,12 +11,12 @@ const allSafariPokemon = ko.pureComputed(() => {
 });
 
 const getRotation = ko.pureComputed(() => {
-    if (!Companion.save.isLoaded()) {
+    if (!SaveData.isLoaded()) {
         return [];
     }
 
     const rotationSize = GameConstants.FRIEND_SAFARI_POKEMON;
-    const trainerId = Companion.save.saveData().player.trainerId || '000000';
+    const trainerId = SaveData.file().player.trainerId || '000000';
     SeededRand.seed(+trainerId);
     const shuffledPokemon = new Array(rotationSize).fill(SeededRand.shuffleArray(allSafariPokemon())).flat();
 
