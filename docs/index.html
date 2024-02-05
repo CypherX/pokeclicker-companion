@@ -19,7 +19,7 @@
     </head>
     <body>
         <div id="toaster"></div>
-        <input type="file" id="file-selector" accept=".txt" class="d-none" onchange="Companion.save.loadFile(this.files[0])">
+        <input type="file" id="file-selector" accept=".txt" class="d-none" onchange="SaveData.loadFile(this.files[0])">
         <div id="container" class="d-none">
             <div class="d-flex flex-column" style="height: 100vh;">
                 <div id="header" class="mb-4">
@@ -68,23 +68,23 @@
             </button>
             <div class="btn-group">
                 <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
-                <!-- ko if: Companion.save.prevLoadedSaves().length -->
+                <!-- ko if: SaveData.prevLoadedSaves().length -->
                 <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li class="small"><a class="dropdown-item disabled" href="#">Previously Loaded Saves</a></li>
-                    <!-- ko foreach: Companion.save.prevLoadedSaves -->
+                    <!-- ko foreach: SaveData.prevLoadedSaves -->
                     <li class="small">
                         <div class="d-flex align-items-center">
-                            <a class="dropdown-item flex-grow-1 pe-2" href="#" data-bind="text: $data.name, click: () => { Companion.save.loadPreviousFile($index()) }"></a>
+                            <a class="dropdown-item flex-grow-1 pe-2" href="#" data-bind="text: $data.name, click: () => { SaveData.loadPreviousFile($index()) }"></a>
                             <div class="text-danger ms-2 me-3" style="cursor: pointer;"
-                                data-bind="click: (_, e) => { Companion.save.prevLoadedSaves.splice($index(), 1); e.stopPropagation(); }">x</div>
+                                data-bind="click: (_, e) => { SaveData.prevLoadedSaves.splice($index(), 1); e.stopPropagation(); }">x</div>
                         </div>
                     </li>
                     <!-- /ko -->
                     <li><hr class="dropdown-divider"></li>
-                    <li class="small"><a class="dropdown-item" href="#" data-bind="click: () => { Companion.save.prevLoadedSaves([]); }">Remove All</a></li>
+                    <li class="small"><a class="dropdown-item" href="#" data-bind="click: () => { SaveData.prevLoadedSaves([]); }">Remove All</a></li>
                 </ul>
                 <!-- /ko -->
             </div>
@@ -93,7 +93,7 @@
 </nav>
 
 <!-- import "mySaveNavigation.html" -->
-<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#mySaveContent' && Companion.save.isLoaded">
+<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#mySaveContent' && SaveData.isLoaded">
     <div class="container-fluid justify-content-xl-center g-0">
         <ul class="navbar-nav" role="tablist">
             <li class="nav-item mx-1">
@@ -173,7 +173,7 @@
 <!-- import end -->
 <!-- import end -->
 
-                    <div class="alert alert-danger rounded-0 p-2 text-center" data-bind="visible: Companion.save.isOlderVersion">
+                    <div class="alert alert-danger rounded-0 p-2 text-center" data-bind="visible: SaveData.isOlderVersion">
                         The loaded save is from an older version of PokéClicker and may result in incorrect data and statistics.
                     </div>
                 </div>
@@ -184,22 +184,24 @@
 <div class="tab-pane active h-100" id="mySaveContent">
     <div data-bind="template: { name: 'load-save-template' }"></div>
 
-    <div class="tab-content h-100" data-bind="if: Companion.save.isLoaded">
+    <div class="tab-content h-100" data-bind="if: SaveData.isLoaded">
         <!-- import "mySaveMissingPokemon.html" -->
 <div class="tab-pane h-100 container-xxl show active" id="mySaveMissingPokemon" data-bind="with: Companion.getMissingPokemon" style="overflow: auto;">
     <!-- ko ifnot: $data.length -->
-    <p class="text-warning text-center h4 mt-5">
-        Congratulations!<br/>
-        You've caught all <span data-bind="text: Companion.data.obtainablePokemonList.length.toLocaleString()">0</span> Pokémon!
-    </p>
-    <p class="text-info text-center h4 mt-5" data-bind="visible: Companion.caughtShinyCount() === Companion.data.obtainablePokemonList.length">
-        &#10024; Impressive! &#10024;<br/>
-        &#10024; All of your Pokémon are shiny! &#10024;
-    </p>
-    <p class="text-danger text-center h4 mt-5" data-bind="visible: Companion.caughtResistantCount() === Companion.data.obtainablePokemonList.length">
-        Magnificent!<br />
-        Your entire party is Resistant!
-    </p>
+    <div class="d-flex flex-wrap justify-content-center gap-5 mt-5">
+        <p class="text-warning text-center h4">
+            Congratulations!<br/>
+            You've caught all <span data-bind="text: Companion.data.obtainablePokemonList.length.toLocaleString()">0</span> Pokémon!
+        </p>
+        <p class="text-info text-center h4" data-bind="visible: Companion.caughtShinyCount() === Companion.data.obtainablePokemonList.length">
+            &#10024; Impressive! &#10024;<br/>
+            &#10024; All of your Pokémon are shiny! &#10024;
+        </p>
+        <p class="text-danger text-center h4" data-bind="visible: Companion.caughtResistantCount() === Companion.data.obtainablePokemonList.length">
+            Magnificent!<br />
+            Your entire party is Resistant!
+        </p>
+    </div>
     <!-- /ko -->
     <!-- ko if: $data.length -->
     <div class="d-flex flex-column h-100 col-12 col-lg-8 mx-auto">
@@ -1087,7 +1089,7 @@
                         }">Export</button>
                     </div>
                 </div>
-                <div class="row mb-1" data-bind="visible: Companion.save.isLoaded">
+                <div class="row mb-1" data-bind="visible: SaveData.isLoaded">
                     <div class="col-12">
                         <div class="form-check form-switch form-check-inline">
                             <input class="form-check-input" type="checkbox" role="switch" id="hidePokemonOptimalVitamins" autocomplete="off" data-bind="checked: VitaminTracker.hidePokemonOptimalVitamins">
@@ -1124,10 +1126,10 @@
                         </tr>
                     </tbody>
                 </table>
-                <!-- ko ifnot: Companion.save.isLoaded -->
+                <!-- ko ifnot: SaveData.isLoaded -->
                 <div class="text-end small mt-2">* Load a save file to view the vitamins your Pokémon currently have</div>
                 <!-- /ko -->
-                <!-- ko if: Companion.save.isLoaded -->
+                <!-- ko if: SaveData.isLoaded -->
                 <div class="text-end small mt-2">* Above totals do not include vitamins you have already purchased</div>
                 <!-- /ko -->
             </div>
@@ -1139,34 +1141,34 @@
                     <thead>
                         <tr class="table-dark fw-normal border-top-0 align-middle">
                             <th class="text-center sortable" data-sort="id" style="width: 0;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">#</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">#</th>
                             <th class="sortable" data-sort="name"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Pokémon</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Pokémon</th>
                             <th class="text-center" style="width: 10%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Native Region</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Native Region</th>
                             <th class="text-center sortable" data-sort="base-attack" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Base Attack</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Base Attack</th>
                             <th class="text-center sortable" data-sort="base-bonus" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 },
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 },
                                     tooltip: { title: 'Attack gained each breeding cycle with no vitamins.' }">Attack Bonus</th>
                             <th class="text-center sortable" data-sort="base-steps" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Egg Steps</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Egg Steps</th>
                             <!-- ko foreach: GameHelper.enumNumbers(GameConstants.VitaminType) -->
                             <th class="text-center" style="width: 5%;" data-bind="text: `${GameConstants.VitaminType[$data]}`, tooltip: {
                                 title: `Optimal amount of ${GameConstants.VitaminType[$data]} to give this Pokémon based on the selected Highest Region. Loading a save file will display the current amount of vitamins alongside the optimal amount.`
                             }"></th>
                             <!-- /ko -->
                             <th class="text-center sortable" data-sort="vitamin-bonus" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 },
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 },
                                     tooltip: { title: 'Attack gained each breeding cycle with optimal vitamins.' }">
                                 <span class="text-nowrap">Bonus w/</span> Vitamins
                             </th>
                             <th class="text-center sortable" data-sort="vitamin-steps" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Steps w/ Vitamins</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Steps w/ Vitamins</th>
                             <th class="text-center sortable" data-sort="breeding-efficiency" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Breeding Efficiency</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Breeding Efficiency</th>
                         </tr>
-                        <!-- ko if: Companion.save.isLoaded -->
+                        <!-- ko if: SaveData.isLoaded -->
                         <tr class="table-dark fw-normal border-top-0 align-middle">
                             <th colspan="3" class="text-center p-1 border-top-0 border-start-0">Current | Optimal</th>
                         </tr>
@@ -1291,12 +1293,12 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?v=20240202b"></script>
+        <script src="./bundle.js?v=20240205"></script>
     </body>
 </html>
 
 <script type="text/html" id="load-save-template">
-    <!-- ko ifnot: Companion.save.isLoaded -->
+    <!-- ko ifnot: SaveData.isLoaded -->
     <div class="position-absolute top-50 start-50 translate-middle" style="z-index: -1;">
         <h1 class="display-6 mb-0">Select a save file or check out the other pages.</h1>
         <small class="font-monospace">PokéClicker <code data-bind="text: `v${Companion.package.version}`"></code></small>
