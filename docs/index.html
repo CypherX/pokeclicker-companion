@@ -770,7 +770,7 @@
                     <!-- /ko -->
                     <td class="text-nowrap" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, Weather.period))}`"></td>
                     <!-- ko foreach: Companion.data.validRegions -->
-                    <td class="text-dark" data-bind="text: WeatherType[$parent.regionalWeather[$data]], style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
+                    <td class="text-dark" data-bind="text: GameConstants.humanifyString(WeatherType[$parent.regionalWeather[$data]]), style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
                     <!-- /ko -->
                 </tr>
                 <!-- /ko -->
@@ -790,7 +790,7 @@
             </thead>
             <tbody data-bind="foreach: GameHelper.enumNumbers(WeatherType)">
                 <tr>
-                    <td class="align-middle text-dark" data-bind="text: WeatherType[$data], style: { 'background-color': Weather.weatherConditions[$data].color }"></td>
+                    <td class="align-middle text-dark" data-bind="text: GameConstants.humanifyString(WeatherType[$data]), style: { 'background-color': Weather.weatherConditions[$data].color }"></td>
                     <!-- ko foreach: Companion.data.validRegions -->
                     <td class="text-center align-middle" data-bind="text: Util.formatDateTime(Forecast.getNextWeatherDate($data, $parent)) || '-'"></td>
                     <!-- /ko -->
