@@ -118,7 +118,7 @@ const pokemonRegionOverride = {
     'Unown (E)': GameConstants.Region.sinnoh,
     'Unown (!)': GameConstants.Region.hoenn,
     'Unown (?)': GameConstants.Region.hoenn,
-    'XD001': GameConstants.Region.hoenn,
+    'XD001': GameConstants.Region.unova,
     'Hoppip (Chimecho)': GameConstants.Region.hoenn,
     'Meltan': GameConstants.Region.alola,
     'Melmetal': GameConstants.Region.alola,
