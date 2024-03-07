@@ -12242,6 +12242,7 @@ const getBattleData = ko.pureComputed(() => {
         }
 
         const town = TownList[g.parent?.name ?? g.town];
+        g.townObj = town;
 
         g.isCompleted = gymsDefeated[GameConstants.getGymIndex(g.town)] > 0;
         g.secondsToWin = 0;
@@ -13545,6 +13546,15 @@ const notify = ({
     });
 };
 
+const getRegionNameText = (region, subRegion = 0) => {
+    const regionName = GameConstants.camelCaseToString(GameConstants.Region[region]);
+    const subRegionName = SubRegions.getSubRegionById(region, subRegion)?.name;
+    if (regionName == subRegionName || !subRegionName) {
+        return regionName;
+    }
+    return `${regionName} / ${subRegionName}`;
+};
+
 module.exports = {
     formatDate,
     formatDateTime,
@@ -13562,6 +13572,7 @@ module.exports = {
     decompressString,
 
     notify,
+    getRegionNameText,
 };
 },{"lzutf8":6}],48:[function(require,module,exports){
 const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
