@@ -12146,7 +12146,7 @@ const gymList = ko.pureComputed(() => {
     if (!baseGymList) {
         baseGymList = [];
         GameConstants.RegionGyms.forEach((gyms, region) => {
-            if (region > player.highestRegion()) {
+            if (region > GameConstants.MAX_AVAILABLE_REGION) {
                 return;
             }
     
@@ -12161,11 +12161,26 @@ const gymList = ko.pureComputed(() => {
         });
 
         Companion.data.GymListOverride.forEach((g) => baseGymList.push({...g}));
-        baseGymList = baseGymList.sort((a, b) => a.region - b.region).flatMap(g => g.gyms.map(g => GymList[g]));
+        baseGymList = baseGymList.sort((a, b) => a.region - b.region)
+            .flatMap(rg => rg.gyms.map(g => {
+                const gym = GymList[g];
+                gym.region = rg.region;
+                return gym;
+            }));
     }
+
+    console.log(baseGymList);
 
     const gymsDefeated = SaveData.file().save.statistics.gymsDefeated;
     const gymList = baseGymList.filter(g => {
+        if (!Companion.settings.showAllRegions() && g.region > player.highestRegion()) {
+            return false;
+        }
+
+        if (g.region > GameConstants.MAX_AVAILABLE_REGION) {
+            return false;
+        }
+
         if (settings.hideCompleted() && gymsDefeated[GameConstants.getGymIndex(g.town)] > 0) {
             return false;
         }
@@ -12183,7 +12198,11 @@ const tempBattleList = ko.pureComputed(() => {
 
     const temporaryBattleDefeated = SaveData.file().save.statistics.temporaryBattleDefeated;
     return Object.values(TemporaryBattleList).filter(tb => {
-        if (tb.getTown().region > player.highestRegion()) {
+        if (!Companion.settings.showAllRegions() && tb.getTown().region > player.highestRegion()) {
+            return false;
+        }
+
+        if (tb.getTown().region > GameConstants.MAX_AVAILABLE_REGION) {
             return false;
         }
 
@@ -12314,6 +12333,7 @@ module.exports = {
     initialize,
     settings,
     getBattleData,
+    gymList,
 };
 },{}],38:[function(require,module,exports){
 const UnobtainablePokemon = [
