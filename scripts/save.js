@@ -164,7 +164,13 @@ const loadAttackData = () => {
             }
         }
     }
-    
+
+    GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
+        if (!player.itemList[flute]()) {
+            player.gainItem(flute, 1);
+        }
+    })
+
     EffectEngineRunner.initialize(App.game.multiplier, GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]));
     FluteEffectRunner.initialize(App.game.multiplier);
 
@@ -193,6 +199,9 @@ const loadAttackData = () => {
             FluteEffectRunner.toggleEffect(flute);
         }
     });
+
+    BattleCalculator.settings.xAttackEnabled(false);
+    BattleCalculator.settings.yellowFluteEnabled(false);
 
     isDamageLoaded(true);
 };
