@@ -11384,7 +11384,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 },{"process/browser.js":31,"timers":34}],35:[function(require,module,exports){
 module.exports={
   "name": "pokeclicker",
-  "version": "0.10.19",
+  "version": "0.10.17",
   "description": "PokéClicker repository",
   "main": "index.js",
   "scripts": {
@@ -11491,7 +11491,7 @@ module.exports={
 
 },{}],36:[function(require,module,exports){
 const partyList = ko.pureComputed(() => {
-    const saveData = SaveData.file();
+    const saveData = Companion.save.saveData();
     const party = saveData?.save.party.caughtPokemon ?? [];
     const statistics = saveData?.save.statistics;
 
@@ -11532,7 +11532,7 @@ const getSortedPartyList = ko.pureComputed(() => {
 }).extend({ rateLimit: 100 });
 
 const getMissingPokemon = ko.pureComputed(() => {
-    if (!SaveData.isLoaded()) {
+    if (!Companion.save.isLoaded()) {
         return [];
     }
 
@@ -11555,7 +11555,7 @@ const getMissingPokemon = ko.pureComputed(() => {
         pokemon: []
     };
 
-    const saveData = SaveData.file();
+    const saveData = Companion.save.saveData();
     const showRequiredOnly = Companion.settings.showRequiredOnly();
     const showAllRegions = Companion.settings.showAllRegions();
 
@@ -11603,39 +11603,12 @@ const getTotalMissingPokemonCount = ko.pureComputed(() => {
     }, 0);
 });
 
-const caughtPokemonCount = ko.pureComputed(() => {
-    if (!SaveData.isLoaded()) {
-        return 0;
-    }
-
-    return SaveData.file().save.party.caughtPokemon
-        .filter(p => Companion.data.obtainablePokemonMap[p.id]).length;
-});
-
-const caughtShinyCount = ko.pureComputed(() => {
-    if (!SaveData.isLoaded()) {
-        return 0;
-    }
-
-    return SaveData.file().save.party.caughtPokemon
-        .filter(p => p[PartyPokemonSaveKeys.shiny] === true).length;
-});
-
-const caughtResistantCount = ko.pureComputed(() => {
-    if (!SaveData.isLoaded()) {
-        return 0;
-    }
-
-    return SaveData.file().save.party.caughtPokemon
-        .filter(p => p[PartyPokemonSaveKeys.pokerus] === GameConstants.Pokerus.Resistant).length;
-});
-
 const hideFromPokemonStatsTable = (partyPokemon) => {
     return ko.pureComputed(() => {
         const searchVal = pokemonStatTableSearch();
         if (searchVal) {
             if (!partyPokemon.id.toString().includes(searchVal)
-                && !partyPokemon.name.toLowerCase().includes(searchVal.toLowerCase())) {
+                && !partyPokemon.name.toLowerCase().includes(searchVal)) {
                 return true;
             }
         }
@@ -11813,12 +11786,12 @@ const getDungeonData = ko.pureComputed(() => {
 const getDungeonDataFlat = ko.pureComputed(() => getDungeonData().flatMap(d => d.dungeons));
 
 const getDungeonClearCount = (dungeon) => {
-    if (!SaveData.isLoaded()) {
+    if (!Companion.save.isLoaded()) {
         return 0;
     }
 
     const dungeonIndex = GameConstants.getDungeonIndex(dungeon);
-    return SaveData.file().save.statistics.dungeonsCleared[dungeonIndex] || 0;
+    return Companion.save.saveData().save.statistics.dungeonsCleared[dungeonIndex] || 0;
 };
 
 const totalDungeonClears = ko.pureComputed(() => {
@@ -11872,12 +11845,12 @@ const getGymData = ko.pureComputed(() => {
 });
 
 const getGymClearCount = (gym) => {
-    if (!SaveData.isLoaded()) {
+    if (!Companion.save.isLoaded()) {
         return 0;
     }
 
     const gymIndex = GameConstants.getGymIndex(gym);
-    return SaveData.file().save.statistics.gymsDefeated[gymIndex] || 0;
+    return Companion.save.saveData().save.statistics.gymsDefeated[gymIndex] || 0;
 };
 
 const getRouteData = ko.pureComputed(() => {
@@ -11916,12 +11889,12 @@ const getRouteData = ko.pureComputed(() => {
 });
 
 const getRouteDefeatCount = (region, routeNumber) => {
-    if (!SaveData.isLoaded()) {
+    if (!Companion.save.isLoaded()) {
         return 0;
     }
 
     const regionName = GameConstants.Region[region];
-    return SaveData.file().save.statistics.routeKills[regionName][routeNumber] || 0;
+    return Companion.save.saveData().save.statistics.routeKills[regionName][routeNumber] || 0;
 };
 
 const hideOtherStatSection = (data) => {
@@ -11945,14 +11918,12 @@ const typeDamageDistribution = ko.observable();
 const includeXAttack = ko.observable(true);
 const includeYellowFlute = ko.observable(true);
 const includeGems = ko.observable(true);
-const typeDamageWeather = ko.observable(WeatherType.Clear);
-const typeDamageRegion = ko.observable(GameConstants.Region.none);
 
 const calculateTypeDamageDistribution = () => {
     // load shit
     if (!typeDamageDistribution()) {
-        player.effectList = Save.initializeEffects(SaveData.file().player.effectList);
-        const itemList = SaveData.file().player._itemList;
+        player.effectList = Save.initializeEffects(Companion.save.saveData().player.effectList);
+        const itemList = Companion.save.saveData().player._itemList;
         player.itemList = Save.initializeItemlist();
         if (itemList) {
             for (const key in itemList) {
@@ -11967,10 +11938,10 @@ const calculateTypeDamageDistribution = () => {
 
         Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
             const saveKey = App.game[key].saveKey;
-            App.game[key].fromJSON(SaveData.file().save[saveKey]);
+            App.game[key].fromJSON(Companion.save.saveData().save[saveKey]);
         });
 
-        SaveData.file().save.achievements?.forEach((achievementName) => {
+        Companion.save.saveData().save.achievements?.forEach((achievementName) => {
             const achievement = AchievementHandler.findByName(achievementName);
             if (achievement) {
                 achievement.unlocked(true);
@@ -11994,8 +11965,6 @@ const calculateTypeDamageDistribution = () => {
         FluteEffectRunner.toggleEffect('Yellow_Flute');
     }
 
-    const ignoreRegionMultiplier = typeDamageRegion() == GameConstants.Region.none;
-
     const result = {};
     let max = 0;
     let min = Number.MAX_SAFE_INTEGER;
@@ -12003,7 +11972,7 @@ const calculateTypeDamageDistribution = () => {
     for (let type1 = 0; type1 <= 17; ++type1) {
         result[PokemonType[type1]] = {};
         for (let type2 = 0; type2 <= 17; ++type2) {
-            let dmg = App.game.party.calculatePokemonAttack(type1, type2, ignoreRegionMultiplier, typeDamageRegion(), true, false, typeDamageWeather(), true, true);
+            let dmg = App.game.party.calculatePokemonAttack(type1, type2, true, GameConstants.Region.none, true, false, WeatherType.Clear, true, true);
             result[PokemonType[type1]][PokemonType[type2]] = dmg.toLocaleString();
             max = Math.max(max, dmg);
             min = Math.min(min, dmg);
@@ -12048,7 +12017,7 @@ $(document).ready(() => {
     });
 
     Companion.settings.initialize();
-    SaveData.initialize();
+    Companion.save.initialize();
 
     Forecast.generateForecasts();
 });
@@ -12124,9 +12093,6 @@ module.exports = {
 
     partyList,
     getSortedPartyList,
-    caughtPokemonCount,
-    caughtShinyCount,
-    caughtResistantCount,
 
     hideFromPokemonStatsTable,
     getPokemonStatsTableCount,
@@ -12157,8 +12123,6 @@ module.exports = {
     includeXAttack,
     includeYellowFlute,
     includeGems,
-    typeDamageWeather,
-    typeDamageRegion,
 
     tabVisited,
     activeTab,
@@ -12255,20 +12219,10 @@ const pokemonRegionOverride = {
     ...Object.fromEntries(
         pokemonList.filter(p => Math.floor(p.id) == 25 && p.id > 25).map(p => [p.name, GameConstants.Region.alola])
     ),
-    'Detective Pikachu': GameConstants.Region.kalos,
-    'Detective Raichu': GameConstants.Region.kalos,
-    'Pikachu (World Cap)': GameConstants.Region.galar,
-
-    // Valencian and Pinkan
-    ...Object.fromEntries(
-        pokemonList.filter(p => p.name.startsWith('Pinkan ') || p.name.startsWith('Valencian '))
-            .map(p => [p.name, GameConstants.Region.hoenn])
-    ),
-    'Pink Butterfree': GameConstants.Region.hoenn,
-    "Ash's Butterfree": GameConstants.Region.hoenn,
+    'Pikachu (Clone)': GameConstants.Region.kanto,
     'Pinkan Pikachu': GameConstants.Region.kalos,
-    'Crystal Onix': GameConstants.Region.hoenn,
-    'Crystal Steelix': GameConstants.Region.hoenn,
+    'Detective Pikachu': GameConstants.Region.kanto,
+    'Pikachu (World Cap)': GameConstants.Region.galar,
 
     // Mega and Primal
     ...Object.fromEntries(
@@ -12282,10 +12236,7 @@ const pokemonRegionOverride = {
             .map(p => [p.name, GameConstants.Region.galar])
     ),
 
-    'Unown (E)': GameConstants.Region.sinnoh,
-    'Unown (!)': GameConstants.Region.hoenn,
-    'Unown (?)': GameConstants.Region.hoenn,
-    'XD001': GameConstants.Region.unova,
+    'XD001': GameConstants.Region.hoenn,
     'Hoppip (Chimecho)': GameConstants.Region.hoenn,
     'Meltan': GameConstants.Region.alola,
     'Melmetal': GameConstants.Region.alola,
@@ -12503,12 +12454,12 @@ const revealHintsButtonClick = () => revealHintsCounter(revealHintsCounter() + 1
 
 const getBerries = ko.pureComputed(() => {
     const berries = ['North', 'West', 'East', 'South'].map(d => ({ direction: d, berry: undefined }));
-    if (!SaveData.isLoaded()) {
+    if (!Companion.save.isLoaded()) {
         return berries;
     }
 
     const enigmaMutationIdx = App.game.farming.mutations.findIndex(m => m.mutatedBerry == BerryType.Enigma);
-    const hintsSeen = SaveData.file().save.farming.mutations[enigmaMutationIdx];
+    const hintsSeen = Companion.save.saveData().save.farming.mutations[enigmaMutationIdx];
 
     for (let i = 0; i < berries.length; i++) {
         if (hintsSeen[i] || revealHints()) {
@@ -12533,7 +12484,8 @@ const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
 const dailyDeals = ko.observableArray();
 
-const generateForecasts = (date = new Date()) => {
+const generateForecasts = () => {
+    const date = new Date();
     const currentHour = date.getHours();
     const unownData = [];
     const weatherData = [];
@@ -12541,7 +12493,7 @@ const generateForecasts = (date = new Date()) => {
     const berryMasterData = [];
     const dailyDealData = [];
 
-    for (let day = 0; day < 365; day++) {
+    for (let day = 0; day < 120; day++) {
         const saveDate = new Date(date);
 
         // Unown
@@ -12608,17 +12560,6 @@ const generateForecasts = (date = new Date()) => {
     boostedRoutes(boostedRouteData.slice(0, 6));
     berryMasters(berryMasterData);
     dailyDeals(dailyDealData);
-};
-
-const getUpcomingWeather = () => {
-    const dayForecast = weatherForecast.slice(0, 18).reduce((map, wf) => {
-        const date = Util.formatDate(wf.startDate);
-        map[date] = map[date] || [];
-        map[date].push(wf);
-        return map;
-    }, {});
-
-    return Object.entries(dayForecast).map(([date, forecast]) => ({ date, forecast }));
 };
 
 const getNextWeatherDate = (region, weather) => {
@@ -12733,7 +12674,6 @@ module.exports = {
     selectedDailyDealItemNextTrades,
 
     generateForecasts,
-    getUpcomingWeather,
     getNextWeatherDate,
     getBerryMasterDeals,
     getBerryMasterNextItemDate,
@@ -12744,7 +12684,7 @@ module.exports = {
 },{}],40:[function(require,module,exports){
 const allSafariPokemon = ko.pureComputed(() => {
     // List isn't needed until a save is loaded
-    if (!SaveData.isLoaded()) {
+    if (!Companion.save.isLoaded()) {
         return [];
     }
 
@@ -12755,12 +12695,12 @@ const allSafariPokemon = ko.pureComputed(() => {
 });
 
 const getRotation = ko.pureComputed(() => {
-    if (!SaveData.isLoaded()) {
+    if (!Companion.save.isLoaded()) {
         return [];
     }
 
     const rotationSize = GameConstants.FRIEND_SAFARI_POKEMON;
-    const trainerId = SaveData.file().player.trainerId || '000000';
+    const trainerId = Companion.save.saveData().player.trainerId || '000000';
     SeededRand.seed(+trainerId);
     const shuffledPokemon = new Array(rotationSize).fill(SeededRand.shuffleArray(allSafariPokemon())).flat();
 
@@ -12896,21 +12836,18 @@ window.Companion = {
     ...require('./game'),
     ...require('./app'),
     data: require('./data'),
+    save: require('./save'),
     settings: require('./settings'),
 }
 
-Object.assign(window, {
-    SaveData: require('./save'),
-    Forecast: require('./forecast'),
-    VitaminTracker: require('./vitaminTracker'),
-    Enigma: require('./enigma'),
-    FriendSafari: require('./friendSafari'),
-    SaveFixes: require('./saveFixes'),
-    Util: require('./util'),
-});
-
+window.Forecast = require('./forecast');
+window.VitaminTracker = require('./vitaminTracker');
+window.Enigma = require('./enigma');
+window.FriendSafari = require('./friendSafari');
+window.Util = require('./util');
+window.SaveFixes = require('./saveFixes');
 },{"../pokeclicker/package.json":35,"./app":36,"./data":37,"./enigma":38,"./forecast":39,"./friendSafari":40,"./game":41,"./save":43,"./saveFixes":44,"./settings":45,"./util":46,"./vitaminTracker":47}],43:[function(require,module,exports){
-const file = ko.observable();
+const saveData = ko.observable();
 const prevLoadedSaves = ko.observableArray();
 
 const loadFile = (file) => {
@@ -12926,7 +12863,7 @@ const loadFile = (file) => {
 const loadSaveData = (saveString, fileName) => {
     const saveFile = JSON.parse(saveString);
 
-    if (file() !== undefined) {
+    if (saveData() !== undefined) {
         Companion.initGame();
     }
 
@@ -12938,7 +12875,7 @@ const loadSaveData = (saveString, fileName) => {
     VitaminTracker.highestRegion(player.highestRegion());
     Companion.typeDamageDistribution(undefined);
 
-    file(saveFile);
+    saveData(saveFile);
 
     const prevDataIndex = prevLoadedSaves().findIndex((save) => save.name == fileName);
     if (prevDataIndex > 0) {
@@ -12951,66 +12888,24 @@ const loadSaveData = (saveString, fileName) => {
         prevLoadedSaves(arr);
     }
 
-    if (!saveFile.save.party.caughtPokemon?.length) {
-        Util.notify({
-            message: 'Why don\'t you come back after catching some pokémon? Not a very good trainer, this one.',
-            type: 'danger',
-            timeout: 30000
-        });
-    }
-
-    const monoType = getMonoType(saveFile.save.party.caughtPokemon);
-    if (monoType) {
-        Util.notify({
-            message: `Haha, look, they only have ${monoType.map(t => PokemonType[t]).join('/')} pokémon!`,
-            type: 'danger',
-            timeout: 30000
-        });
-    }
-
     if (saveFile.save.profile.name.toLowerCase() == 'bailey') {
-        let msg;
         if (Rand.intBetween(1, 20) == 1) {
-            msg = 'Ȟ̷̨̠͈͖̲̠͍͓̊͂̐e̵͈͖̮̼̼͚͍̳̠̖̺͚̓͝ĺ̷̢̧̧̻̫͚̒l̴̛̲̼͒̽́͒̆̑͑̃̌̎o̸̡̘̞̝̭̙̠̰͋̆̚.̵̡̛̹͙̤̺̳̱͚̹̏͌̓̓̌̿̊̒́͂̂̊͂̚ ̵̨̨̖̭̞̰͖̞̮͚̺̟̰̔B̴̢̰̳͓̬̤̯̬͍̙͎̟͉͓̙̓̈́̓̽͑̍̓̂͑́͘͘a̵̛̭̬͎̪̔͋͌̀͂̏i̷̱͉̪͖̫͇̮͔̯͆̄̔͋͂ḽ̵̳͕͆̎̈́ę̶̛͕̘͎̮̯͙̱͔̙͓͉̿̽̍͂̋̇̏̐̈̽͜y̷̡̟̦̓̍͐̓̆̀̍̂̕.̶̤͖͚̅̅̒̔͘͘ ̴̧̤͔̜̪̦͇̿̀̋͒̾̋͋̚W̸̨̜͍̲̖̱̯̖͇̣̩̉̏͘͘͘͜͝͝e̴̛̩͈̥̻̺̝̲̹͂̈́̉͆̀̀͊́͐.̶̢̱͙̱̱͈͖̳̫̝͇̰̐̏̀̂̎̇͋͛͛̇̉͐́̚̕ͅͅ ̸̙̩̥͕̪̖̅̆̓̏̕͝͝͝ͅS̸̙͈̺͙̟͓̠̼͍͖̭͇͂̍̊͂̎̃̂͜e̸̟͊́̈́͆̉̽̎̔̈̊̔̑̕̕̚e̷̛̯̼̱͐͊͒̈́́̽͐̏̉̔.̴̧̛̉̈̊͛͐ ̶̨͕̗̱̙͚̗̩͉̖̥͈̠̬̑̉̀Ỹ̷̡͖̪̝̦͈̲͘͝o̵̢͍̗͍̱̪̮̊͛͛͋̂̆̔̒͊́̈͂̾̋ͅû̶̹̳̽͌̊̌̓̑͝.̶̡̢̹̤͚͚̟͇͕͖̦̠̪͆̍̈̉̉̈́͆̑̎̆͘̚͝ ̶̙͈͋̾͊̆̒̌͐̂Ŵ̸̧̺̗̥̲͈̳̟̜͚̜͚̏̽͗̊̾̐̿̉͝ȩ̵̼̪͎͉͇͙̭͎̻͈͗̈́͂̓̈́̒̃̈̔̋̉̂̈̕ͅ.̷̤͔͕̎̎̐̂͆̈́̀ ̸̢̧̻̗̯̥͓̥͕̱̖̬̲̅́̒͌̿̎̔͌̈͌̀͠͠ͅͅÂ̸̛̛̖͕̱̫̲̞̯̫͉͖̻̳͂̂̅̈́̑̓́͐̈̀r̷̢̗̳̗̤͔͓̻̳̳̠̳̬̩̞̆̎̾̈́͋̊̕͝e̴͓͇͙̬͔̼͔͇̋̋̐̐̽͐̈́͘̚.̸͍̞̼͈̖̩̮̹̈́̊̄͠ ̴͓͔̬̟̈́̈W̵͍͍̼̜̤͔̭̻̞̫̹̎̇̿́̀͘ͅa̷̡̡̨̩̙͍͖̜̍̾̈́͊̽̂͂͜t̵̟͚͙͇̫͚̠̭͈̣̘̫͆͒̑͊̀͒̆̉́͑͋̊̕͘ͅç̶̮͉͍̫̋̅̅̓͑͠ḩ̷͕̟̠̩̼̼͓̜̳̦͝ĭ̵̧̢̨̼͓̩͈̮͖͖͓̰͕̈́̈́͂̋̅̐̍̔̎̀́̕n̸̛͚͕̝̐́̿͌͂̊͛̓̂̓̓͑͋͝g̸̞̠̭͖̯̲͕̫̗͖͔͙̀̿̇͜.̸̨̡̢̱͖͙̰͍͙̟͈͓̪͙͊̓̆̃́̀̀̈́';
+            alert('Ȟ̷̨̠͈͖̲̠͍͓̊͂̐e̵͈͖̮̼̼͚͍̳̠̖̺͚̓͝ĺ̷̢̧̧̻̫͚̒l̴̛̲̼͒̽́͒̆̑͑̃̌̎o̸̡̘̞̝̭̙̠̰͋̆̚.̵̡̛̹͙̤̺̳̱͚̹̏͌̓̓̌̿̊̒́͂̂̊͂̚ ̵̨̨̖̭̞̰͖̞̮͚̺̟̰̔B̴̢̰̳͓̬̤̯̬͍̙͎̟͉͓̙̓̈́̓̽͑̍̓̂͑́͘͘a̵̛̭̬͎̪̔͋͌̀͂̏i̷̱͉̪͖̫͇̮͔̯͆̄̔͋͂ḽ̵̳͕͆̎̈́ę̶̛͕̘͎̮̯͙̱͔̙͓͉̿̽̍͂̋̇̏̐̈̽͜y̷̡̟̦̓̍͐̓̆̀̍̂̕.̶̤͖͚̅̅̒̔͘͘ ̴̧̤͔̜̪̦͇̿̀̋͒̾̋͋̚W̸̨̜͍̲̖̱̯̖͇̣̩̉̏͘͘͘͜͝͝e̴̛̩͈̥̻̺̝̲̹͂̈́̉͆̀̀͊́͐.̶̢̱͙̱̱͈͖̳̫̝͇̰̐̏̀̂̎̇͋͛͛̇̉͐́̚̕ͅͅ ̸̙̩̥͕̪̖̅̆̓̏̕͝͝͝ͅS̸̙͈̺͙̟͓̠̼͍͖̭͇͂̍̊͂̎̃̂͜e̸̟͊́̈́͆̉̽̎̔̈̊̔̑̕̕̚e̷̛̯̼̱͐͊͒̈́́̽͐̏̉̔.̴̧̛̉̈̊͛͐ ̶̨͕̗̱̙͚̗̩͉̖̥͈̠̬̑̉̀Ỹ̷̡͖̪̝̦͈̲͘͝o̵̢͍̗͍̱̪̮̊͛͛͋̂̆̔̒͊́̈͂̾̋ͅû̶̹̳̽͌̊̌̓̑͝.̶̡̢̹̤͚͚̟͇͕͖̦̠̪͆̍̈̉̉̈́͆̑̎̆͘̚͝ ̶̙͈͋̾͊̆̒̌͐̂Ŵ̸̧̺̗̥̲͈̳̟̜͚̜͚̏̽͗̊̾̐̿̉͝ȩ̵̼̪͎͉͇͙̭͎̻͈͗̈́͂̓̈́̒̃̈̔̋̉̂̈̕ͅ.̷̤͔͕̎̎̐̂͆̈́̀ ̸̢̧̻̗̯̥͓̥͕̱̖̬̲̅́̒͌̿̎̔͌̈͌̀͠͠ͅͅÂ̸̛̛̖͕̱̫̲̞̯̫͉͖̻̳͂̂̅̈́̑̓́͐̈̀r̷̢̗̳̗̤͔͓̻̳̳̠̳̬̩̞̆̎̾̈́͋̊̕͝e̴͓͇͙̬͔̼͔͇̋̋̐̐̽͐̈́͘̚.̸͍̞̼͈̖̩̮̹̈́̊̄͠ ̴͓͔̬̟̈́̈W̵͍͍̼̜̤͔̭̻̞̫̹̎̇̿́̀͘ͅa̷̡̡̨̩̙͍͖̜̍̾̈́͊̽̂͂͜t̵̟͚͙͇̫͚̠̭͈̣̘̫͆͒̑͊̀͒̆̉́͑͋̊̕͘ͅç̶̮͉͍̫̋̅̅̓͑͠ḩ̷͕̟̠̩̼̼͓̜̳̦͝ĭ̵̧̢̨̼͓̩͈̮͖͖͓̰͕̈́̈́͂̋̅̐̍̔̎̀́̕n̸̛͚͕̝̐́̿͌͂̊͛̓̂̓̓͑͋͝g̸̞̠̭͖̯̲͕̫̗͖͔͙̀̿̇͜.̸̨̡̢̱͖͙̰͍͙̟͈͓̪͙͊̓̆̃́̀̀̈́');
         } else {
             const hour = (new Date()).getHours();
             if (hour < 5) {
-                msg = 'Bailey! What are you still doing up!? GO TO BED!';
+                alert('Bailey! What are you still doing up!? GO TO BED!');
             } else if (hour < 12) {
-                msg = 'Good morning, Bailey! Did you sleep well?';
+                alert('Good morning, Bailey! Did you sleep well?');
             } else if (hour < 18) {
-                msg = 'Good afternoon, Bailey! We missed you. Enjoy your stay.';
+                alert('Good afternoon, Bailey! We missed you. Enjoy your stay.');
             } else if (hour < 22) {
-                msg = 'Good evening, Bailey. How was your day?';
+                alert('Good evening, Bailey. How was your day? ');
             } else {
-                msg = 'Hello, Bailey. It\'s getting kind of late, perhaps consider retiring to bed soon?';
+                alert('Hello, Bailey. It\'s getting kind of late, perhaps consider retiring to bed soon?');
             }
         }
-        if (msg) {
-            Util.notify({
-                message: msg,
-                type: 'danger',
-                timeout: 30000
-            });
-        }
     }
-};
-
-const getMonoType = (party) => {
-    if (!party?.length) {
-        return undefined;
-    }
-
-    let types = pokemonMap[party[0].id].type;
-    for (let i = 1; i < party.length; i++) {
-        const ptypes = pokemonMap[party[i].id].type;
-        types = types.filter(t => ptypes.includes(t));
-        if (!types.length) {
-            return undefined;
-        }
-    }
-
-    return types;
 };
 
 const loadPreviousFile = (index) => {
@@ -13022,11 +12917,11 @@ const loadPreviousFile = (index) => {
 };
 
 const isLoaded = ko.pureComputed(() => {
-    return file() !== undefined;
+    return saveData() !== undefined;
 });
 
 const isOlderVersion = ko.pureComputed(() => {
-    const saveVersion = file()?.save.update.version;
+    const saveVersion = saveData()?.save.update.version;
     return saveVersion && saveVersion != Companion.package.version;
 });
 
@@ -13043,7 +12938,7 @@ const initialize = () => {
 
 
 module.exports = {
-    file,
+    saveData,
     prevLoadedSaves,
 
     loadFile,
@@ -13078,27 +12973,6 @@ const fixList = [
             }
 
             saveData.statistics.temporaryBattleDefeated[tempBattleIndex] = 0;
-            return true;
-        }
-    },
-    {
-        name: 'A New World - Distortion World',
-        description: 'The A New World quest line is softlocked because Distortion World is unavailable.',
-        requireCurrentVersion: true,
-        fixFunction: (playerData, saveData, settingsData) => {
-            const dungeonIndex = GameConstants.getDungeonIndex('Distortion World');
-            if (!saveData.statistics.dungeonsCleared[dungeonIndex]) {
-                saveFixError('Distortion World has not been previously cleared, nothing to fix.');
-                return false;
-            }
-
-            const questState = saveData.quests.questLines.find(ql => ql.name === 'A New World')?.state ?? 0;
-            if (questState !== QuestLineState.started) {
-                saveFixError('Quest line has already been completed or is not started.');
-                return false;
-            }
-
-            saveData.statistics.dungeonsCleared[dungeonIndex] = 0;
             return true;
         }
     },
@@ -13263,39 +13137,6 @@ const decompressString = (input, inputEncoding = 'Base64') => {
     return lzutf8.decompress(input, { inputEncoding });
 };
 
-const notify = ({
-    message,
-    type = 'primary',
-    timeout = 5000,
-    title = '',
-}) => {
-    const toastId = Rand.string(7);
-    const toastHtml =
-    `<div id="${toastId}" class="toast bg-${type}" data-bs-autohide="false">
-        ${title ? `<div class="toast-header">
-            <strong class="me-auto">${title}</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>` : ''}
-        <div class="toast-body d-flex">
-            <span class="flex-grow-1">${message.replace(/\n/g, '<br/>')}</span>
-            ${title ? '' : '<button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>'}
-        </div>
-    </div>`;
-
-    $('#toaster').prepend(toastHtml);
-    $(`#${toastId}`)?.toast('show');
-
-    $(`#${toastId}`).on('shown.bs.toast', () => {
-        setTimeout(() => {
-            $(`#${toastId}`).toast('hide');
-        }, timeout);
-    });
-
-    $(`#${toastId}`).on('hidden.bs.toast', () => {
-        document.getElementById(toastId).remove();
-    });
-};
-
 module.exports = {
     formatDate,
     formatDateTime,
@@ -13311,8 +13152,6 @@ module.exports = {
 
     compressString,
     decompressString,
-
-    notify,
 };
 },{"lzutf8":6}],47:[function(require,module,exports){
 const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
@@ -13409,7 +13248,7 @@ const getVitaminPokemonList = ko.pureComputed(() => {
     }
 
     const region = highestRegion();
-    const saveLoaded = SaveData.isLoaded();
+    const saveLoaded = Companion.save.isLoaded();
     const pokemon = getFilteredVitaminList();
     pokemon.forEach((p) => {
         const regionVitamins = p.regionVitamins[region];
@@ -13442,7 +13281,7 @@ const getFilteredVitaminList = () => {
         }
 
         const partyPokemon = Companion.partyList()[pokemon.id];
-        if (SaveData.isLoaded() && hideUncaughtPokemon() && !partyPokemon) {
+        if (Companion.save.isLoaded() && hideUncaughtPokemon() && !partyPokemon) {
             return false;
         }
 
@@ -13481,7 +13320,7 @@ const getTotalVitaminsNeeded = ko.pureComputed(() => {
 });
 
 const exportData = () => {
-    const isSaveLoaded = SaveData.isLoaded();
+    const isSaveLoaded = Companion.save.isLoaded();
     const headers = [ '#', 'Pokemon', 'Type 1', 'Type 2' ];
     if (isSaveLoaded) {
         headers.push('Caught', 'Shiny');
