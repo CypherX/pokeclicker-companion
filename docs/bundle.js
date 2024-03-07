@@ -12130,8 +12130,8 @@ module.exports = {
 
 },{}],37:[function(require,module,exports){
 const settings = {
-    xAttackEnabled: ko.observable(true),
-    yellowFluteEnabled: ko.observable(true),
+    xAttackEnabled: ko.observable(false),
+    yellowFluteEnabled: ko.observable(false),
     weather: ko.observable(WeatherType.Clear),
     hideCompleted: ko.observable(true),
 };
@@ -12168,8 +12168,6 @@ const gymList = ko.pureComputed(() => {
                 return gym;
             }));
     }
-
-    console.log(baseGymList);
 
     const gymsDefeated = SaveData.file().save.statistics.gymsDefeated;
     const gymList = baseGymList.filter(g => {
@@ -12322,9 +12320,9 @@ const calcPartyAttack = (type1, type2, region, weather, playerRegion = 0, player
 const initialize = () => {
     SaveData.file.subscribe((file) => {
         if (file) {
-            const challenges = SaveData.file().save.challenges.list;
-            settings.xAttackEnabled(!challenges.disableBattleItems);
-            settings.yellowFluteEnabled(!challenges.disableBattleItems);
+            //const challenges = SaveData.file().save.challenges.list;
+            //settings.xAttackEnabled(!challenges.disableBattleItems);
+            //settings.yellowFluteEnabled(!challenges.disableBattleItems);
         }
     });
 };
@@ -12333,7 +12331,6 @@ module.exports = {
     initialize,
     settings,
     getBattleData,
-    gymList,
 };
 },{}],38:[function(require,module,exports){
 const UnobtainablePokemon = [
@@ -13250,7 +13247,13 @@ const loadAttackData = () => {
             }
         }
     }
-    
+
+    GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
+        if (!player.itemList[flute]()) {
+            player.gainItem(flute, 1);
+        }
+    })
+
     EffectEngineRunner.initialize(App.game.multiplier, GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]));
     FluteEffectRunner.initialize(App.game.multiplier);
 
@@ -13279,6 +13282,9 @@ const loadAttackData = () => {
             FluteEffectRunner.toggleEffect(flute);
         }
     });
+
+    BattleCalculator.settings.xAttackEnabled(false);
+    BattleCalculator.settings.yellowFluteEnabled(false);
 
     isDamageLoaded(true);
 };
