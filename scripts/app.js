@@ -489,30 +489,6 @@ const calculateTypeDamageDistribution = () => {
     });
 };
 
-/*const doCalcStuff = ko.observable(false);
-const calcCanIBeat = () => {
-    SaveData.loadAttackData();
-    doCalcStuff(true);
-};
-
-const canIWinTempBattles = ko.pureComputed(() => {
-    const a = doCalcStuff();
-    const tempBattles = Object.values(TemporaryBattleList).filter(tb => tb.getTown().region <= GameConstants.MAX_AVAILABLE_REGION);
-    tempBattles.forEach(tb => {
-        tb.secondsToWin = 0;
-
-        if (a) {
-            tb.getPokemonList().forEach(p => {
-                const dataPokemon = PokemonHelper.getPokemonByName(p.name);
-                const damage = App.game.party.calculatePokemonAttack(dataPokemon.type1, dataPokemon.type2);
-                tb.secondsToWin += Math.max(1, Math.ceil(p.maxHealth / damage));
-            });
-        }
-    });
-
-    return tempBattles;
-});*/
-
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#mySaveContent');
 
@@ -545,8 +521,8 @@ $(document).ready(() => {
 
     Companion.settings.initialize();
     SaveData.initialize();
-
     Forecast.generateForecasts();
+    BattleCalculator.initialize();
 });
 
 function compareBy(sortOption, direction) {
@@ -658,9 +634,4 @@ module.exports = {
 
     tabVisited,
     activeTab,
-
-    //doCalcStuff,
-    //calcCanIBeat,
-    //calcTempBattle,
-    //canIWinTempBattles,
 };

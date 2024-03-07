@@ -136,6 +136,9 @@ const loadAttackData = () => {
         return;
     }
 
+    AchievementHandler.achievementList = [];
+    AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
+
     // load starters
     player.regionStarters = [];
     const savedPlayer = SaveData.file().player;

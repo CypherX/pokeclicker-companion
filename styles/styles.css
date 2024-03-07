@@ -66,3 +66,16 @@ td.bg-vitamin-2 { background: rgba(0, 188, 140, 0.1); }
 .custom-collapse.dropdown-toggle.collapsed::after {
     transform: rotate(0);
 }
+
+table.custom-borders {
+    border-bottom: 1px solid #444;
+}
+
+table.custom-borders > tbody > tr > td {
+    border-bottom: 0 !important;
+}
+
+table.custom-borders > tbody > tr:not(:first-child):not(.collapse) > td {
+    border-top: 1px solid #444;
+}
+
