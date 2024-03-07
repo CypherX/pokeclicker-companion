@@ -15,5 +15,6 @@ Object.assign(window, {
     Enigma: require('./enigma'),
     FriendSafari: require('./friendSafari'),
     SaveFixes: require('./saveFixes'),
+    WillIWin: require('./willIWin'),
     Util: require('./util'),
 });

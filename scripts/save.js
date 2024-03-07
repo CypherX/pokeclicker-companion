@@ -1,5 +1,6 @@
 const file = ko.observable();
 const prevLoadedSaves = ko.observableArray();
+const isDamageLoaded = ko.observable(false);
 
 const loadFile = (file) => {
     const fileName = file.name;
@@ -25,6 +26,7 @@ const loadSaveData = (saveString, fileName) => {
     Enigma.revealHintsCounter(0);
     VitaminTracker.highestRegion(player.highestRegion());
     Companion.typeDamageDistribution(undefined);
+    isDamageLoaded(false);
 
     file(saveFile);
 
@@ -129,6 +131,68 @@ const initialize = () => {
     });
 };
 
+const loadAttackData = () => {
+    if (!isLoaded() || isDamageLoaded()) {
+        return;
+    }
+
+    // load starters
+    player.regionStarters = [];
+    const savedPlayer = SaveData.file().player;
+    for (let i = 0; i <= GameConstants.MAX_AVAILABLE_REGION; i++) {
+        if (savedPlayer.regionStarters && savedPlayer.regionStarters[i] != undefined) {
+            player.regionStarters.push(ko.observable(savedPlayer.regionStarters[i]));
+        } else if (i < (savedPlayer.highestRegion ?? 0)) {
+            player.regionStarters.push(ko.observable(GameConstants.Starter.Grass));
+        } else if (i == (savedPlayer.highestRegion ?? 0)) {
+            player.regionStarters.push(ko.observable(GameConstants.Starter.None));
+        } else {
+            this.regionStarters.push(ko.observable(GameConstants.Starter.None));
+        }
+    }
+
+    player.effectList = Save.initializeEffects(SaveData.file().player.effectList);
+    const itemList = SaveData.file().player._itemList;
+    player.itemList = Save.initializeItemlist();
+    if (itemList) {
+        for (const key in itemList) {
+            if (player.itemList[key]) {
+                player.itemList[key](itemList[key]);
+            }
+        }
+    }
+    
+    EffectEngineRunner.initialize(App.game.multiplier, GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]));
+    FluteEffectRunner.initialize(App.game.multiplier);
+
+    // everything we need to load to calculate true damage
+    //const thingsToLoad = ['breeding', 'keyItems', 'badgeCase', 'oakItems', 'party', 'gems', 'farming', 'statistics', 'quests', 'challenges', 'multiplier'];
+
+    //Object.keys(App.game).filter(key => thingsToLoad.includes(key)).filter(key => App.game[key]?.saveKey).forEach(key => {
+    Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
+        const saveKey = App.game[key].saveKey;
+        App.game[key].fromJSON(SaveData.file().save[saveKey]);
+    });
+
+    SaveData.file().save.achievements?.forEach((achievementName) => {
+        const achievement = AchievementHandler.findByName(achievementName);
+        if (achievement) {
+            achievement.unlocked(true);
+        }
+    });
+
+    AchievementHandler.preCheckAchievements();
+    AchievementHandler.calculateMaxBonus();
+
+    // disable flute effects
+    GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
+        if (FluteEffectRunner.isActive(flute)()) {
+            FluteEffectRunner.toggleEffect(flute);
+        }
+    });
+
+    isDamageLoaded(true);
+};
 
 module.exports = {
     file,
@@ -136,9 +200,11 @@ module.exports = {
 
     loadFile,
     loadPreviousFile,
+    loadAttackData,
 
     isLoaded,
     isOlderVersion,
 
     initialize,
+    isDamageLoaded,
 }
