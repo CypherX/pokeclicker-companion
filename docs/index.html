@@ -13,12 +13,13 @@
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
-        <script src="./pokeclicker/scripts/modules.min.js?v=0.10.17"></script>
-        <script src="./pokeclicker/scripts/script.min.js?v=0.10.17"></script>
+        <script src="./pokeclicker/scripts/modules.min.js?v=0.10.19"></script>
+        <script src="./pokeclicker/scripts/script.min.js?v=0.10.19"></script>
         <script type="text/javascript" src="./libs/bootstrap.bundle.min.js"></script>
     </head>
     <body>
-        <input type="file" id="file-selector" accept=".txt" class="d-none" onchange="Companion.save.loadFile(this.files[0])">
+        <div id="toaster"></div>
+        <input type="file" id="file-selector" accept=".txt" class="d-none" onchange="SaveData.loadFile(this.files[0])">
         <div id="container" class="d-none">
             <div class="d-flex flex-column" style="height: 100vh;">
                 <div id="header" class="mb-4">
@@ -49,7 +50,7 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#toolsContent" type="button" role="tab">
+                    <button class="nav-link" id="tab-tools" data-bs-toggle="pill" data-bs-target="#toolsContent" type="button" role="tab">
                         Tools
                     </button>
                 </li>
@@ -67,23 +68,23 @@
             </button>
             <div class="btn-group">
                 <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
-                <!-- ko if: Companion.save.prevLoadedSaves().length -->
+                <!-- ko if: SaveData.prevLoadedSaves().length -->
                 <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li class="small"><a class="dropdown-item disabled" href="#">Previously Loaded Saves</a></li>
-                    <!-- ko foreach: Companion.save.prevLoadedSaves -->
+                    <!-- ko foreach: SaveData.prevLoadedSaves -->
                     <li class="small">
                         <div class="d-flex align-items-center">
-                            <a class="dropdown-item flex-grow-1 pe-2" href="#" data-bind="text: $data.name, click: () => { Companion.save.loadPreviousFile($index()) }"></a>
+                            <a class="dropdown-item flex-grow-1 pe-2" href="#" data-bind="text: $data.name, click: () => { SaveData.loadPreviousFile($index()) }"></a>
                             <div class="text-danger ms-2 me-3" style="cursor: pointer;"
-                                data-bind="click: (_, e) => { Companion.save.prevLoadedSaves.splice($index(), 1); e.stopPropagation(); }">x</div>
+                                data-bind="click: (_, e) => { SaveData.prevLoadedSaves.splice($index(), 1); e.stopPropagation(); }">x</div>
                         </div>
                     </li>
                     <!-- /ko -->
                     <li><hr class="dropdown-divider"></li>
-                    <li class="small"><a class="dropdown-item" href="#" data-bind="click: () => { Companion.save.prevLoadedSaves([]); }">Remove All</a></li>
+                    <li class="small"><a class="dropdown-item" href="#" data-bind="click: () => { SaveData.prevLoadedSaves([]); }">Remove All</a></li>
                 </ul>
                 <!-- /ko -->
             </div>
@@ -92,7 +93,7 @@
 </nav>
 
 <!-- import "mySaveNavigation.html" -->
-<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#mySaveContent' && Companion.save.isLoaded">
+<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#mySaveContent' && SaveData.isLoaded">
     <div class="container-fluid justify-content-xl-center g-0">
         <ul class="navbar-nav" role="tablist">
             <li class="nav-item mx-1">
@@ -158,11 +159,16 @@
 <!-- import end -->
 
 <!-- import "toolsNavigation.html" -->
-<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#main-tab-tools'">
+<nav class="navbar navbar-expand bg-primary py-0" data-bs-theme="dark" data-bind="visible: Companion.activeTab() == '#toolsContent'">
     <div class="container-fluid justify-content-xl-center g-0">
         <ul class="navbar-nav" role="tablist">
             <li class="nav-item mx-1">
-                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tools-save-fixes" type="button" role="tab">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tools-battle-calculator" type="button" role="tab">
+                    Battle Calculator
+                </button>
+            </li>
+            <li class="nav-item mx-1">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tools-save-fixes" type="button" role="tab">
                     Save Fixes
                 </button>
             </li>
@@ -172,26 +178,42 @@
 <!-- import end -->
 <!-- import end -->
 
-                    <div class="alert alert-danger rounded-0 p-2 text-center" data-bind="visible: Companion.save.isOlderVersion">
+                    <div class="alert alert-danger rounded-0 p-2 text-center" data-bind="visible: SaveData.isOlderVersion">
                         The loaded save is from an older version of PokéClicker and may result in incorrect data and statistics.
                     </div>
                 </div>
 
                 <div id="main-content" class="tab-content flex-grow-1" style="overflow: auto;">
-                    
+
                     <!-- import "mySaveContent.html" -->
 <div class="tab-pane active h-100" id="mySaveContent">
     <div data-bind="template: { name: 'load-save-template' }"></div>
 
-    <div class="tab-content h-100" data-bind="if: Companion.save.isLoaded">
+    <div class="tab-content h-100" data-bind="if: SaveData.isLoaded">
         <!-- import "mySaveMissingPokemon.html" -->
-<div class="tab-pane h-100 container-xxl show active" id="mySaveMissingPokemon">
-    <div class="d-flex flex-column" data-bind="with: Companion.getMissingPokemon">
-        <div data-bind="visible: !$data.length">
-            <p class="text-warning text-center h4 mt-5">Congratulations!<br/>You've caught 'em all!</p>
+<div class="tab-pane h-100 container-xxl show active" id="mySaveMissingPokemon" data-bind="with: Companion.getMissingPokemon" style="overflow: auto;">
+    <!-- ko ifnot: $data.length -->
+    <div class="d-flex flex-wrap justify-content-center gap-5 mt-5">
+        <p class="text-warning text-center h4">
+            Congratulations!<br/>
+            You've caught all <span data-bind="text: Companion.data.obtainablePokemonList.length.toLocaleString()">0</span> Pokémon!
+        </p>
+        <p class="text-info text-center h4" data-bind="visible: Companion.caughtShinyCount() === Companion.data.obtainablePokemonList.length">
+            &#10024; Impressive! &#10024;<br/>
+            &#10024; All of your Pokémon are shiny! &#10024;
+        </p>
+        <p class="text-danger text-center h4" data-bind="visible: Companion.caughtResistantCount() === Companion.data.obtainablePokemonList.length">
+            Magnificent!<br />
+            Your entire party is Resistant!
+        </p>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: $data.length -->
+    <div class="d-flex flex-column h-100 col-12 col-lg-8 mx-auto">
+        <div class="mb-1">
+            <span data-bind="text: `Caught Pokémon: ${Companion.caughtPokemonCount().toLocaleString()} / ${Companion.data.obtainablePokemonList.length.toLocaleString()}`"></span>
         </div>
-        <div class="col-12 col-lg-8 mx-auto" data-bind="visible: $data.length">
-            <!-- ko foreach: $data -->
+        <div class="flex-grow-1" style="overflow: auto;" data-bind="foreach: $data">
             <div class="card mb-3">
                 <div class="card-header bg-dark rounded-0 sticky-top"
                     data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`"></div>
@@ -218,9 +240,9 @@
                     </table>
                 </div>
             </div>
-            <!-- /ko -->
         </div>
     </div>
+    <!-- /ko -->
 </div>
 <!-- import end -->
 
@@ -537,27 +559,52 @@
             <div class="tab-pane h-100 container-xxl" id="type-damage" role="tabpanel" aria-labelledby="type-damage-tab">
                 <div class="d-flex flex-column h-100">
                     <div class="control-row">
-                        <div class="align-items-center">
-                            <button type="button" class="btn btn-primary me-3"
-                                data-bind="click: () => Companion.calculateTypeDamageDistribution()">
-                                Calculate
-                            </button>
-                            <div class="form-check form-check-inline form-switch me-3">
-                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageXAttack" data-bind="checked: Companion.includeXAttack">
-                                <label class="form-check-label" for="typeDamageXAttack">xAttack</label>
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-primary me-3"
+                                    data-bind="click: () => Companion.calculateTypeDamageDistribution()">
+                                    Calculate
+                                </button>
                             </div>
-                            <div class="form-check form-check-inline form-switch me-3">
-                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageYellowFlute" data-bind="checked: Companion.includeYellowFlute">
-                                <label class="form-check-label" for="typeDamageYellowFlute">Yellow Flute</label>
+                            <div class="col-auto">
+                                <div class="form-check form-check-inline form-switch me-3">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="typeDamageXAttack" data-bind="checked: Companion.includeXAttack">
+                                    <label class="form-check-label" for="typeDamageXAttack">xAttack</label>
+                                </div>
                             </div>
-                            <div class="form-check form-check-inline form-switch me-3">
-                                <input class="form-check-input" type="checkbox" role="switch" id="typeDamageGems" data-bind="checked: Companion.includeGems">
-                                <label class="form-check-label" for="typeDamageGems">Gems</label>
+                            <div class="col-auto">
+                                <div class="form-check form-check-inline form-switch me-3">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="typeDamageYellowFlute" data-bind="checked: Companion.includeYellowFlute">
+                                    <label class="form-check-label" for="typeDamageYellowFlute">Yellow Flute</label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-check form-check-inline form-switch me-3">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="typeDamageGems" data-bind="checked: Companion.includeGems">
+                                    <label class="form-check-label" for="typeDamageGems">Gems</label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group">
+                                    <div class="input-group-text">Weather</div>
+                                    <select class="form-select form-select-sm"
+                                        data-bind="options: GameHelper.enumSelectOption(WeatherType), optionsText: 'name', optionsValue: 'value', value: Companion.typeDamageWeather">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group">
+                                    <div class="input-group-text">Region</div>
+                                    <select class="form-select form-select-sm"
+                                        data-bind="options: GameHelper.enumSelectOption(GameConstants.Region).filter(o => o.value <= GameConstants.MAX_AVAILABLE_REGION),
+                                            optionsText: (item) => GameConstants.camelCaseToString(item.name), optionsValue: 'value', value: Companion.typeDamageRegion">
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                        <p class="mt-1 small">First calculate will be slower. You must re-calculate after adjusting the above settings.</p>
+                        <p class="mt-2 small">First calculate will be slower. You must re-calculate after adjusting the above settings.</p>
                     </div>
-                    <div class="table-responsive mt-2" data-bind="if: Companion.typeDamageDistribution">
+                    <div class="table-responsive mt-1" data-bind="if: Companion.typeDamageDistribution">
                         <!-- ko let: { types: Object.keys(Companion.typeDamageDistribution().distribution) } -->
                         <table class="table table-column-row-hover table-black-bg table-sticky-header table-sm mb-0" style="font-size: 0.9rem;">
                             <thead>
@@ -722,19 +769,15 @@
                     <!-- /ko -->
                 </tr>
             </thead>
-            <tbody data-bind="foreach: Object.values(Forecast.weatherForecast.slice(0, 18).reduce((map, wf) => {
-                map[wf.startDate.getDate()] = map[wf.startDate.getDate()] || [];
-                map[wf.startDate.getDate()].push(wf);
-                return map;
-            }, {}))">
-                <!-- ko foreach: $data -->
-                <tr>
+            <tbody class="text-center" data-bind="foreach: Forecast.getUpcomingWeather()">
+                <!-- ko foreach: $data.forecast -->
+                <tr class="align-middle">
                     <!-- ko if: $index() == 0 -->
-                    <td class="text-center align-middle" data-bind="text: Util.formatDate($data.startDate), attr: { rowspan: $parent.length }"></td>
+                    <td data-bind="text: $parent.date, attr: { rowspan: $parent.forecast.length }"></td>
                     <!-- /ko -->
-                    <td class="text-center text-nowrap" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, Weather.period))}`"></td>
+                    <td class="text-nowrap" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, Weather.period))}`"></td>
                     <!-- ko foreach: Companion.data.validRegions -->
-                    <td class="text-center text-dark" data-bind="text: WeatherType[$parent.regionalWeather[$data]], style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
+                    <td class="text-dark" data-bind="text: GameConstants.humanifyString(WeatherType[$parent.regionalWeather[$data]]), style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
                     <!-- /ko -->
                 </tr>
                 <!-- /ko -->
@@ -754,7 +797,7 @@
             </thead>
             <tbody data-bind="foreach: GameHelper.enumNumbers(WeatherType)">
                 <tr>
-                    <td class="align-middle text-dark" data-bind="text: WeatherType[$data], style: { 'background-color': Weather.weatherConditions[$data].color }"></td>
+                    <td class="align-middle text-dark" data-bind="text: GameConstants.humanifyString(WeatherType[$data]), style: { 'background-color': Weather.weatherConditions[$data].color }"></td>
                     <!-- ko foreach: Companion.data.validRegions -->
                     <td class="text-center align-middle" data-bind="text: Util.formatDateTime(Forecast.getNextWeatherDate($data, $parent)) || '-'"></td>
                     <!-- /ko -->
@@ -1051,7 +1094,7 @@
                         }">Export</button>
                     </div>
                 </div>
-                <div class="row mb-1" data-bind="visible: Companion.save.isLoaded">
+                <div class="row mb-1" data-bind="visible: SaveData.isLoaded">
                     <div class="col-12">
                         <div class="form-check form-switch form-check-inline">
                             <input class="form-check-input" type="checkbox" role="switch" id="hidePokemonOptimalVitamins" autocomplete="off" data-bind="checked: VitaminTracker.hidePokemonOptimalVitamins">
@@ -1088,10 +1131,10 @@
                         </tr>
                     </tbody>
                 </table>
-                <!-- ko ifnot: Companion.save.isLoaded -->
+                <!-- ko ifnot: SaveData.isLoaded -->
                 <div class="text-end small mt-2">* Load a save file to view the vitamins your Pokémon currently have</div>
                 <!-- /ko -->
-                <!-- ko if: Companion.save.isLoaded -->
+                <!-- ko if: SaveData.isLoaded -->
                 <div class="text-end small mt-2">* Above totals do not include vitamins you have already purchased</div>
                 <!-- /ko -->
             </div>
@@ -1103,34 +1146,34 @@
                     <thead>
                         <tr class="table-dark fw-normal border-top-0 align-middle">
                             <th class="text-center sortable" data-sort="id" style="width: 0;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">#</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">#</th>
                             <th class="sortable" data-sort="name"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Pokémon</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Pokémon</th>
                             <th class="text-center" style="width: 10%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Native Region</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Native Region</th>
                             <th class="text-center sortable" data-sort="base-attack" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Base Attack</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Base Attack</th>
                             <th class="text-center sortable" data-sort="base-bonus" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 },
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 },
                                     tooltip: { title: 'Attack gained each breeding cycle with no vitamins.' }">Attack Bonus</th>
                             <th class="text-center sortable" data-sort="base-steps" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Egg Steps</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Egg Steps</th>
                             <!-- ko foreach: GameHelper.enumNumbers(GameConstants.VitaminType) -->
                             <th class="text-center" style="width: 5%;" data-bind="text: `${GameConstants.VitaminType[$data]}`, tooltip: {
                                 title: `Optimal amount of ${GameConstants.VitaminType[$data]} to give this Pokémon based on the selected Highest Region. Loading a save file will display the current amount of vitamins alongside the optimal amount.`
                             }"></th>
                             <!-- /ko -->
                             <th class="text-center sortable" data-sort="vitamin-bonus" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 },
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 },
                                     tooltip: { title: 'Attack gained each breeding cycle with optimal vitamins.' }">
                                 <span class="text-nowrap">Bonus w/</span> Vitamins
                             </th>
                             <th class="text-center sortable" data-sort="vitamin-steps" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Steps w/ Vitamins</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Steps w/ Vitamins</th>
                             <th class="text-center sortable" data-sort="breeding-efficiency" style="width: 5%;"
-                                data-bind="attr: { rowspan: Companion.save.isLoaded() ? 2 : 1 }">Breeding Efficiency</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Breeding Efficiency</th>
                         </tr>
-                        <!-- ko if: Companion.save.isLoaded -->
+                        <!-- ko if: SaveData.isLoaded -->
                         <tr class="table-dark fw-normal border-top-0 align-middle">
                             <th colspan="3" class="text-center p-1 border-top-0 border-start-0">Current | Optimal</th>
                         </tr>
@@ -1163,9 +1206,195 @@
 <!-- import end -->
                     
                     <!-- import "toolsContent.html" -->
-<div class="tab-pane" id="toolsContent">
-    <div class="tab-content container-xxl h-100">
-        <div class="tab-pane show active" id="tools-save-fixes">
+<div class="tab-pane h-100 container-xxl" id="toolsContent">
+    <div class="tab-content h-100 container-xxl">
+        <div class="tab-pane h-100 container-xxl show active" id="tools-battle-calculator">
+            <div data-bind="template: { name: 'load-save-template' }"></div>
+
+            <div class="d-flex flex-column h-100" data-bind="if: SaveData.isLoaded">
+                <div class="control-row mx-auto mb-3" data-bind="visible: SaveData.isDamageLoaded">
+                    <div class="row align-items-center" data-bind="with: BattleCalculator.settings">
+                        <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorxAttach" data-bind="checked: $data.xAttackEnabled">
+                                <label class="form-check-label" for="BattleCalculatorxAttach">xAttack</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorYellowFlute" data-bind="checked: $data.yellowFluteEnabled">
+                                <label class="form-check-label" for="BattleCalculatorYellowFlute">Yellow Flute</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="input-group">
+                                <div class="input-group-text">Weather</div>
+                                <select class="form-select form-select-sm"
+                                    data-bind="options: GameHelper.enumSelectOption(WeatherType), optionsText: 'name', optionsValue: 'value', value: $data.weather">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorHideCompleted" data-bind="checked: $data.hideCompleted">
+                                <label class="form-check-label" for="BattleCalculatorHideCompleted">Hide Completed Battles</label>
+                            </div>
+                        </div>
+                        <!--<div class="col-auto">
+                            <div class="input-group">
+                                <div class="input-group-text">Region</div>
+                                <select class="form-select form-select-sm"
+                                    data-bind="options: GameHelper.enumSelectOption(GameConstants.Region).filter(o => o.value <= GameConstants.MAX_AVAILABLE_REGION),
+                                        optionsText: (item) => GameConstants.camelCaseToString(item.name), optionsValue: 'value', value: $data.region">
+                                </select>
+                            </div>
+                        </div>-->
+                    </div>
+                </div>
+
+                <div class="mx-auto text-center mt-5" data-bind="hidden: SaveData.isDamageLoaded">
+                    <button type="button" class="btn btn-primary" data-bind="click: () => SaveData.loadAttackData()">Calculate Battles</button>
+                    <div class="form-text">Additional data must be loaded from your save file. This may take a few seconds.</div>
+                </div>
+
+                <!-- ko if: SaveData.isDamageLoaded -->
+                <ul class="nav nav-tabs container-xxl mb-4" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="gym-elite4-tab" data-bs-toggle="pill" data-bs-target="#gym-e4" type="button" role="tab" aria-controls="gym-e4" aria-selected="false">
+                            Gyms & Elite 4
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="temp-battles-tab" data-bs-toggle="pill" data-bs-target="#temp-battles" type="button" role="tab" aria-controls="temp-battles" aria-selected="true">
+                            Temporary Battles
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content flex-grow-1" style="overflow: auto;">
+                    <div class="tab-pane active" id="gym-e4" role="tabpanel" aria-labelledby="gym-elite4-tab">
+                        <table class="table table-bordered table-sticky-header custom-borders">
+                            <thead>
+                                <tr class="table-dark">
+                                    <th>Gym</th>
+                                    <th class="text-center">Pokémon</th>
+                                    <th class="text-center">Total HP</th>
+                                    <th class="text-center">Battle Seconds</th>
+                                    <th class="text-center">Seconds To Win</th>
+                                    <th class="text-center">Completed?</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <!-- ko using: BattleCalculator.getBattleData -->
+                            <tbody data-bind="foreach: $data.gyms">
+                                <tr class="align-middle">
+                                    <td data-bind="text: $data.town"></td>
+                                    <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
+                                    <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
+                                    <td class="text-center" data-bind="text: `${GameConstants.GYM_TIME / 1000}`"></td>
+                                    <td class="text-center" data-bind="text: $data.secondsToWin.toLocaleString(),
+                                        class: $data.secondsToWin <= (GameConstants.GYM_TIME / 1000) ? 'text-success' : 'text-danger'"></td>
+                                    <td class="text-center" data-bind="text: $data.isCompleted ? 'Yes' : 'No',
+                                        class: $data.isCompleted ? 'text-success' : 'text-danger'"></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bind="attr: { 'data-bs-target': `#gym-collapse${$index()}` }"></button>
+                                    </td>
+                                </tr>
+                                <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }" style="transition: none !important;">
+                                    <td colspan="7">
+                                        <table class="table table-sm small mb-0">
+                                            <thead>
+                                                <tr class="table-dark">
+                                                    <th>Pokemon</th>
+                                                    <th class="text-center">Type</th>
+                                                    <th class="text-center">HP</th>
+                                                    <th class="text-center">Damage Per Attack</th>
+                                                    <th class="text-center">Seconds To Defeat</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody data-bind="foreach: $data.pokemonList">
+                                                <tr>
+                                                    <td data-bind="text: name"></td>
+                                                    <td class="text-center" data-bind="text: pokemonMap[$data.name].type.map(t => PokemonType[t]).join(' / ')"></td>
+                                                    <td class="text-center" data-bind="text: maxHealth.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: partyDamage.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: secondsToDefeat.toLocaleString()"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tbody data-bind="visible: $data.gyms.length == 0">
+                                <tr>
+                                    <td class="text-center" colspan="7">No data to display. Check above settings.</td>
+                                </tr>
+                            </tbody>
+                            <!-- /ko -->
+                        </table>
+                    </div>
+                    <div class="tab-pane" id="temp-battles" role="tabpanel" aria-labelledby="temp-battles-tab">
+                        <table class="table table-bordered table-sticky-header custom-borders">
+                            <thead>
+                                <tr class="table-dark">
+                                    <th>Battle</th>
+                                    <th class="text-center">Pokémon</th>
+                                    <th class="text-center">Total HP</th>
+                                    <th class="text-center">Battle Seconds</th>
+                                    <th class="text-center">Seconds To Win</th>
+                                    <th class="text-center">Completed?</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <!-- ko using: BattleCalculator.getBattleData -->
+                            <tbody data-bind="foreach: $data.tempBattles">
+                                <tr class="align-middle">
+                                    <td data-bind="text: $data.name"></td>
+                                    <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
+                                    <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
+                                    <td class="text-center" data-bind="text: `${GameConstants.TEMP_BATTLE_TIME / 1000}`"></td>
+                                    <td class="text-center" data-bind="text: $data.secondsToWin.toLocaleString(),
+                                        class: $data.secondsToWin <= (GameConstants.TEMP_BATTLE_TIME / 1000) ? 'text-success' : 'text-danger'"></td>
+                                    <td class="text-center" data-bind="text: $data.optionalArgs.resetDaily ? 'Resets Daily' : $data.isCompleted ? 'Yes' : 'No',
+                                        class: $data.optionalArgs.resetDaily ? 'text-body small' : $data.isCompleted ? 'text-success' : 'text-danger'"></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bind="attr: { 'data-bs-target': `#tb-collapse${$index()}` }"></button>
+                                    </td>
+                                </tr>
+                                <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }" style="transition: none !important;">
+                                    <td colspan="7">
+                                        <table class="table table-sm small mb-0">
+                                            <thead>
+                                                <tr class="table-dark">
+                                                    <th>Pokemon</th>
+                                                    <th class="text-center">Type</th>
+                                                    <th class="text-center">HP</th>
+                                                    <th class="text-center">Damage Per Attack</th>
+                                                    <th class="text-center">Seconds To Defeat</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody data-bind="foreach: $data.pokemonList">
+                                                <tr>
+                                                    <td data-bind="text: name"></td>
+                                                    <td class="text-center" data-bind="text: pokemonMap[$data.name].type.map(t => PokemonType[t]).join(' / ')"></td>
+                                                    <td class="text-center" data-bind="text: maxHealth.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: partyDamage.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: secondsToDefeat.toLocaleString()"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <!-- /ko -->
+                        </table>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+        </div>
+        <div class="tab-pane show" id="tools-save-fixes">
             <div class="form col-12 col-lg-6 mx-auto">
                 <p>Fix common issues with your save file. After a fix is applied a fixed copy of the selected save file will be downloaded. Import the fixed file over your existing file in PokéClicker.</p>
                 <hr />
@@ -1234,6 +1463,7 @@
                             <option value="tab-my-save">My Save</option>
                             <option value="tab-forecasts">Forecasts</option>
                             <option value="tab-vitamintracker">Vitamin Tracker</option>
+                            <option value="tab-tools">Tools</option>
                         </select>
                         <div class="form-text">Choose the default tab to display when opening the Companion.</div>
                     </div>
@@ -1255,12 +1485,12 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js"></script>
+        <script src="./bundle.js?v=20240205"></script>
     </body>
 </html>
 
 <script type="text/html" id="load-save-template">
-    <!-- ko ifnot: Companion.save.isLoaded -->
+    <!-- ko ifnot: SaveData.isLoaded -->
     <div class="position-absolute top-50 start-50 translate-middle" style="z-index: -1;">
         <h1 class="display-6 mb-0">Select a save file or check out the other pages.</h1>
         <small class="font-monospace">PokéClicker <code data-bind="text: `v${Companion.package.version}`"></code></small>
