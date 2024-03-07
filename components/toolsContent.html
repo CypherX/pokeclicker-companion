@@ -68,6 +68,7 @@
                             <thead>
                                 <tr class="table-dark">
                                     <th>Gym</th>
+                                    <th class="text-center">Region</th>
                                     <th class="text-center">Pokémon</th>
                                     <th class="text-center">Total HP</th>
                                     <th class="text-center">Battle Seconds</th>
@@ -80,6 +81,7 @@
                             <tbody data-bind="foreach: $data.gyms">
                                 <tr class="align-middle">
                                     <td data-bind="text: $data.town"></td>
+                                    <td class="text-center" data-bind="text: Util.getRegionNameText($data.townObj.region, $data.townObj.subRegion)"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
                                     <td class="text-center" data-bind="text: `${GameConstants.GYM_TIME / 1000}`"></td>
@@ -93,7 +95,7 @@
                                     </td>
                                 </tr>
                                 <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }" style="transition: none !important;">
-                                    <td colspan="7">
+                                    <td colspan="9">
                                         <table class="table table-sm small mb-0">
                                             <thead>
                                                 <tr class="table-dark">
@@ -130,6 +132,7 @@
                             <thead>
                                 <tr class="table-dark">
                                     <th>Battle</th>
+                                    <th class="text-center">Region</th>
                                     <th class="text-center">Pokémon</th>
                                     <th class="text-center">Total HP</th>
                                     <th class="text-center">Battle Seconds</th>
@@ -142,6 +145,7 @@
                             <tbody data-bind="foreach: $data.tempBattles">
                                 <tr class="align-middle">
                                     <td data-bind="text: $data.name"></td>
+                                    <td class="text-center" data-bind="text: Util.getRegionNameText($data.getTown().region, $data.getTown().subRegion)"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
                                     <td class="text-center" data-bind="text: `${GameConstants.TEMP_BATTLE_TIME / 1000}`"></td>

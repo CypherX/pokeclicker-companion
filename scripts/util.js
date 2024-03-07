@@ -104,6 +104,15 @@ const notify = ({
     });
 };
 
+const getRegionNameText = (region, subRegion = 0) => {
+    const regionName = GameConstants.camelCaseToString(GameConstants.Region[region]);
+    const subRegionName = SubRegions.getSubRegionById(region, subRegion)?.name;
+    if (regionName == subRegionName || !subRegionName) {
+        return regionName;
+    }
+    return `${regionName} / ${subRegionName}`;
+};
+
 module.exports = {
     formatDate,
     formatDateTime,
@@ -121,4 +130,5 @@ module.exports = {
     decompressString,
 
     notify,
+    getRegionNameText,
 };

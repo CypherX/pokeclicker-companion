@@ -111,6 +111,7 @@ const getBattleData = ko.pureComputed(() => {
         }
 
         const town = TownList[g.parent?.name ?? g.town];
+        g.townObj = town;
 
         g.isCompleted = gymsDefeated[GameConstants.getGymIndex(g.town)] > 0;
         g.secondsToWin = 0;
