@@ -3,6 +3,7 @@ const settings = {
     yellowFluteEnabled: ko.observable(false),
     weather: ko.observable(WeatherType.Clear),
     hideCompleted: ko.observable(true),
+    hideLocked: ko.observable(false),
 };
 
 
@@ -48,6 +49,10 @@ const gymList = ko.pureComputed(() => {
             return false;
         }
 
+        if (settings.hideLocked() && !g.isUnlocked()) {
+            return false;
+        }
+
         if (settings.hideCompleted() && gymsDefeated[GameConstants.getGymIndex(g.town)] > 0) {
             return false;
         }
@@ -70,6 +75,10 @@ const tempBattleList = ko.pureComputed(() => {
         }
 
         if (tb.getTown().region > GameConstants.MAX_AVAILABLE_REGION) {
+            return false;
+        }
+
+        if (settings.hideLocked() && !tb.isUnlocked()) {
             return false;
         }
 

@@ -32,15 +32,12 @@
                                 <label class="form-check-label" for="BattleCalculatorHideCompleted">Hide Completed Battles</label>
                             </div>
                         </div>
-                        <!--<div class="col-auto">
-                            <div class="input-group">
-                                <div class="input-group-text">Region</div>
-                                <select class="form-select form-select-sm"
-                                    data-bind="options: GameHelper.enumSelectOption(GameConstants.Region).filter(o => o.value <= GameConstants.MAX_AVAILABLE_REGION),
-                                        optionsText: (item) => GameConstants.camelCaseToString(item.name), optionsValue: 'value', value: $data.region">
-                                </select>
+                        <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorHideLocked" data-bind="checked: $data.hideLocked">
+                                <label class="form-check-label" for="BattleCalculatorHideLocked">Hide Locked Battles</label>
                             </div>
-                        </div>-->
+                        </div>
                     </div>
                 </div>
 
@@ -95,7 +92,7 @@
                                     </td>
                                 </tr>
                                 <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }" style="transition: none !important;">
-                                    <td colspan="9">
+                                    <td colspan="8">
                                         <table class="table table-sm small mb-0">
                                             <thead>
                                                 <tr class="table-dark">
@@ -121,7 +118,7 @@
                             </tbody>
                             <tbody data-bind="visible: $data.gyms.length == 0">
                                 <tr>
-                                    <td class="text-center" colspan="7">No data to display. Check above settings.</td>
+                                    <td class="text-center" colspan="8">No data to display. Check above settings.</td>
                                 </tr>
                             </tbody>
                             <!-- /ko -->
@@ -159,7 +156,7 @@
                                     </td>
                                 </tr>
                                 <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }" style="transition: none !important;">
-                                    <td colspan="7">
+                                    <td colspan="8">
                                         <table class="table table-sm small mb-0">
                                             <thead>
                                                 <tr class="table-dark">
@@ -181,6 +178,11 @@
                                             </tbody>
                                         </table>
                                     </td>
+                                </tr>
+                            </tbody>
+                            <tbody data-bind="visible: $data.tempBattles.length == 0">
+                                <tr>
+                                    <td class="text-center" colspan="8">No data to display. Check above settings.</td>
                                 </tr>
                             </tbody>
                             <!-- /ko -->
