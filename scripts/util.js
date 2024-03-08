@@ -76,6 +76,7 @@ const notify = ({
     type = 'primary',
     timeout = 5000,
     title = '',
+    onHideFunction = undefined,
 }) => {
     const toastId = Rand.string(7);
     const toastHtml =
@@ -101,6 +102,7 @@ const notify = ({
 
     $(`#${toastId}`).on('hidden.bs.toast', () => {
         document.getElementById(toastId).remove();
+        onHideFunction?.();
     });
 };
 
@@ -111,6 +113,34 @@ const getRegionNameText = (region, subRegion = 0) => {
         return regionName;
     }
     return `${regionName} / ${subRegionName}`;
+};
+
+const notifications = [
+    {
+        id: 'newfeatbattlecalculator',
+        title: 'New Feature',
+        message: 'Check out the new Battle Calculator on the Tools tab to see if your party is ready to take on their next challenge!',
+        type: 'info',
+        timeout: 30000,
+        expires: new Date(2024, 2, 15),
+    },
+];
+
+const createNotifications = () => {
+    const seenNotifications = JSON.parse(localStorage.getItem('seenNotifications')) || [];
+    notifications.filter(n => Date.now() < n.expires && !seenNotifications.includes(n.id)).forEach(n => {
+        Util.notify({
+            message: n.message,
+            type: n.type,
+            timeout: n.timeout,
+            title: n.title,
+            onHideFunction: () => {
+                const seen = JSON.parse(localStorage.getItem('seenNotifications')) || [];
+                seen.push(n.id);
+                localStorage.setItem('seenNotifications', JSON.stringify(seen));
+            }
+        });
+    });
 };
 
 module.exports = {
@@ -131,4 +161,5 @@ module.exports = {
 
     notify,
     getRegionNameText,
+    createNotifications,
 };

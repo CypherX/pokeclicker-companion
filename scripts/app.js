@@ -523,6 +523,8 @@ $(document).ready(() => {
     SaveData.initialize();
     Forecast.generateForecasts();
     BattleCalculator.initialize();
+
+    Util.createNotifications();
 });
 
 function compareBy(sortOption, direction) {
