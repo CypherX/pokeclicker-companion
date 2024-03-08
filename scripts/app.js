@@ -458,43 +458,7 @@ const typeDamageRegion = ko.observable(GameConstants.Region.none);
 
 const calculateTypeDamageDistribution = () => {
     // load shit
-    if (!typeDamageDistribution()) {
-        player.effectList = Save.initializeEffects(SaveData.file().player.effectList);
-        const itemList = SaveData.file().player._itemList;
-        player.itemList = Save.initializeItemlist();
-        if (itemList) {
-            for (const key in itemList) {
-                if (player.itemList[key]) {
-                    player.itemList[key](itemList[key]);
-                }
-            }
-        }
-        
-        EffectEngineRunner.initialize(App.game.multiplier, GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]));
-        FluteEffectRunner.initialize(App.game.multiplier);
-
-        Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
-            const saveKey = App.game[key].saveKey;
-            App.game[key].fromJSON(SaveData.file().save[saveKey]);
-        });
-
-        SaveData.file().save.achievements?.forEach((achievementName) => {
-            const achievement = AchievementHandler.findByName(achievementName);
-            if (achievement) {
-                achievement.unlocked(true);
-            }
-        });
-
-        AchievementHandler.preCheckAchievements();
-        AchievementHandler.calculateMaxBonus();
-
-        // disable flute effects
-        GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
-            if (FluteEffectRunner.isActive(flute)()) {
-                FluteEffectRunner.toggleEffect(flute);
-            }
-        });
-    }
+    SaveData.loadAttackData();
 
     player.effectList['xAttack'](includeXAttack() ? 1 : 0);
     App.game.challenges.list.disableGems.active(!includeGems());
@@ -557,8 +521,10 @@ $(document).ready(() => {
 
     Companion.settings.initialize();
     SaveData.initialize();
-
     Forecast.generateForecasts();
+    BattleCalculator.initialize();
+
+    Util.createNotifications();
 });
 
 function compareBy(sortOption, direction) {

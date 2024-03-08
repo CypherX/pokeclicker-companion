@@ -1,6 +1,196 @@
-<div class="tab-pane" id="toolsContent">
-    <div class="tab-content container-xxl h-100">
-        <div class="tab-pane show active" id="tools-save-fixes">
+<div class="tab-pane h-100 container-xxl" id="toolsContent">
+    <div class="tab-content h-100 container-xxl">
+        <div class="tab-pane h-100 container-xxl show active" id="tools-battle-calculator">
+            <div data-bind="template: { name: 'load-save-template' }"></div>
+
+            <div class="d-flex flex-column h-100" data-bind="if: SaveData.isLoaded">
+                <div class="control-row mx-auto mb-3" data-bind="visible: SaveData.isDamageLoaded">
+                    <div class="row align-items-center" data-bind="with: BattleCalculator.settings">
+                        <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorxAttach" data-bind="checked: $data.xAttackEnabled">
+                                <label class="form-check-label" for="BattleCalculatorxAttach">xAttack</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorYellowFlute" data-bind="checked: $data.yellowFluteEnabled">
+                                <label class="form-check-label" for="BattleCalculatorYellowFlute">Yellow Flute</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="input-group">
+                                <div class="input-group-text">Weather</div>
+                                <select class="form-select form-select-sm"
+                                    data-bind="options: GameHelper.enumSelectOption(WeatherType), optionsText: 'name', optionsValue: 'value', value: $data.weather">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorHideCompleted" data-bind="checked: $data.hideCompleted">
+                                <label class="form-check-label" for="BattleCalculatorHideCompleted">Hide Completed Battles</label>
+                            </div>
+                        </div>
+                        <!--<div class="col-auto">
+                            <div class="input-group">
+                                <div class="input-group-text">Region</div>
+                                <select class="form-select form-select-sm"
+                                    data-bind="options: GameHelper.enumSelectOption(GameConstants.Region).filter(o => o.value <= GameConstants.MAX_AVAILABLE_REGION),
+                                        optionsText: (item) => GameConstants.camelCaseToString(item.name), optionsValue: 'value', value: $data.region">
+                                </select>
+                            </div>
+                        </div>-->
+                    </div>
+                </div>
+
+                <div class="mx-auto text-center mt-5" data-bind="hidden: SaveData.isDamageLoaded">
+                    <button type="button" class="btn btn-primary" data-bind="click: () => SaveData.loadAttackData()">Calculate Battles</button>
+                    <div class="form-text">Additional data must be loaded from your save file. This may take a few seconds.</div>
+                </div>
+
+                <!-- ko if: SaveData.isDamageLoaded -->
+                <ul class="nav nav-tabs container-xxl mb-4" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="gym-elite4-tab" data-bs-toggle="pill" data-bs-target="#gym-e4" type="button" role="tab" aria-controls="gym-e4" aria-selected="false">
+                            Gyms & Elite 4
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="temp-battles-tab" data-bs-toggle="pill" data-bs-target="#temp-battles" type="button" role="tab" aria-controls="temp-battles" aria-selected="true">
+                            Temporary Battles
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content flex-grow-1" style="overflow: auto;">
+                    <div class="tab-pane active" id="gym-e4" role="tabpanel" aria-labelledby="gym-elite4-tab">
+                        <table class="table table-bordered table-sticky-header custom-borders">
+                            <thead>
+                                <tr class="table-dark">
+                                    <th>Gym</th>
+                                    <th class="text-center">Region</th>
+                                    <th class="text-center">Pokémon</th>
+                                    <th class="text-center">Total HP</th>
+                                    <th class="text-center">Battle Seconds</th>
+                                    <th class="text-center">Seconds To Win</th>
+                                    <th class="text-center">Completed?</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <!-- ko using: BattleCalculator.getBattleData -->
+                            <tbody data-bind="foreach: $data.gyms">
+                                <tr class="align-middle">
+                                    <td data-bind="text: $data.town"></td>
+                                    <td class="text-center" data-bind="text: Util.getRegionNameText($data.townObj.region, $data.townObj.subRegion)"></td>
+                                    <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
+                                    <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
+                                    <td class="text-center" data-bind="text: `${GameConstants.GYM_TIME / 1000}`"></td>
+                                    <td class="text-center" data-bind="text: $data.secondsToWin.toLocaleString(),
+                                        class: $data.secondsToWin <= (GameConstants.GYM_TIME / 1000) ? 'text-success' : 'text-danger'"></td>
+                                    <td class="text-center" data-bind="text: $data.isCompleted ? 'Yes' : 'No',
+                                        class: $data.isCompleted ? 'text-success' : 'text-danger'"></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bind="attr: { 'data-bs-target': `#gym-collapse${$index()}` }"></button>
+                                    </td>
+                                </tr>
+                                <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }" style="transition: none !important;">
+                                    <td colspan="9">
+                                        <table class="table table-sm small mb-0">
+                                            <thead>
+                                                <tr class="table-dark">
+                                                    <th>Pokemon</th>
+                                                    <th class="text-center">Type</th>
+                                                    <th class="text-center">HP</th>
+                                                    <th class="text-center">Damage Per Attack</th>
+                                                    <th class="text-center">Seconds To Defeat</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody data-bind="foreach: $data.pokemonList">
+                                                <tr>
+                                                    <td data-bind="text: name"></td>
+                                                    <td class="text-center" data-bind="text: pokemonMap[$data.name].type.map(t => PokemonType[t]).join(' / ')"></td>
+                                                    <td class="text-center" data-bind="text: maxHealth.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: partyDamage.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: secondsToDefeat.toLocaleString()"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tbody data-bind="visible: $data.gyms.length == 0">
+                                <tr>
+                                    <td class="text-center" colspan="7">No data to display. Check above settings.</td>
+                                </tr>
+                            </tbody>
+                            <!-- /ko -->
+                        </table>
+                    </div>
+                    <div class="tab-pane" id="temp-battles" role="tabpanel" aria-labelledby="temp-battles-tab">
+                        <table class="table table-bordered table-sticky-header custom-borders">
+                            <thead>
+                                <tr class="table-dark">
+                                    <th>Battle</th>
+                                    <th class="text-center">Region</th>
+                                    <th class="text-center">Pokémon</th>
+                                    <th class="text-center">Total HP</th>
+                                    <th class="text-center">Battle Seconds</th>
+                                    <th class="text-center">Seconds To Win</th>
+                                    <th class="text-center">Completed?</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <!-- ko using: BattleCalculator.getBattleData -->
+                            <tbody data-bind="foreach: $data.tempBattles">
+                                <tr class="align-middle">
+                                    <td data-bind="text: $data.name"></td>
+                                    <td class="text-center" data-bind="text: Util.getRegionNameText($data.getTown().region, $data.getTown().subRegion)"></td>
+                                    <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
+                                    <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
+                                    <td class="text-center" data-bind="text: `${GameConstants.TEMP_BATTLE_TIME / 1000}`"></td>
+                                    <td class="text-center" data-bind="text: $data.secondsToWin.toLocaleString(),
+                                        class: $data.secondsToWin <= (GameConstants.TEMP_BATTLE_TIME / 1000) ? 'text-success' : 'text-danger'"></td>
+                                    <td class="text-center" data-bind="text: $data.optionalArgs.resetDaily ? 'Resets Daily' : $data.isCompleted ? 'Yes' : 'No',
+                                        class: $data.optionalArgs.resetDaily ? 'text-body small' : $data.isCompleted ? 'text-success' : 'text-danger'"></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bind="attr: { 'data-bs-target': `#tb-collapse${$index()}` }"></button>
+                                    </td>
+                                </tr>
+                                <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }" style="transition: none !important;">
+                                    <td colspan="7">
+                                        <table class="table table-sm small mb-0">
+                                            <thead>
+                                                <tr class="table-dark">
+                                                    <th>Pokemon</th>
+                                                    <th class="text-center">Type</th>
+                                                    <th class="text-center">HP</th>
+                                                    <th class="text-center">Damage Per Attack</th>
+                                                    <th class="text-center">Seconds To Defeat</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody data-bind="foreach: $data.pokemonList">
+                                                <tr>
+                                                    <td data-bind="text: name"></td>
+                                                    <td class="text-center" data-bind="text: pokemonMap[$data.name].type.map(t => PokemonType[t]).join(' / ')"></td>
+                                                    <td class="text-center" data-bind="text: maxHealth.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: partyDamage.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: secondsToDefeat.toLocaleString()"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <!-- /ko -->
+                        </table>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+        </div>
+        <div class="tab-pane show" id="tools-save-fixes">
             <div class="form col-12 col-lg-6 mx-auto">
                 <p>Fix common issues with your save file. After a fix is applied a fixed copy of the selected save file will be downloaded. Import the fixed file over your existing file in PokéClicker.</p>
                 <hr />
