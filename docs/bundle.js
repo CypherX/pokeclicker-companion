@@ -12014,7 +12014,7 @@ $(document).ready(() => {
     Companion.settings.initialize();
     SaveData.initialize();
     Forecast.generateForecasts();
-    BattleCalculator.initialize();
+    //BattleCalculator.initialize();
 
     Util.createNotifications();
 });
@@ -12139,6 +12139,7 @@ const settings = {
     hideLocked: ko.observable(false),
 };
 
+let regionMultiplierOverride = -1;
 
 let baseGymList = undefined;
 const gymList = ko.pureComputed(() => {
@@ -12174,7 +12175,7 @@ const gymList = ko.pureComputed(() => {
 
     const gymsDefeated = SaveData.file().save.statistics.gymsDefeated;
     const gymList = baseGymList.filter(g => {
-        if (!Companion.settings.showAllRegions() && g.region > player.highestRegion()) {
+        if (!Companion.settings.showAllRegions() && Math.floor(g.region) > player.highestRegion()) {
             return false;
         }
 
@@ -12255,6 +12256,8 @@ const getBattleData = ko.pureComputed(() => {
         const town = TownList[g.parent?.name ?? g.town];
         g.townObj = town;
 
+        regionMultiplierOverride = town.region;
+
         g.isCompleted = gymsDefeated[GameConstants.getGymIndex(g.town)] > 0;
         g.secondsToWin = 0;
 
@@ -12276,6 +12279,7 @@ const getBattleData = ko.pureComputed(() => {
         }
 
         const town = tb.getTown();
+        regionMultiplierOverride = town.region;
 
         tb.isCompleted = temporaryBattleDefeated[GameConstants.getTemporaryBattlesIndex(tb.name)] > 0;
         tb.secondsToWin = 0;
@@ -12289,6 +12293,7 @@ const getBattleData = ko.pureComputed(() => {
     });
 
     battleData.tempBattles = tempBattles;
+    regionMultiplierOverride = -1;
 
     return battleData;
 }).extend({ rateLimit: 50 });
@@ -12322,27 +12327,35 @@ const calcPartyAttack = (type1, type2, region, weather, playerRegion = 0, player
             // Only magikarps can attack in magikarp jump
             continue;
         }
-        attack += App.game.party.calculateOnePokemonAttack(pokemon, type1, type2, region, false, true, false, weather, true, true);
+        attack += App.game.party.calculateOnePokemonAttack(pokemon, type1, type2, region, false, true, false, weather, false, true);
     }
 
     const bonus = App.game.party.multiplier.getBonus('pokemonAttack');
     return Math.round(attack * bonus);
 };
 
+// modified Party.getRegionAttackMultiplier
+const getRegionAttackMultiplier = Party.prototype.getRegionAttackMultiplier;
+Party.prototype.getRegionAttackMultiplier = () => {
+    const region = Math.max(regionMultiplierOverride, player.highestRegion());
+    return getRegionAttackMultiplier(region);
+};
+
 const initialize = () => {
-    SaveData.file.subscribe((file) => {
+    /*SaveData.file.subscribe((file) => {
         if (file) {
             //const challenges = SaveData.file().save.challenges.list;
             //settings.xAttackEnabled(!challenges.disableBattleItems);
             //settings.yellowFluteEnabled(!challenges.disableBattleItems);
         }
-    });
+    });*/
 };
 
 module.exports = {
     initialize,
     settings,
     getBattleData,
+    //calcPartyAttack,
 };
 },{}],38:[function(require,module,exports){
 const UnobtainablePokemon = [
@@ -13294,6 +13307,9 @@ const loadAttackData = () => {
             FluteEffectRunner.toggleEffect(flute);
         }
     });
+
+    // set all pokemon to max level to handle attack calculations better
+    App.game.party.caughtPokemon.forEach(p => p.level = App.game.badgeCase.maxLevel());
 
     BattleCalculator.settings.xAttackEnabled(false);
     BattleCalculator.settings.yellowFluteEnabled(false);
