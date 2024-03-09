@@ -200,6 +200,9 @@ const loadAttackData = () => {
         }
     });
 
+    // set all pokemon to max level to handle attack calculations better
+    App.game.party.caughtPokemon.forEach(p => p.level = App.game.badgeCase.maxLevel());
+
     BattleCalculator.settings.xAttackEnabled(false);
     BattleCalculator.settings.yellowFluteEnabled(false);
 
