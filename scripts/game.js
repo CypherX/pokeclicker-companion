@@ -44,6 +44,9 @@ const initGame = () => {
   App.game.oakItems.initialize();
   App.game.underground.initialize();
   App.game.farming.initialize();
+
+  // optimizations
+  App.game.badgeCase.maxLevel.extend({ deferred: true });
 };
 
 initGame();

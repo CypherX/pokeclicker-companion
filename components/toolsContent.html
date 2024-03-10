@@ -4,6 +4,11 @@
             <div data-bind="template: { name: 'load-save-template' }"></div>
 
             <div class="d-flex flex-column h-100" data-bind="if: SaveData.isLoaded">
+                <div class="mx-auto text-center mt-5" data-bind="hidden: SaveData.isDamageLoaded">
+                    <button type="button" class="btn btn-primary" data-bind="click: () => SaveData.loadAttackData()">Calculate Battles</button>
+                    <div class="form-text">Additional data must be loaded from your save file. This may take a few seconds.</div>
+                </div>
+
                 <div class="control-row mx-auto mb-3" data-bind="visible: SaveData.isDamageLoaded">
                     <div class="row align-items-center" data-bind="with: BattleCalculator.settings">
                         <div class="col-auto">
@@ -39,11 +44,11 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="mx-auto text-center mt-5" data-bind="hidden: SaveData.isDamageLoaded">
-                    <button type="button" class="btn btn-primary" data-bind="click: () => SaveData.loadAttackData()">Calculate Battles</button>
-                    <div class="form-text">Additional data must be loaded from your save file. This may take a few seconds.</div>
+                    <!-- ko if: !Companion.settings.showAllRegions() && SaveData.file().player.highestRegion < GameConstants.MAX_AVAILABLE_REGION -->
+                    <div class="row text-center mt-1">
+                        <span class="text-muted small">Enable the <span class="text-decoration-underline">Show All Regions / Pokémon</span> setting to see battles from regions you have yet to reach.</span>
+                    </div>
+                    <!-- /ko -->
                 </div>
 
                 <!-- ko if: SaveData.isDamageLoaded -->
