@@ -1232,6 +1232,12 @@
                             </div>
                         </div>
                         <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorTimeFlute" data-bind="checked: $data.timeFluteEnabled">
+                                <label class="form-check-label" for="BattleCalculatorTimeFlute">Time Flute</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
                             <div class="input-group">
                                 <div class="input-group-text">Weather</div>
                                 <select class="form-select form-select-sm"
@@ -1294,9 +1300,9 @@
                                     <td class="text-center" data-bind="text: Util.getRegionNameText($data.townObj.region, $data.townObj.subRegion)"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
-                                    <td class="text-center" data-bind="text: `${GameConstants.GYM_TIME / 1000}`"></td>
+                                    <td class="text-center" data-bind="text: Number(BattleCalculator.getGymBattleTime().toFixed(1))"></td>
                                     <td class="text-center" data-bind="text: $data.secondsToWin.toLocaleString(),
-                                        class: $data.secondsToWin <= (GameConstants.GYM_TIME / 1000) ? 'text-success' : 'text-danger'"></td>
+                                        class: $data.secondsToWin <= BattleCalculator.getGymBattleTime() ? 'text-success' : 'text-danger'"></td>
                                     <td class="text-center" data-bind="text: $data.isCompleted ? 'Yes' : 'No',
                                         class: $data.isCompleted ? 'text-success' : 'text-danger'"></td>
                                     <td class="text-center">
@@ -1358,9 +1364,9 @@
                                     <td class="text-center" data-bind="text: Util.getRegionNameText($data.getTown().region, $data.getTown().subRegion)"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
-                                    <td class="text-center" data-bind="text: `${GameConstants.TEMP_BATTLE_TIME / 1000}`"></td>
+                                    <td class="text-center" data-bind="text: Number(BattleCalculator.getTempBattleTime().toFixed(1))"></td>
                                     <td class="text-center" data-bind="text: $data.secondsToWin.toLocaleString(),
-                                        class: $data.secondsToWin <= (GameConstants.TEMP_BATTLE_TIME / 1000) ? 'text-success' : 'text-danger'"></td>
+                                        class: $data.secondsToWin <= BattleCalculator.getTempBattleTime() ? 'text-success' : 'text-danger'"></td>
                                     <td class="text-center" data-bind="text: $data.optionalArgs.resetDaily ? 'Resets Daily' : $data.isCompleted ? 'Yes' : 'No',
                                         class: $data.optionalArgs.resetDaily ? 'text-body small' : $data.isCompleted ? 'text-success' : 'text-danger'"></td>
                                     <td class="text-center">
@@ -1496,7 +1502,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?v=20240309"></script>
+        <script src="./bundle.js?v=20240310"></script>
     </body>
 </html>
 
