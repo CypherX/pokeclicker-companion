@@ -522,7 +522,6 @@ $(document).ready(() => {
     Companion.settings.initialize();
     SaveData.initialize();
     Forecast.generateForecasts();
-    //BattleCalculator.initialize();
 
     Util.createNotifications();
 });

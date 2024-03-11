@@ -166,19 +166,18 @@ const loadAttackData = () => {
     }
 
     GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
-        if (!player.itemList[flute]()) {
-            player.gainItem(flute, 1);
-        }
+        player.effectList[flute](0);
+        player.itemList[flute](1);
     })
 
     EffectEngineRunner.initialize(App.game.multiplier, GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]));
     FluteEffectRunner.initialize(App.game.multiplier);
 
     // everything we need to load to calculate true damage
-    //const thingsToLoad = ['breeding', 'keyItems', 'badgeCase', 'oakItems', 'party', 'gems', 'farming', 'statistics', 'quests', 'challenges', 'multiplier'];
+    const thingsToLoad = ['breeding', 'keyItems', 'badgeCase', 'oakItems', 'party', 'gems', 'farming', 'statistics', 'quests', 'challenges', 'multiplier'];
 
-    //Object.keys(App.game).filter(key => thingsToLoad.includes(key)).filter(key => App.game[key]?.saveKey).forEach(key => {
-    Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
+    Object.keys(App.game).filter(key => thingsToLoad.includes(key)).filter(key => App.game[key]?.saveKey).forEach(key => {
+    //Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
         const saveKey = App.game[key].saveKey;
         App.game[key].fromJSON(SaveData.file().save[saveKey]);
     });
@@ -193,18 +192,12 @@ const loadAttackData = () => {
     AchievementHandler.preCheckAchievements();
     AchievementHandler.calculateMaxBonus();
 
-    // disable flute effects
-    GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
-        if (FluteEffectRunner.isActive(flute)()) {
-            FluteEffectRunner.toggleEffect(flute);
-        }
-    });
-
     // set all pokemon to max level to handle attack calculations better
     App.game.party.caughtPokemon.forEach(p => p.level = App.game.badgeCase.maxLevel());
 
     BattleCalculator.settings.xAttackEnabled(false);
     BattleCalculator.settings.yellowFluteEnabled(false);
+    BattleCalculator.settings.timeFluteEnabled(false);
 
     isDamageLoaded(true);
 };

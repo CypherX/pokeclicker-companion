@@ -1,6 +1,7 @@
 const settings = {
     xAttackEnabled: ko.observable(false),
     yellowFluteEnabled: ko.observable(false),
+    timeFluteEnabled: ko.observable(false),
     weather: ko.observable(WeatherType.Clear),
     hideCompleted: ko.observable(true),
     hideLocked: ko.observable(false),
@@ -105,8 +106,9 @@ const getBattleData = ko.pureComputed(() => {
     player.effectList['xAttack'](settings.xAttackEnabled() ? 1 : 0);
 
     // Yellow Flute
-    if (settings.yellowFluteEnabled() != FluteEffectRunner.isActive('Yellow_Flute')()) {
-        FluteEffectRunner.toggleEffect('Yellow_Flute');
+    if (settings.yellowFluteEnabled() != isFluteActive('Yellow_Flute')) {
+        //FluteEffectRunner.toggleEffect('Yellow_Flute');
+        toggleFlute('Yellow_Flute');
     }
 
     damageCache.clear();
@@ -165,6 +167,26 @@ const getBattleData = ko.pureComputed(() => {
     return battleData;
 }).extend({ rateLimit: 50 });
 
+const getGymBattleTime = ko.pureComputed(() => {
+    if (!SaveData.isDamageLoaded() || !settings.timeFluteEnabled()) {
+        return GameConstants.GYM_TIME / 1000;
+    }
+
+    const fluteBonus = (ItemList["Time_Flute"].multiplyBy - 1) * (AchievementHandler.achievementBonus() + 1) + 1;
+    const battleTime = GameConstants.GYM_TIME * fluteBonus;
+    return Math.ceil(battleTime / 100) / 10;
+});
+
+const getTempBattleTime = ko.pureComputed(() => {
+    if (!SaveData.isDamageLoaded() || !settings.timeFluteEnabled()) {
+        return GameConstants.TEMP_BATTLE_TIME / 1000;
+    }
+
+    const fluteBonus = (ItemList["Time_Flute"].multiplyBy - 1) * (AchievementHandler.achievementBonus() + 1) + 1;
+    const battleTime = GameConstants.TEMP_BATTLE_TIME * fluteBonus;
+    return Math.ceil(battleTime / 100) / 10;
+});
+
 const damageCache = new Map();
 const calcPokemonDamage = (pokemonName, battleRegion, battleSubRegion) => {
     const pokemon = pokemonMap[pokemonName];
@@ -208,19 +230,34 @@ Party.prototype.getRegionAttackMultiplier = () => {
     return getRegionAttackMultiplier(region);
 };
 
-const initialize = () => {
-    /*SaveData.file.subscribe((file) => {
-        if (file) {
-            //const challenges = SaveData.file().save.challenges.list;
-            //settings.xAttackEnabled(!challenges.disableBattleItems);
-            //settings.yellowFluteEnabled(!challenges.disableBattleItems);
+const toggleFlute = (flute) => {
+    if (isFluteActive(flute)) {
+        player.effectList[flute](0);
+    } else {
+        player.effectList[flute](1);
+    }
+
+    updateFluteActiveGemTypes();
+};
+
+const isFluteActive = (flute) => {
+    return !!player.effectList[flute]();
+};
+
+const updateFluteActiveGemTypes = () => {
+    FluteEffectRunner.activeGemTypes.removeAll();
+    const gemTypes = new Set();
+    GameHelper.enumStrings(GameConstants.FluteItemType).forEach(flute => {
+        if (isFluteActive(flute)) {
+            ItemList[flute].gemTypes.forEach(idx => gemTypes.add(PokemonType[idx]));
         }
-    });*/
+    });
+    [...gemTypes].forEach(x => FluteEffectRunner.activeGemTypes.push(x));
 };
 
 module.exports = {
-    initialize,
     settings,
     getBattleData,
-    //calcPartyAttack,
+    getGymBattleTime,
+    getTempBattleTime,
 };
