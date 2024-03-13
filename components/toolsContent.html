@@ -93,7 +93,7 @@
                                     <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
                                     <td class="text-center" data-bind="text: Number(BattleCalculator.getGymBattleTime().toFixed(1))"></td>
-                                    <td class="text-center" data-bind="text: $data.secondsToWin.toLocaleString(),
+                                    <td class="text-center" data-bind="text: BattleCalculator.formattedSecondsToWin($data.secondsToWin),
                                         class: $data.secondsToWin <= BattleCalculator.getGymBattleTime() ? 'text-success' : 'text-danger'"></td>
                                     <td class="text-center" data-bind="text: $data.isCompleted ? 'Yes' : 'No',
                                         class: $data.isCompleted ? 'text-success' : 'text-danger'"></td>
@@ -157,7 +157,7 @@
                                     <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
                                     <td class="text-center" data-bind="text: Number(BattleCalculator.getTempBattleTime().toFixed(1))"></td>
-                                    <td class="text-center" data-bind="text: $data.secondsToWin.toLocaleString(),
+                                    <td class="text-center" data-bind="text: BattleCalculator.formattedSecondsToWin($data.secondsToWin),
                                         class: $data.secondsToWin <= BattleCalculator.getTempBattleTime() ? 'text-success' : 'text-danger'"></td>
                                     <td class="text-center" data-bind="text: $data.optionalArgs.resetDaily ? 'Resets Daily' : $data.isCompleted ? 'Yes' : 'No',
                                         class: $data.optionalArgs.resetDaily ? 'text-body small' : $data.isCompleted ? 'text-success' : 'text-danger'"></td>

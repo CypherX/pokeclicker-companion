@@ -122,7 +122,7 @@ const notifications = [
         message: 'Check out the new Battle Calculator on the Tools tab to see if your party is ready to take on their next challenge!',
         type: 'info',
         timeout: 30000,
-        expires: new Date(2024, 2, 15),
+        expires: new Date(2024, 2, 22),
     },
 ];
 

@@ -131,12 +131,14 @@ const initialize = () => {
     });
 };
 
+const origAchievementBonus = AchievementHandler.achievementBonus;
 const loadAttackData = () => {
     if (!isLoaded() || isDamageLoaded()) {
         return;
     }
 
     AchievementHandler.achievementList = [];
+    AchievementHandler.achievementBonus = origAchievementBonus;
     AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
 
     // load starters
@@ -191,6 +193,15 @@ const loadAttackData = () => {
 
     AchievementHandler.preCheckAchievements();
     AchievementHandler.calculateMaxBonus();
+    AchievementHandler.achievementList.forEach(a => {
+        if (a.unlocked()) {
+            a.isCompleted = () => true;
+        } else {
+            a.isCompleted = () => false;
+        }
+    });
+    const bonus = AchievementHandler.achievementBonus();
+    AchievementHandler.achievementBonus = () => bonus;
 
     // set all pokemon to max level to handle attack calculations better
     App.game.party.caughtPokemon.forEach(p => p.level = App.game.badgeCase.maxLevel());

@@ -134,8 +134,14 @@ const getBattleData = ko.pureComputed(() => {
             const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0);
             p.partyDamage = damage;
             p.secondsToDefeat = Math.max(1, Math.ceil(p.maxHealth / damage));
-            g.secondsToWin += p.secondsToDefeat;
+            if (damage > 0) {
+                g.secondsToWin += p.secondsToDefeat;
+            }
         });
+
+        if (g.secondsToWin == 0) {
+            g.secondsToWin = Infinity;
+        }
     });
 
     battleData.gyms = gymBattles;
@@ -157,8 +163,14 @@ const getBattleData = ko.pureComputed(() => {
             const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0);
             p.partyDamage = damage;
             p.secondsToDefeat = Math.max(1, Math.ceil(p.maxHealth / damage));
-            tb.secondsToWin += p.secondsToDefeat;
+            if (damage > 0) {
+                tb.secondsToWin += p.secondsToDefeat;
+            }
         });
+
+        if (tb.secondsToWin == 0) {
+            tb.secondsToWin = Infinity;
+        }
     });
 
     battleData.tempBattles = tempBattles;
@@ -233,7 +245,9 @@ Party.prototype.getRegionAttackMultiplier = () => {
 const toggleFlute = (flute) => {
     if (isFluteActive(flute)) {
         player.effectList[flute](0);
+        player.itemList[flute](1);
     } else {
+        player.itemList[flute](0);
         player.effectList[flute](1);
     }
 
@@ -255,9 +269,15 @@ const updateFluteActiveGemTypes = () => {
     [...gemTypes].forEach(x => FluteEffectRunner.activeGemTypes.push(x));
 };
 
+const lol = Rand.intBetween(1, 20);
+const formattedSecondsToWin = (secondsToWin) => {
+    return lol == 1 && secondsToWin === Infinity ? 'lol never' : secondsToWin.toLocaleString();
+};
+
 module.exports = {
     settings,
     getBattleData,
     getGymBattleTime,
     getTempBattleTime,
+    formattedSecondsToWin,
 };
