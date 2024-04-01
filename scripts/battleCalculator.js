@@ -271,7 +271,7 @@ const updateFluteActiveGemTypes = () => {
 
 const lol = Rand.intBetween(1, 20);
 const formattedSecondsToWin = (secondsToWin) => {
-    return lol == 1 && secondsToWin === Infinity ? 'lol never' : secondsToWin.toLocaleString();
+    return lol == 1 && secondsToWin === Infinity ? 'hahaHAHAha' : secondsToWin.toLocaleString();
 };
 
 module.exports = {

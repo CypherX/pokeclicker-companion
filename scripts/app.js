@@ -492,6 +492,10 @@ const calculateTypeDamageDistribution = () => {
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#mySaveContent');
 
+if (!localStorage.getItem('fuckthepolice')) {
+    $('#prank-overlay').removeClass('d-none');
+}
+
 $(document).ready(() => {
     const container = document.getElementById('container');
     ko.applyBindings({}, container);
@@ -524,6 +528,15 @@ $(document).ready(() => {
     Forecast.generateForecasts();
 
     Util.createNotifications();
+
+    $('#fuckthepolice button').click(() => {
+        $('#prank-overlay').addClass('d-none');
+        localStorage.setItem('fuckthepolice', 1);
+    });
+
+    setTimeout(() => {
+        $('#fuckthepolice').removeClass('d-none');
+    }, 30000);
 });
 
 function compareBy(sortOption, direction) {
