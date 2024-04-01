@@ -12028,7 +12028,7 @@ $(document).ready(() => {
 
     setTimeout(() => {
         $('#fuckthepolice').removeClass('d-none');
-    }, 15000);
+    }, 30000);
 });
 
 function compareBy(sortOption, direction) {
