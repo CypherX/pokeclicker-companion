@@ -12016,6 +12016,7 @@ $(document).ready(() => {
     Forecast.generateForecasts();
 
     Util.createNotifications();
+    
 });
 
 function compareBy(sortOption, direction) {
