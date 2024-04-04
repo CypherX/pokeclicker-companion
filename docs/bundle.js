@@ -11941,6 +11941,34 @@ const hideOtherStatSection = (data) => {
     return false;
 };
 
+const getGMaxOrder = ko.pureComputed(() => {
+    if (!SaveData.isLoaded()) {
+        return [];
+    }
+
+    const unlockableGMax = dungeonList["Max Lair"].bossList
+        .filter(b => b.options?.requirement?.requirements?.some(r => r instanceof QuestLineStepCompletedRequirement && typeof r.questIndex === 'function'));
+    const quests = App.game.quests.getQuestLine('The Lair of Giants').quests();
+
+    const gmax = unlockableGMax.map(b => {
+        const req = b.options.requirement.requirements.find(r => r instanceof QuestLineStepCompletedRequirement);
+        const questStepIndex = req.questIndex();
+        return {
+            pokemon: b.name,
+            questStep: questStepIndex,
+            wishingPieces: quests[questStepIndex].amount,
+        };
+    }).sort((a, b) => a.questStep - b.questStep);
+
+    // pikachu, meowth, eevee always first
+    gmax.splice(0, 0, { pokemon: 'Gigantamax Pikachu' }, { pokemon: 'Gigantamax Meowth' }, { pokemon: 'Gigantamax Eevee' });
+
+    // eternapants always last
+    gmax.push({ pokemon: 'Eternamax Eternatus' });
+
+    return gmax;
+});
+
 const typeDamageDistribution = ko.observable();
 const includeXAttack = ko.observable(true);
 const includeYellowFlute = ko.observable(true);
@@ -12016,7 +12044,6 @@ $(document).ready(() => {
     Forecast.generateForecasts();
 
     Util.createNotifications();
-    
 });
 
 function compareBy(sortOption, direction) {
@@ -12117,6 +12144,8 @@ module.exports = {
     getGymData,
     getRouteData,
     hideOtherStatSection,
+
+    getGMaxOrder,
 
     typeDamageDistribution,
     calculateTypeDamageDistribution,
