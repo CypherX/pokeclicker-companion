@@ -22,6 +22,11 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="gmax-order-tab" data-bs-toggle="pill" data-bs-target="#gmax-order" type="button" role="tab" aria-controls="gmax-order" aria-selected="false">
+                    Gigantamax Order
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="type-damage-tab" data-bs-toggle="pill" data-bs-target="#type-damage" type="button" role="tab" aria-controls="type-damage" aria-selected="false">
                     Type Damage
                 </button>
@@ -214,6 +219,25 @@
                 <!-- ko if: Enigma.revealHints -->
                 <div class="text-center text-muted mt-5">Impatient (or unlucky) little shit, ain't ye?</div>
                 <!-- /ko -->
+            </div>
+
+            <div class="tab-pane h-100 container-xxl" id="gmax-order" role="tabpanel" aria-labelledby="gmax-order-tab">
+                <div class="d-flex flex-column h-100" style="overflow: auto;">
+                    <table class="table table-bordered table-striped table-hover table-sticky-header">
+                        <thead>
+                            <tr class="table-dark">
+                                <th>Pokemon</th>
+                                <th class="text-center">Wishing Pieces</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: Companion.getGMaxOrder">
+                            <tr>
+                                <td data-bind="text: $data.pokemon"></td>
+                                <td class="text-center" data-bind="text: $data.wishingPieces || '-'"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="tab-pane h-100 container-xxl" id="type-damage" role="tabpanel" aria-labelledby="type-damage-tab">
