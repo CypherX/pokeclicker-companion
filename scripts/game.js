@@ -45,6 +45,8 @@ const initGame = () => {
   App.game.underground.initialize();
   App.game.farming.initialize();
 
+  QuestLineHelper.loadQuestLines();
+
   // optimizations
   App.game.badgeCase.maxLevel.extend({ deferred: true });
 };
@@ -52,7 +54,6 @@ const initGame = () => {
 initGame();
 
 AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
-QuestLineHelper.loadQuestLines();
 
 // Knockout tooltip bindings
 ko.bindingHandlers.tooltip = {

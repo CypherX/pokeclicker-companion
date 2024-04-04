@@ -472,7 +472,12 @@ const getGMaxOrder = ko.pureComputed(() => {
     gmax.splice(0, 0, { pokemon: 'Gigantamax Pikachu' }, { pokemon: 'Gigantamax Meowth' }, { pokemon: 'Gigantamax Eevee' });
 
     // eternapants always last
-    gmax.push({ pokemon: 'Eternamax Eternatus' });
+    let name = 'Eternamax Eternatus';
+    const monoType = SaveData.getMonoType(SaveData.file().save.party.caughtPokemon);
+    if (monoType?.length == 1 && monoType[0] == PokemonType.Poison) {
+        name = 'Eternapants Eternapantatus';
+    }
+    gmax.push({ pokemon: name });
 
     return gmax;
 });

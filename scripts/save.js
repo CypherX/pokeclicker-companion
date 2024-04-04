@@ -223,6 +223,7 @@ module.exports = {
 
     isLoaded,
     isOlderVersion,
+    getMonoType,
 
     initialize,
     isDamageLoaded,
