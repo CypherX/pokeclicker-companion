@@ -12044,6 +12044,26 @@ $(document).ready(() => {
         }
     });
 
+    let timeTravelerClicks = 0;
+    $('#time-traveler').click(() => {
+        timeTravelerClicks++;
+        if (timeTravelerClicks >= 10) {
+            Util.notify({
+               message: `Greetings, Time Traveler!<br /><br /><a id="disable-time-traveler" href="#">I hate fun and don't want to see the neat moving car ever again :(</a>`,
+               timeout: 15000,
+               type: 'dark',
+            });
+            timeTravelerClicks = 0;
+        } else {
+            Util.notify({ message: 'Greetings, Time Traveler!' });
+        }
+    });
+
+    $(document).on('click', '#disable-time-traveler', () => {
+        localStorage.setItem('disabledelorean', 1);
+        $('#time-traveler').remove();
+    });
+
     Companion.settings.initialize();
     SaveData.initialize();
     Forecast.generateForecasts();
@@ -13250,6 +13270,16 @@ const loadSaveData = (saveString, fileName) => {
             type: 'danger',
             timeout: 30000
         });
+    }
+
+    if (saveFile.player._timeTraveller) {
+        if (!localStorage.getItem('disabledelorean')) {
+            setTimeout(() => {
+                $('#time-traveler').addClass('d-sm-block');
+            }, 1000);
+        }
+    } else {
+        $('#time-traveler').removeClass('d-sm-block');
     }
 
     const monoType = getMonoType(saveFile.save.party.caughtPokemon);
