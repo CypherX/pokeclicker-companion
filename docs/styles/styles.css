@@ -89,7 +89,7 @@ table.custom-borders > tbody > tr:not(:first-child):not(.collapse) > td {
     bottom: 0px;
     user-select: none;
 
-    animation: linear infinite;
+    animation: linear 2;
     animation-name: delorean;
     animation-duration: 10s;
 }
@@ -127,5 +127,6 @@ table.custom-borders > tbody > tr:not(:first-child):not(.collapse) > td {
     100% {
         left: 0;
         transform: translateX(-100%) scaleX(-1);
+        display: none;
     }
 }

@@ -12044,7 +12044,7 @@ $(document).ready(() => {
         }
     });
 
-    let timeTravelerClicks = 0;
+    /*let timeTravelerClicks = 0;
     $('#time-traveler').click(() => {
         timeTravelerClicks++;
         if (timeTravelerClicks >= 10) {
@@ -12062,7 +12062,7 @@ $(document).ready(() => {
     $(document).on('click', '#disable-time-traveler', () => {
         localStorage.setItem('disabledelorean', 1);
         $('#time-traveler').remove();
-    });
+    });*/
 
     Companion.settings.initialize();
     SaveData.initialize();
