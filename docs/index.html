@@ -208,7 +208,7 @@
         </p>
     </div>
     <!-- /ko -->
-    <!-- ko if: $data.length == 0 && Companion.settings.showRequiredOnly() -->
+    <!-- ko if: $data.length == 0 && Companion.settings.showRequiredOnly() && Companion.caughtPokemonCount() < Companion.data.obtainablePokemonList.length -->
     <p class="text-center h5 mt-5">
         You have caught at least one form of each Pokémon and completed the Pokédex in every available region.<br /><br />
         Disable the <span class="text-warning"><i>Show Required Pokémon Only</i></span> option in the settings to see all missing Pokémon!
