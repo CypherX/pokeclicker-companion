@@ -1,5 +1,5 @@
 <div class="tab-pane h-100 container-xxl show active" id="mySaveMissingPokemon" data-bind="with: Companion.getMissingPokemon" style="overflow: auto;">
-    <!-- ko ifnot: $data.length -->
+    <!-- ko if: Companion.caughtPokemonCount() === Companion.data.obtainablePokemonList.length -->
     <div class="d-flex flex-wrap justify-content-center gap-5 mt-5">
         <p class="text-warning text-center h4">
             Congratulations!<br/>
@@ -14,6 +14,12 @@
             Your entire party is Resistant!
         </p>
     </div>
+    <!-- /ko -->
+    <!-- ko if: $data.length == 0 && Companion.settings.showRequiredOnly() -->
+    <p class="text-center h5 mt-5">
+        You have caught at least one form of each Pokémon and completed the Pokédex in every available region.<br /><br />
+        Disable the <span class="text-warning"><i>Show Required Pokémon Only</i></span> option in the settings to see all missing Pokémon!
+    </p>
     <!-- /ko -->
     <!-- ko if: $data.length -->
     <div class="d-flex flex-column h-100 col-12 col-lg-8 mx-auto">
