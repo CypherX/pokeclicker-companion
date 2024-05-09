@@ -192,6 +192,7 @@
     <div class="tab-content h-100" data-bind="if: SaveData.isLoaded">
         <!-- import "mySaveMissingPokemon.html" -->
 <div class="tab-pane h-100 container-xxl show active" id="mySaveMissingPokemon" data-bind="with: Companion.getMissingPokemon" style="overflow: auto;">
+    <!-- all pokemon obtained -->
     <!-- ko if: Companion.caughtPokemonCount() === Companion.data.obtainablePokemonList.length -->
     <div class="d-flex flex-wrap justify-content-center gap-5 mt-5">
         <p class="text-warning text-center h4">
@@ -208,12 +209,18 @@
         </p>
     </div>
     <!-- /ko -->
-    <!-- ko if: $data.length == 0 && Companion.settings.showRequiredOnly() && Companion.caughtPokemonCount() < Companion.data.obtainablePokemonList.length -->
+
+    <!-- ko if: Companion.caughtPokemonCount() < Companion.data.obtainablePokemonList.length -->
+
+    <!-- showRequiredOnly setting enabled, nothing required missing -->
+    <!-- ko ifnot: $data.length -->
     <p class="text-center h5 mt-5">
         You have caught at least one form of each Pokémon and completed the Pokédex in every available region.<br /><br />
         Disable the <span class="text-warning"><i>Show Required Pokémon Only</i></span> option in the settings to see all missing Pokémon!
     </p>
     <!-- /ko -->
+
+    <!-- missing pokemon -->
     <!-- ko if: $data.length -->
     <div class="d-flex flex-column h-100 col-12 col-lg-8 mx-auto">
         <div class="mb-1">
@@ -248,6 +255,8 @@
             </div>
         </div>
     </div>
+    <!-- /ko -->
+
     <!-- /ko -->
 </div>
 <!-- import end -->
