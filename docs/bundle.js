@@ -11384,11 +11384,12 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 },{"process/browser.js":31,"timers":34}],35:[function(require,module,exports){
 module.exports={
   "name": "pokeclicker",
-  "version": "0.10.19",
+  "version": "0.10.20",
   "description": "PokéClicker repository",
   "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=development gulp",
+    "build": "cross-env NODE_ENV=development gulp build",
     "test": "npm run ts-test && npm run eslint && npm run stylelint && npm run vitest",
     "ts-test": "gulp scripts",
     "vitest": "vitest --run",
@@ -11420,7 +11421,6 @@ module.exports={
   "devDependencies": {
     "@types/bootstrap": "^4.3.1",
     "@types/bootstrap-notify": "^3.1.34",
-    "@types/gtag.js": "0.0.4",
     "@types/intro.js": "^2.4.7",
     "@types/jquery": "^3.5.16",
     "@types/knockout": "^3.4.66",
@@ -12452,7 +12452,6 @@ module.exports = {
 const UnobtainablePokemon = [
     'Mega Medicham',
     'Mega Altaria',
-    'Mega Banette',
     'Arceus (Fire)',
     'Arceus (Water)',
     'Arceus (Electric)',
@@ -12573,6 +12572,7 @@ const pokemonRegionOverride = {
     'Hoppip (Chimecho)': GameConstants.Region.hoenn,
     'Meltan': GameConstants.Region.alola,
     'Melmetal': GameConstants.Region.alola,
+    'Ditto (Transforming)': GameConstants.Region.alola,
     'Flowering Celebi': GameConstants.Region.galar,
     'Magearna (Original Color)': GameConstants.Region.galar,
 
@@ -13033,7 +13033,7 @@ const allSafariPokemon = ko.pureComputed(() => {
     }
 
     return pokemonList
-        .filter((p) => PokemonHelper.isObtainableAndNotEvable(p.name)
+        .filter((p) => PokemonLocations.isObtainableAndNotEvable(p.name)
             && PokemonHelper.calcNativeRegion(p.name) <= GameConstants.MAX_AVAILABLE_REGION)
         .map((p) => p.name);
 });
@@ -13136,6 +13136,7 @@ const initGame = () => {
 initGame();
 
 AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
+SafariPokemonList.generateSafariLists();
 
 // Knockout tooltip bindings
 ko.bindingHandlers.tooltip = {

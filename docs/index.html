@@ -13,8 +13,8 @@
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
-        <script src="./pokeclicker/scripts/modules.min.js?v=0.10.19"></script>
-        <script src="./pokeclicker/scripts/script.min.js?v=0.10.19"></script>
+        <script src="./pokeclicker/scripts/modules.min.js?v=0.10.20"></script>
+        <script src="./pokeclicker/scripts/script.min.js?v=0.10.20"></script>
         <script type="text/javascript" src="./libs/bootstrap.bundle.min.js"></script>
     </head>
     <body>
@@ -243,9 +243,9 @@
                                 <td class="text-center" data-bind="text: $data.id"></td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <knockout class="flex-grow-1" data-bind="text: $data.name"></knockout>
+                                        <knockout class="flex-grow-1" data-bind="text: $data.id == 132.01 ? 'Magikarp?' : $data.name"></knockout>
                                         <a class="small" href="#" target="_blank"
-                                            data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pok%C3%A9mon/${$data.name}` }">wiki</a>
+                                            data-bind="if: $data.id != 132.01 , attr: { href: `https://wiki.pokeclicker.com/#!Pok%C3%A9mon/${$data.name}` }">wiki</a>
                                     </div>
                                 </td>
                             </tr>
@@ -1541,7 +1541,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?v=20240509"></script>
+        <script src="./bundle.js?v=20240618"></script>
     </body>
 </html>
 
