@@ -54,6 +54,7 @@ const initGame = () => {
 initGame();
 
 AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
+SafariPokemonList.generateSafariLists();
 
 // Knockout tooltip bindings
 ko.bindingHandlers.tooltip = {

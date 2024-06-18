@@ -5,7 +5,7 @@ const allSafariPokemon = ko.pureComputed(() => {
     }
 
     return pokemonList
-        .filter((p) => PokemonHelper.isObtainableAndNotEvable(p.name)
+        .filter((p) => PokemonLocations.isObtainableAndNotEvable(p.name)
             && PokemonHelper.calcNativeRegion(p.name) <= GameConstants.MAX_AVAILABLE_REGION)
         .map((p) => p.name);
 });
