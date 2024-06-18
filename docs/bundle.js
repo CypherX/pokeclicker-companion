@@ -13455,6 +13455,14 @@ const fixList = [
                 settingsData.heldItemRegionFilter = -2;
             }
 
+            if (settingsData.breedingCategoryFilter !== undefined) {
+                settingsData.breedingCategoryFilter = -1;
+            }
+
+            if (settingsData.pokedexCategoryFilter !== undefined) {
+                settingsData.pokedexCategoryFilter = -1;
+            }
+
             return true;
         }
     },
