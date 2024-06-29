@@ -6,7 +6,7 @@ const fixList = [
     {
         name: 'v0.10.20 Game Stuck Loading',
         description: 'After selecting a save file the game never loads',
-        requireCurrentVersion: true,
+        requireCurrentVersion: false,
         fixFunction: (playerData, saveData, settingsData) => {
             if (settingsData.vitaminRegionFilter !== undefined) {
                 settingsData.vitaminRegionFilter = -2;
@@ -18,6 +18,14 @@ const fixList = [
 
             if (settingsData.heldItemRegionFilter !== undefined) {
                 settingsData.heldItemRegionFilter = -2;
+            }
+
+            if (settingsData.breedingCategoryFilter !== undefined) {
+                settingsData.breedingCategoryFilter = -1;
+            }
+
+            if (settingsData.pokedexCategoryFilter !== undefined) {
+                settingsData.pokedexCategoryFilter = -1;
             }
 
             return true;
