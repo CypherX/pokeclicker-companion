@@ -12549,7 +12549,7 @@ const pokemonRegionOverride = {
     ),
     'Pink Butterfree': GameConstants.Region.hoenn,
     "Ash's Butterfree": GameConstants.Region.hoenn,
-    'Pinkan Pikachu': GameConstants.Region.kalos,
+    'Pinkan Pikachu': GameConstants.Region.hoenn,
     'Crystal Onix': GameConstants.Region.hoenn,
     'Crystal Steelix': GameConstants.Region.hoenn,
 
