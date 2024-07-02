@@ -270,8 +270,7 @@
                     autocomplete="off" style="width: 250px;" data-bind="textInput: Companion.pokemonStatTableSearch">
             </div>
             <div class="col-md-3 col-5">
-                <select class="form-select w-100" id="pokemonStatTableFilter" style="width: 250px;" autocomplete="off"
-                    onchange="Companion.pokemonStatTableFilter(this.value)">
+                <select class="form-select w-100" id="pokemonStatTableFilter" style="width: 250px;" autocomplete="off" onchange="Companion.pokemonStatTableFilter(this.value)">
                     <option value="none">No Filter</option>
                     <option value="not-shiny">Not Shiny</option>
                     <option value="not-resistant">Not Resistant</option>
@@ -283,6 +282,7 @@
                     <option value="missing-purified">Missing Purified</option>
                     <option value="shadow">Shadow</option>
                     <option value="purified">Purified</option>
+                    <!--<option value="wanderers">Wanderer Exclusives</option>-->
                 </select>
             </div>
             <div class="col-md-6 col-2 text-end">
@@ -1541,7 +1541,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?v=20240629"></script>
+        <script src="./bundle.js?v=20240702"></script>
     </body>
 </html>
 
