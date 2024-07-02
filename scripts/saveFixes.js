@@ -31,6 +31,20 @@ const fixList = [
             return true;
         }
     },
+    {
+        name: 'Hatchery List Stuck',
+        description: 'Your hatchery list is stuck loading and only showing one or no pokemon',
+        requireCurrentVersion: true,
+        fixFunction: (playerData, saveData, settingsData) => {
+            saveData.party.caughtPokemon.forEach((pokemon) => {
+                if (!Array.isArray(pokemon[6])) {
+                    pokemon[6] = [pokemon[6] ?? 0];
+                }
+            });
+
+            return true;
+        }
+    },
     /*{
         name: 'Anomaly Mewtwo - Castelia City',
         description: 'Anomaly Mewtwo missing from Castelia City for the An Unrivaled Power quest line.',
