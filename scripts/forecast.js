@@ -3,6 +3,7 @@ const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
 const dailyDeals = ko.observableArray();
+const enigmaDirection = ko.observableArray();
 
 const generateForecasts = (date = new Date()) => {
     const currentHour = date.getHours();
@@ -67,6 +68,13 @@ const generateForecasts = (date = new Date()) => {
             }
         }
 
+        // Enigma Direction
+        SeededRand.seedWithDate(date);
+        enigmaDirection.push({
+            date: saveDate,
+            direction: directionFromIndex(SeededRand.floor(4)),
+        });
+
         date.setDate(date.getDate() + 1);
     }
 
@@ -80,6 +88,19 @@ const generateForecasts = (date = new Date()) => {
     berryMasters(berryMasterData);
     dailyDeals(dailyDealData);
 };
+
+const directionFromIndex = (index) => {
+    switch (index) {
+        case 0:
+            return 'North';
+        case 1:
+            return 'West';
+        case 2:
+            return 'East';
+        case 3:
+            return 'South';
+    }
+}
 
 const getUpcomingWeather = () => {
     const dayForecast = weatherForecast.slice(0, 18).reduce((map, wf) => {
@@ -199,6 +220,7 @@ module.exports = {
     boostedRoutes,
     berryMasters,
     dailyDeals,
+    enigmaDirection,
 
     selectedDailyDealItem,
     selectedDailyDealItemNextTrades,
