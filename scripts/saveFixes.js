@@ -3,7 +3,7 @@ const selectedFile = ko.observable();
 const saveFixError = ko.observable();
 
 const fixList = [
-    {
+    /*{
         name: 'v0.10.20 Game Stuck Loading',
         description: 'After selecting a save file the game never loads',
         requireCurrentVersion: false,
@@ -30,8 +30,8 @@ const fixList = [
 
             return true;
         }
-    },
-    {
+    },*/
+    /*{
         name: 'Hatchery List Stuck',
         description: 'Your hatchery list is stuck loading and only showing one or no pokemon',
         requireCurrentVersion: true,
@@ -44,7 +44,7 @@ const fixList = [
 
             return true;
         }
-    },
+    },*/
     /*{
         name: 'Anomaly Mewtwo - Castelia City',
         description: 'Anomaly Mewtwo missing from Castelia City for the An Unrivaled Power quest line.',
