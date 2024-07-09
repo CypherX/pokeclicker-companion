@@ -121,7 +121,7 @@ const pokemonRegionOverride = {
     'Hoppip (Chimecho)': GameConstants.Region.hoenn,
     'Meltan': GameConstants.Region.alola,
     'Melmetal': GameConstants.Region.alola,
-    'Ditto (Transforming)': GameConstants.Region.alola,
+    'Ditto (Magikarp)': GameConstants.Region.alola,
     'Flowering Celebi': GameConstants.Region.galar,
     'Magearna (Original Color)': GameConstants.Region.galar,
 
