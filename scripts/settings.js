@@ -15,7 +15,7 @@ const initialize = () => {
         showAllRegions(true);
     }
     
-    if (localStorage.getItem('defaultTab')) {
+    if (localStorage.getItem('defaultTab') && !window.location.hash.includes('#!')) {
         const tab = localStorage.getItem('defaultTab');
         if (document.getElementById(tab)) {
             defaultTab(tab);

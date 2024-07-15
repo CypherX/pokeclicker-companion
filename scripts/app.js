@@ -552,12 +552,44 @@ $(document).ready(() => {
         }
     });
 
+    if (window.location.hash.includes('#!')) {
+        const page = window.location.hash.replace(/.*#!/, '');
+        page.split('/').forEach(s => {
+            const tab = $(`button[data-bs-toggle="pill"][data-path="${s}"]`);
+            if (tab.length) {
+                tab.tab('show');
+            }
+        });
+    }
+
+    $(document).on('shown.bs.tab', 'button[data-bs-toggle="pill"]', (e) => {
+        updateNavigationHash();
+    });
+
     Companion.settings.initialize();
     SaveData.initialize();
     Forecast.generateForecasts();
 
     Util.createNotifications();
+
+    updateNavigationHash();
 });
+
+const updateNavigationHash = () => {
+    const pages = [];
+    $('button[data-bs-toggle="pill"].active:visible').each(function() {
+        const path = $(this).data('path');
+        if (path) {
+            pages.push(path);
+        }
+    });
+
+    if (pages.length) {
+        window.history.replaceState(null, '', `#!${pages.join('/')}`);
+    } else {
+        window.history.replaceState(null, '', location.pathname);
+    }
+};
 
 function compareBy(sortOption, direction) {
     return function (a, b) {
