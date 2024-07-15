@@ -3,7 +3,7 @@ const partyList = ko.pureComputed(() => {
     const party = saveData?.save.party.caughtPokemon ?? [];
     const statistics = saveData?.save.statistics;
 
-    return party.reduce((_map, p) => {
+    return party.filter(p => Companion.data.obtainablePokemonMap[p.id]).reduce((_map, p) => {
         const partyPokemon = PokemonFactory.generatePartyPokemon(p.id);
         partyPokemon.fromJSON(p);
 
@@ -126,7 +126,8 @@ const caughtShinyCount = ko.pureComputed(() => {
     }
 
     return SaveData.file().save.party.caughtPokemon
-        .filter(p => p[PartyPokemonSaveKeys.shiny] === true).length;
+        .filter(p => Companion.data.obtainablePokemonMap[p.id]
+            && p[PartyPokemonSaveKeys.shiny] === true).length;
 });
 
 const caughtResistantCount = ko.pureComputed(() => {
@@ -135,7 +136,8 @@ const caughtResistantCount = ko.pureComputed(() => {
     }
 
     return SaveData.file().save.party.caughtPokemon
-        .filter(p => p[PartyPokemonSaveKeys.pokerus] === GameConstants.Pokerus.Resistant).length;
+        .filter(p => Companion.data.obtainablePokemonMap[p.id]
+            && p[PartyPokemonSaveKeys.pokerus] === GameConstants.Pokerus.Resistant).length;
 });
 
 const hideFromPokemonStatsTable = (partyPokemon) => {
