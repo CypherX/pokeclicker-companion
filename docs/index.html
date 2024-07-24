@@ -889,7 +889,7 @@
             <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
                     data-bind="text: $data, css: { active: $index() == 0 },
-                        attr: { id: `berrymaster-${$index()}-tab`, 'data-bs-target': `#berrymaster-${$index()}` }"></button>
+                        attr: { id: `berrymaster-${$index()}-tab`, 'data-bs-target': `#berrymaster-${$index()}`, 'data-path': $data.replace(/\s+/g, '') }"></button>
             </li>
         </ul>
         <div class="tab-content flex-grow-1" style="overflow: auto;" data-bind="foreach: GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None')">
@@ -1569,7 +1569,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?v=20240715"></script>
+        <script src="./bundle.js?v=20240724"></script>
     </body>
 </html>
 
