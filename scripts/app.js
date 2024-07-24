@@ -557,14 +557,14 @@ $(document).ready(() => {
     if (window.location.hash.includes('#!')) {
         const page = window.location.hash.replace(/.*#!/, '');
         page.split('/').forEach(s => {
-            const tab = $(`button[data-bs-toggle="pill"][data-path="${s}"]`);
+            const tab = $(`button[data-bs-toggle="pill"][data-path="${decodeURIComponent(s)}"]`);
             if (tab.length) {
                 tab.tab('show');
             }
         });
     }
 
-    $(document).on('shown.bs.tab', 'button[data-bs-toggle="pill"]', (e) => {
+    $(document).on('shown.bs.tab', 'button[data-bs-toggle="pill"]', () => {
         updateNavigationHash();
     });
 
@@ -587,7 +587,7 @@ const updateNavigationHash = () => {
     });
 
     if (pages.length) {
-        window.history.replaceState(null, '', `#!${pages.join('/')}`);
+        window.history.replaceState(null, '', `#!${pages.join('/').replace(/\s+/g, '')}`);
     } else {
         window.history.replaceState(null, '', location.pathname);
     }
