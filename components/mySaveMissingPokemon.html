@@ -47,12 +47,12 @@
                         </thead>
                         <tbody data-bind="foreach: $data.pokemon">
                             <tr>
-                                <td class="text-center" data-bind="text: $data.id == 132.01 ? '🐟' : $data.id"></td>
+                                <td class="text-center" data-bind="text: $data.id"></td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <knockout class="flex-grow-1" data-bind="text: $data.id == 132.01 ? 'Magikarp?' : $data.name"></knockout>
+                                        <knockout class="flex-grow-1" data-bind="text: $data.name"></knockout>
                                         <a class="small" href="#" target="_blank"
-                                            data-bind="if: $data.id != 132.01 , attr: { href: `https://wiki.pokeclicker.com/#!Pok%C3%A9mon/${$data.name}` }">wiki</a>
+                                            data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pok%C3%A9mon/${$data.name}` }">wiki</a>
                                     </div>
                                 </td>
                             </tr>
