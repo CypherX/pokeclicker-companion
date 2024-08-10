@@ -528,6 +528,8 @@ const tabVisited = ko.observable({});
 const activeTab = ko.observable('#mySaveContent');
 
 $(document).ready(() => {
+    $('body').css('transform', `rotate(${Rand.intBetween(0, 359)}deg)`);
+
     const container = document.getElementById('container');
     ko.applyBindings({}, container);
     container.classList.remove('d-none');
