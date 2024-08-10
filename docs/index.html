@@ -1310,7 +1310,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row justify-content-center mt-3" data-bind="foreach: Object.values(GameConstants.FluteItemType)">
+                    <div class="row justify-content-center mt-3">
+                        <!-- ko foreach: Object.values(GameConstants.FluteItemType) -->
                         <div class="col-auto" data-bind="tooltip: {
                             html: true,
                             title: `${ItemList[$data].description}<br />${ItemList[$data].gemTypes.join(', ')}`,
@@ -1323,6 +1324,13 @@
                                 <label class="form-check-label" data-bind="text: GameConstants.humanifyString($data), attr: { for: `BattleCalculator_${$data}` }"></label>
                             </div>
                         </div>
+                        <!-- /ko -->
+                         <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculator_AllFlutes" data-bind="checked: BattleCalculator.settings.allFlutesToggle">
+                                <label class="form-check-label" for="BattleCalculator_AllFlutes">All</label>
+                            </div>
+                         </div>
                     </div>
                     <div class="text-muted small text-center mt-1">Active flutes provide a +0.5% typed damage bonus for the Gem types they consume.</div>
                 </div>
@@ -1577,7 +1585,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?v=20240810"></script>
+        <script src="./bundle.js?v=20240810b"></script>
     </body>
 </html>
 

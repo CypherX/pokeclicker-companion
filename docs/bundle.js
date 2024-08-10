@@ -12201,13 +12201,20 @@ module.exports = {
 },{}],37:[function(require,module,exports){
 const settings = {
     xAttackEnabled: ko.observable(false),
-    //yellowFluteEnabled: ko.observable(false),
-    //timeFluteEnabled: ko.observable(false),
     weather: ko.observable(WeatherType.Clear),
     hideCompleted: ko.observable(true),
     hideLocked: ko.observable(false),
     activeFlutes: ko.observableArray([]),
+    allFlutesToggle: ko.observable(false),
 };
+
+settings.allFlutesToggle.subscribe((value) => {
+    if (value) {
+        settings.activeFlutes(Object.values(GameConstants.FluteItemType));
+    } else {
+        settings.activeFlutes([]);
+    }
+});
 
 let regionMultiplierOverride = -1;
 
