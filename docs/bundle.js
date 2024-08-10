@@ -12201,11 +12201,12 @@ module.exports = {
 },{}],37:[function(require,module,exports){
 const settings = {
     xAttackEnabled: ko.observable(false),
-    yellowFluteEnabled: ko.observable(false),
-    timeFluteEnabled: ko.observable(false),
+    //yellowFluteEnabled: ko.observable(false),
+    //timeFluteEnabled: ko.observable(false),
     weather: ko.observable(WeatherType.Clear),
     hideCompleted: ko.observable(true),
     hideLocked: ko.observable(false),
+    activeFlutes: ko.observableArray([]),
 };
 
 let regionMultiplierOverride = -1;
@@ -12306,11 +12307,10 @@ const getBattleData = ko.pureComputed(() => {
     // xAttack
     player.effectList['xAttack'](settings.xAttackEnabled() ? 1 : 0);
 
-    // Yellow Flute
-    if (settings.yellowFluteEnabled() != isFluteActive('Yellow_Flute')) {
-        //FluteEffectRunner.toggleEffect('Yellow_Flute');
-        toggleFlute('Yellow_Flute');
-    }
+    // Flutes
+    Object.values(GameConstants.FluteItemType).forEach((flute) => {
+        toggleFlute(flute, settings.activeFlutes().includes(flute));
+    });
 
     damageCache.clear();
     const gymsDefeated = SaveData.file().save.statistics.gymsDefeated;
@@ -12380,8 +12380,12 @@ const getBattleData = ko.pureComputed(() => {
     return battleData;
 }).extend({ rateLimit: 50 });
 
+const timeFluteEnabled = ko.pureComputed(() => {
+    return settings.activeFlutes().includes('Time_Flute');
+});
+
 const getGymBattleTime = ko.pureComputed(() => {
-    if (!SaveData.isDamageLoaded() || !settings.timeFluteEnabled()) {
+    if (!SaveData.isDamageLoaded() || !timeFluteEnabled()) {
         return GameConstants.GYM_TIME / 1000;
     }
 
@@ -12391,7 +12395,7 @@ const getGymBattleTime = ko.pureComputed(() => {
 });
 
 const getTempBattleTime = ko.pureComputed(() => {
-    if (!SaveData.isDamageLoaded() || !settings.timeFluteEnabled()) {
+    if (!SaveData.isDamageLoaded() || !timeFluteEnabled()) {
         return GameConstants.TEMP_BATTLE_TIME / 1000;
     }
 
@@ -12443,7 +12447,7 @@ Party.prototype.getRegionAttackMultiplier = () => {
     return getRegionAttackMultiplier(region);
 };
 
-const toggleFlute = (flute) => {
+/*const toggleFlute = (flute) => {
     if (isFluteActive(flute)) {
         player.effectList[flute](0);
         player.itemList[flute](1);
@@ -12453,7 +12457,21 @@ const toggleFlute = (flute) => {
     }
 
     updateFluteActiveGemTypes();
-};
+};*/
+
+const toggleFlute = (flute, active) => {
+    if (active && !isFluteActive(flute)) {
+        player.itemList[flute](0);
+        player.effectList[flute](1);
+        updateFluteActiveGemTypes();
+    }
+
+    if (!active && isFluteActive(flute)) {
+        player.effectList[flute](0);
+        player.itemList[flute](1);
+        updateFluteActiveGemTypes();
+    }
+}
 
 const isFluteActive = (flute) => {
     return !!player.effectList[flute]();
@@ -13467,8 +13485,7 @@ const loadAttackData = () => {
     App.game.party.caughtPokemon.forEach(p => p.level = App.game.badgeCase.maxLevel());
 
     BattleCalculator.settings.xAttackEnabled(false);
-    BattleCalculator.settings.yellowFluteEnabled(false);
-    BattleCalculator.settings.timeFluteEnabled(false);
+    BattleCalculator.settings.activeFlutes([]);
 
     isDamageLoaded(true);
 };
