@@ -207,8 +207,7 @@ const loadAttackData = () => {
     App.game.party.caughtPokemon.forEach(p => p.level = App.game.badgeCase.maxLevel());
 
     BattleCalculator.settings.xAttackEnabled(false);
-    BattleCalculator.settings.yellowFluteEnabled(false);
-    BattleCalculator.settings.timeFluteEnabled(false);
+    BattleCalculator.settings.activeFlutes([]);
 
     isDamageLoaded(true);
 };
