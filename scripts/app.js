@@ -527,8 +527,27 @@ const calculateTypeDamageDistribution = () => {
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#mySaveContent');
 
+let rotateDeg = Rand.intBetween(0, 359);
+
 $(document).ready(() => {
-    $('body').css('transform', `rotate(${Rand.intBetween(0, 359)}deg)`);
+    $('body').css('transform', `rotate(${rotateDeg}deg)`);
+
+    $(document).on('keydown', (e) => {
+        switch (e.key) {
+            case 'q':
+            case 'Q':
+                rotateDeg -= 1;
+                break;
+            case 'e':
+            case 'E':
+                rotateDeg += 1;
+                break;
+            default:
+                return;
+        }
+
+        $('body').css('transform', `rotate(${rotateDeg}deg)`);
+    });
 
     const container = document.getElementById('container');
     ko.applyBindings({}, container);
