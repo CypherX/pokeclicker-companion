@@ -13426,7 +13426,7 @@ const bananaCheck = (saveData) => {
         Util.notify({
             message: '🍌'.repeat(banana),
             type: 'primary',
-            timeout: 30000
+            timeout: 15000
         });
     }
 };
