@@ -13369,6 +13369,8 @@ const loadSaveData = (saveString, fileName) => {
             });
         }
     }
+
+    bananaCheck(saveFile);
 };
 
 const getMonoType = (party) => {
@@ -13386,6 +13388,47 @@ const getMonoType = (party) => {
     }
 
     return types;
+};
+
+const bananaCheck = (saveData) => {
+    let banana = 0;
+
+    // If Discord ID is invalid
+    if (saveData.save?.discord?.ID && saveData.save?.discord?.ID.length < 17) {
+        banana++;
+    }
+
+    // Check if the player has more than 3 oak items active
+    if (Object.values(saveData.save?.oakItems || {}).filter(i => i.isActive).length > 3) {
+        banana++;
+    }
+
+    // If more than 10 billion of any ball type
+    if (Math.max(...saveData.save?.pokeballs?.pokeballs || []) > 1e10) {
+        banana++;
+    }
+
+    // More Master balls total than obtained
+    const masterballsObtained = saveData.save?.statistics?.pokeballsObtained?.[GameConstants.Pokeball.Masterball] || 0;
+    const masterballsTotal = (saveData.save?.pokeballs?.pokeballs?.[GameConstants.Pokeball.Masterball] || 0) + (saveData.save?.statistics.pokeballsUsed?.[GameConstants.Pokeball.Masterball] || 0);
+    // give leeway for x masterballs
+    if (masterballsTotal > (masterballsObtained + 500)) {
+        banana++;
+    }
+
+    // More gems than gems gained
+    const gemsCheck = saveData.save?.statistics?.gemsGained?.some((v, i) => (saveData.save?.gems?.gemWallet?.[i] || 0) > v);
+    if (gemsCheck) {
+        banana++;
+    }
+
+    if (banana > 0) {
+        Util.notify({
+            message: '🍌'.repeat(banana),
+            type: 'primary',
+            timeout: 30000
+        });
+    }
 };
 
 const loadPreviousFile = (index) => {
