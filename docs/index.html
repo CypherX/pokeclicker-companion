@@ -20,8 +20,12 @@
     <body>
         <div id="toaster"></div>
         <input type="file" id="file-selector" accept=".txt" class="d-none" onchange="SaveData.loadFile(this.files[0])">
+        <!--<div id="drag-drop-overlay" class="d-none"></div>
+        <div id="drag-drop-message" class="d-none position-absolute bottom-0 start-50 translate-middle-x h3 text-warning">
+            Drag-and-drop PokéClicker Save File
+        </div>-->
         <div id="container" class="d-none">
-            <div class="d-flex flex-column" style="height: 100vh;">
+            <div class="d-flex flex-column" id="flex-container" style="height: 100vh;">
                 <div id="header" class="mb-4">
                     <!-- import "mainNavigation.html" -->
 <nav class="navbar navbar-expand-md bg-dark" data-bs-theme="dark">
@@ -62,31 +66,21 @@
             </ul>
         </div>
         <div class="d-none d-md-block position-absolute end-0 me-2">
-            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal"
+                data-bind="tooltip: { title: 'Companion Settings', placement: 'bottom', trigger: 'hover' }">
                 <img src="assets/gear-solid.svg" class="d-flex my-1 align-self-center"
                     style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />
             </button>
-            <div class="btn-group">
-                <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
-                <!-- ko if: SaveData.prevLoadedSaves().length -->
-                <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="visually-hidden">Toggle Dropdown</span>
+            <div class="input-group" style="display: inline-flex; vertical-align: middle; width: unset;">
+                <span class="input-group-text text-white" style="border-color: #444; user-select: none;">PokéClicker Save</span>
+                <button class="btn btn-primary btn-save-selector" type="button"
+                    data-bind="tooltip: { title: 'Browse for and select a save file to load. Drag-and-drop anywhere on this page is also supported.', placement: 'bottom', trigger: 'hover' }">
+                    <img src="assets/file-import-solid.svg" width="16" style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li class="small"><a class="dropdown-item disabled" href="#">Previously Loaded Saves</a></li>
-                    <!-- ko foreach: SaveData.prevLoadedSaves -->
-                    <li class="small">
-                        <div class="d-flex align-items-center">
-                            <a class="dropdown-item flex-grow-1 pe-2" href="#" data-bind="text: $data.name, click: () => { SaveData.loadPreviousFile($index()) }"></a>
-                            <div class="text-danger ms-2 me-3" style="cursor: pointer;"
-                                data-bind="click: (_, e) => { SaveData.prevLoadedSaves.splice($index(), 1); e.stopPropagation(); }">x</div>
-                        </div>
-                    </li>
-                    <!-- /ko -->
-                    <li><hr class="dropdown-divider"></li>
-                    <li class="small"><a class="dropdown-item" href="#" data-bind="click: () => { SaveData.prevLoadedSaves([]); }">Remove All</a></li>
-                </ul>
-                <!-- /ko -->
+                <button class="btn btn-primary btn-save-clipboard" type="button" data-bs-toggle="modal" data-bs-target="#loadFromClipboardModal"
+                    data-bind="tooltip: { title: 'Import file from text/clipboard. Save can be copied to the clipboard in-game from the Save menu.', placement: 'bottom', trigger: 'hover' }">
+                    <img src="assets/paste-regular.svg" width="16" style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />
+                </button>
             </div>
         </div>
     </div>
@@ -1579,13 +1573,28 @@
 
         </div>
 
+        <div class="modal" id="loadFromClipboardModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <p>Paste PokéClicker Save Data</p>
+                        <textarea id="saveDataInput" class="form-control" rows="5" autocomplete="off"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="loadFromClipboard" class="btn btn-primary">Load</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
             <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
             </symbol>
         </svg>
 
-        <script src="./bundle.js?v=20240927"></script>
+        <script src="./bundle.js?v=20240927-2"></script>
     </body>
 </html>
 
