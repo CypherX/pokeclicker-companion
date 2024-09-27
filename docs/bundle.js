@@ -12060,6 +12060,26 @@ $(document).ready(() => {
         updateNavigationHash();
     });
 
+    $(document).on('dragover', (event) => {
+        event.preventDefault();
+    });
+
+    document.addEventListener('drop', (event) => {
+        event.preventDefault();
+
+        let files = [];
+        if (event.dataTransfer.items) {
+            files = [...event.dataTransfer.items].filter((item) => item.kind === 'file').map((item) => item.getAsFile());
+        } else {
+            files = [...event.dataTransfer.files];
+        }
+
+        const file = files.find((file) => file.name?.toLowerCase().endsWith('.txt'));
+        if (file) {
+            SaveData.loadFile(file);
+        }
+    });
+
     Companion.settings.initialize();
     SaveData.initialize();
     Forecast.generateForecasts();
