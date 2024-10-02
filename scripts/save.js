@@ -12,7 +12,7 @@ const loadFile = (file) => {
     fileReader.readAsText(file);
 };
 
-const loadSaveData = (saveString, fileName) => {
+const loadSaveData = (saveString, fileName = null) => {
     const saveFile = JSON.parse(saveString);
 
     if (file() !== undefined) {
@@ -30,15 +30,17 @@ const loadSaveData = (saveString, fileName) => {
 
     file(saveFile);
 
-    const prevDataIndex = prevLoadedSaves().findIndex((save) => save.name == fileName);
-    if (prevDataIndex > 0) {
-        prevLoadedSaves.unshift(prevLoadedSaves.splice(prevDataIndex, 1)[0]);
-    } else if (prevDataIndex == -1) {
-        const compressed = Util.compressString(saveString);
-        const arr = prevLoadedSaves();
-        arr.unshift({ name: fileName, data: compressed });
-        arr.length = Math.min(arr.length, 5);
-        prevLoadedSaves(arr);
+    if (fileName) {
+        const prevDataIndex = prevLoadedSaves().findIndex((save) => save.name == fileName);
+        if (prevDataIndex > 0) {
+            prevLoadedSaves.unshift(prevLoadedSaves.splice(prevDataIndex, 1)[0]);
+        } else if (prevDataIndex == -1) {
+            const compressed = Util.compressString(saveString);
+            const arr = prevLoadedSaves();
+            arr.unshift({ name: fileName, data: compressed });
+            arr.length = Math.min(arr.length, 5);
+            prevLoadedSaves(arr);
+        }
     }
 
     if (!saveFile.save.party.caughtPokemon?.length) {
@@ -260,6 +262,7 @@ module.exports = {
     prevLoadedSaves,
 
     loadFile,
+    loadSaveData,
     loadPreviousFile,
     loadAttackData,
 

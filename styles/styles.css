@@ -79,3 +79,22 @@ table.custom-borders > tbody > tr:not(:first-child):not(.collapse) > td {
     border-top: 1px solid #444;
 }
 
+/*.drag-drop-border {
+    border: 2px dashed #fff;
+}*/
+
+#drag-drop-overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #000;
+    opacity: 0.8;
+    border: 2px dashed #fff;
+    z-index: 1000;
+}
+
+#drag-drop-message {
+    z-index: 1001;
+}

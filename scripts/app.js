@@ -536,6 +536,18 @@ $(document).ready(() => {
         document.getElementById('file-selector').click();
     });
 
+    $('#loadFromClipboard').click(() => {
+        const data = $('#saveDataInput').val().trim();
+        if (data.length) {
+            SaveData.loadSaveData(atob(data));
+            $('#loadFromClipboardModal').modal('hide');
+        }
+    });
+
+    $('#loadFromClipboardModal').on('shown.bs.modal', () => {
+        document.getElementById('saveDataInput').focus();
+    });
+
     $(document).on('shown.bs.tab', 'button[data-bs-toggle="pill"]', (e) => {
         tabVisited({ ...tabVisited(), [$(e.target).data('bs-target')]: true });
     });
@@ -570,6 +582,16 @@ $(document).ready(() => {
 
     $(document).on('dragover', (event) => {
         event.preventDefault();
+    });
+
+    document.addEventListener('dragenter', (event) => {
+        //$('#flex-container').addClass('drag-drop-border');
+        //$('#drag-drop-overlay, #drag-drop-message').removeClass('d-none');
+    });
+
+    document.addEventListener('dragleave', (event) => {
+        //$('#flex-container').removeClass('drag-drop-border');
+        //$('#drag-drop-overlay, #drag-drop-message').addClass('d-none');
     });
 
     document.addEventListener('drop', (event) => {
