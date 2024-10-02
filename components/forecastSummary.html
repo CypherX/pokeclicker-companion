@@ -1,0 +1,133 @@
+<div class="tab-pane show active" id="forecastSummary">
+    <h4 class="mb-4">
+        Daily Summary
+        <small class="text-muted float-end" data-bind="text: Forecast.summaryDate().toDateString()"></small>
+    </h4>
+    <div class="row">
+
+        <div class="col col-md-8">
+            <div class="row">
+                <div class="col-6">
+                    <div class="card mb-2">
+                        <div class="card-header bg-primary">Unown</div>
+                        <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
+                            <table class="table table-sm table-striped small mb-0">
+                                <thead>
+                                    <tr class="table-dark">
+                                        <th>Dungeon</th>
+                                        <th class="text-center">Unown</th>
+                                    </tr>
+                                </thead>
+                                <tbody data-bind="foreach: Forecast.summary().unown">
+                                    <tr>
+                                        <td data-bind="text: Companion.data.unownDungeonList[$index()]"></td>
+                                        <td class="text-center" data-bind="text: $data"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card mb-2">
+                        <div class="card-header bg-primary">Daily Deals</div>
+                        <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
+                            <table class="table table-sm small mb-0">
+                                <tbody data-bind="foreach: Forecast.summary().dailyDeals">
+                                    <tr class="text-center align-middle">
+                                        <td data-bind="text: `${amount1} × ${item1.name}`"></td>
+                                        <td>→</td>
+                                        <td data-bind="text: `${amount2} × ${item2.name}`"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card mb-2">
+                        <div class="card-header bg-primary">Weather</div>
+                        <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-sm small mb-0">
+                                    <thead>
+                                        <tr class="table-dark text-center">
+                                            <th>Time</th>
+                                            <!-- ko foreach: Companion.data.validRegionNames -->
+                                            <th data-bind="text: $data"></th>
+                                            <!-- /ko -->
+                                        </tr>
+                                    </thead>
+                                    <tbody data-bind="foreach: Forecast.summary().weather">
+                                        <tr class="text-center align-middle">
+                                            <td class="text-nowrap" data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, Weather.period))}`"></td>
+                                            <!-- ko foreach: Companion.data.validRegions -->
+                                            <td class="text-dark" data-bind="text: GameConstants.humanifyString(WeatherType[$parent.regionalWeather[$data]]), style: { 'background-color': Weather.weatherConditions[$parent.regionalWeather[$data]].color }"></td>
+                                            <!-- /ko -->
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-primary">Boosted Routes</div>
+                        <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
+                            <table class="table table-bordered table-sm small mb-0">
+                                <thead>
+                                    <tr class="table-dark text-center">
+                                        <th>Region</th>
+                                        <!-- ko foreach: Forecast.summary().boostedRoutes -->
+                                        <th data-bind="text: `${Util.formatTime24Hours($data.startDate)} - ${Util.formatTime24Hours(Util.dateAddHours($data.startDate, RoamingPokemonList.period))}`"></th>
+                                        <!-- /ko -->
+                                    </tr>
+                                </thead>
+                                <tbody data-bind="foreach: Companion.data.roamerGroups">
+                                    <tr class="align-middle">
+                                        <td data-bind="text: $data.name"></td>
+                                        <!-- ko foreach: Forecast.summary().boostedRoutes -->
+                                        <td class="text-center" data-bind="text: $data.regionalRoutes[$parentContext.$index()]"></td>
+                                        <!-- /ko -->
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col col-md-4">
+            <div class="card mb-2">
+                <div class="card-header bg-primary">Berry Trades</div>
+                <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
+                    <div class="" data-bind="foreach: GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None')">
+                        <table class="table table-sm small mb-1">
+                            <thead>
+                                <tr class="table-dark">
+                                    <td colspan="3" class="text-center" data-bind="text: $data"></td>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: Forecast.summary().berryTrades[$index()]">
+                                <tr class="text-center align-middle">
+                                    <td>
+                                        <div class="d-flex flex-column text-center" data-bind="foreach: berries">
+                                            <div class="text-nowrap" data-bind="text: `${amount} × ${BerryType[berryType]}`"></div>
+                                        </div>
+                                    </td>
+                                    <td>→</td>
+                                    <td class="text-nowrap" data-bind="text: `${$data.item.amount} × ${$data.item.itemType._displayName ?? $data.item.itemType.name}`"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

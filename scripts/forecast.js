@@ -5,7 +5,17 @@ const berryMasters = ko.observableArray();
 const dailyDeals = ko.observableArray();
 const enigmaDirection = ko.observableArray();
 
+const summaryDate = ko.observable(new Date());
+const summary = ko.observable({
+    unown: [],
+    weather: [],
+    boostedRoutes: [],
+    berryTrades: [],
+    dailyDeals: [],
+});
+
 const generateForecasts = (date = new Date()) => {
+    summaryDate(new Date(date));
     const currentHour = date.getHours();
     const unownData = [];
     const weatherData = [];
@@ -77,6 +87,14 @@ const generateForecasts = (date = new Date()) => {
 
         date.setDate(date.getDate() + 1);
     }
+
+    summary({
+        unown: unownData[0].unowns,
+        weather: [...weatherData.slice(0, 6)],
+        boostedRoutes: [...boostedRouteData.slice(0, 3)],
+        berryTrades: berryMasterData[0].traderDeals,
+        dailyDeals: dailyDealData[0].deals,
+    });
 
     // Remove past data
     weatherData.splice(0, Math.floor(currentHour / Weather.period));
@@ -221,6 +239,8 @@ module.exports = {
     berryMasters,
     dailyDeals,
     enigmaDirection,
+    summary,
+    summaryDate,
 
     selectedDailyDealItem,
     selectedDailyDealItemNextTrades,
