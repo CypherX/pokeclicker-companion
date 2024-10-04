@@ -110,7 +110,7 @@
                         <table class="table table-sm small mb-1">
                             <thead>
                                 <tr class="table-dark">
-                                    <td colspan="3" class="text-center" data-bind="text: $data"></td>
+                                    <td colspan="3" class="text-center" data-bind="text: `${$data} (${SubRegions.getSubRegionById(TownList[$data].region, TownList[$data].subRegion ?? 0).name})`"></td>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: Forecast.summary().berryTrades[$index()]">
