@@ -12105,6 +12105,7 @@ $(document).ready(() => {
     Companion.settings.initialize();
     SaveData.initialize();
     Forecast.generateForecasts();
+    Forecast.generateDailySummary();
 
     Util.createNotifications();
 
@@ -12926,10 +12927,10 @@ const summary = ko.observable({
     boostedRoutes: [],
     berryTrades: [],
     dailyDeals: [],
+    islandScan: {},
 });
 
 const generateForecasts = (date = new Date()) => {
-    summaryDate(new Date(date));
     const currentHour = date.getHours();
     const unownData = [];
     const weatherData = [];
@@ -12941,74 +12942,40 @@ const generateForecasts = (date = new Date()) => {
         const saveDate = new Date(date);
 
         // Unown
-        SeededDateRand.seedWithDate(date);
         unownData.push({
             startDate: saveDate,
-            unowns: [
-                SeededDateRand.fromArray(AlphUnownList),
-                SeededDateRand.fromArray(TanobyUnownList),
-                SeededDateRand.fromArray(SolaceonUnownList),
-            ]
+            unowns: getUnownByDate(date),
         });
 
         // Berry Masters
-        BerryDeal.generateDeals(date);
         berryMasterData.push({
             date: saveDate,
-            traderDeals: Object.values(BerryDeal.list).map((d) => [...d()])
+            traderDeals: getBerryDealsByDate(date),
         });
 
         // Daily Deals
-        DailyDeal.generateDeals(5, date);
         dailyDealData.push({
             date: saveDate,
-            deals: [...DailyDeal.list()]
+            deals: getDailyDealsByDate(date),
         });
 
         // Weather
-        for (let hour = 0; hour <= 23; hour += Weather.period) {
-            const hourDate = new Date(date.setHours(hour, 0, 0, 0));
-            const weather = { startDate: hourDate, regionalWeather: {} };
-            for (let region = GameConstants.Region.kanto; region <= GameConstants.MAX_AVAILABLE_REGION; region++) {
-                weather.regionalWeather[region] = Weather.getWeather(region, hourDate);
-            }
-            weatherData.push(weather);
-        }
+        weatherData.push(...getRegionalWeatherByDate(date));
 
         // Boosted Routes
         // only generate a few days worth
         if (boostedRouteData.length < 9) {
-            for (let hour = 0; hour <= 23; hour += RoamingPokemonList.period) {
-                const hourDate = new Date(date.setHours(hour, 0, 0, 0));
-                RoamingPokemonList.generateIncreasedChanceRoutes(hourDate);
-
-                const boostedRoute = { startDate: hourDate, regionalRoutes: [] };
-                Companion.data.roamerGroups.forEach((rg) => {
-                    const route = RoamingPokemonList.getIncreasedChanceRouteBySubRegionGroup(rg.region, rg.subRegionGroup)();
-                    boostedRoute.regionalRoutes.push(route.routeName.replace('Route ', ''));
-                });
-
-                boostedRouteData.push(boostedRoute);
-            }
+            boostedRouteData.push(...getBoostedRoutesByDate(date));
         }
 
         // Enigma Direction
-        SeededRand.seedWithDate(date);
         enigmaDirection.push({
             date: saveDate,
-            direction: directionFromIndex(SeededRand.floor(4)),
+            direction: getEnigmaDirectionByDate(date),
         });
 
         date.setDate(date.getDate() + 1);
     }
-
-    summary({
-        unown: unownData[0].unowns,
-        weather: [...weatherData.slice(0, 6)],
-        boostedRoutes: [...boostedRouteData.slice(0, 3)],
-        berryTrades: berryMasterData[0].traderDeals,
-        dailyDeals: dailyDealData[0].deals,
-    });
 
     // Remove past data
     weatherData.splice(0, Math.floor(currentHour / Weather.period));
@@ -13019,6 +12986,72 @@ const generateForecasts = (date = new Date()) => {
     boostedRoutes(boostedRouteData.slice(0, 6));
     berryMasters(berryMasterData);
     dailyDeals(dailyDealData);
+};
+
+const generateDailySummary = (date = new Date()) => {
+    summaryDate(new Date(date));
+    summary({
+        unown: getUnownByDate(date),
+        weather: getRegionalWeatherByDate(date),
+        boostedRoutes: getBoostedRoutesByDate(date),
+        berryTrades: getBerryDealsByDate(date),
+        dailyDeals: getDailyDealsByDate(date),
+        islandScan: getIslandScanPokemonByDate(date),
+    });
+};
+
+const getUnownByDate = (date = new Date()) => {
+    SeededDateRand.seedWithDate(date);
+    return [
+        SeededDateRand.fromArray(AlphUnownList),
+        SeededDateRand.fromArray(TanobyUnownList),
+        SeededDateRand.fromArray(SolaceonUnownList),
+    ];
+};
+
+const getBerryDealsByDate = (date = new Date()) => {
+    BerryDeal.generateDeals(date);
+    return Object.values(BerryDeal.list).map((d) => [...d()]);
+};
+
+const getDailyDealsByDate = (date = new Date()) => {
+    DailyDeal.generateDeals(5, date);
+    return [...DailyDeal.list()];
+};
+
+const getRegionalWeatherByDate = (date = new Date()) => {
+    const weatherData = [];
+    for (let hour = 0; hour <= 23; hour += Weather.period) {
+        const hourDate = new Date(date.setHours(hour, 0, 0, 0));
+        const weather = { startDate: hourDate, regionalWeather: {} };
+        for (let region = GameConstants.Region.kanto; region <= GameConstants.MAX_AVAILABLE_REGION; region++) {
+            weather.regionalWeather[region] = Weather.getWeather(region, hourDate);
+        }
+        weatherData.push(weather);
+    }
+    return weatherData;
+};
+
+const getBoostedRoutesByDate = (date = new Date()) => {
+    const routeData = [];
+    for (let hour = 0; hour <= 23; hour += RoamingPokemonList.period) {
+        const hourDate = new Date(date.setHours(hour, 0, 0, 0));
+        RoamingPokemonList.generateIncreasedChanceRoutes(hourDate);
+
+        const boostedRoute = { startDate: hourDate, regionalRoutes: [] };
+        Companion.data.roamerGroups.forEach((rg) => {
+            const route = RoamingPokemonList.getIncreasedChanceRouteBySubRegionGroup(rg.region, rg.subRegionGroup)();
+            boostedRoute.regionalRoutes.push(route.routeName.replace('Route ', ''));
+        });
+
+        routeData.push(boostedRoute);
+    }
+    return routeData;
+};
+
+const getEnigmaDirectionByDate = (date = new Date()) => {
+    SeededRand.seedWithDate(date);
+    return directionFromIndex(SeededRand.floor(4));
 };
 
 const directionFromIndex = (index) => {
@@ -13144,6 +13177,50 @@ const findNextTradesForItem = (itemName, days = 1095) => {
     return deals;
 };
 
+const getIslandScanPokemonByDate = (date = new Date()) => {
+    const data = { route: [], dungeon: [] };
+
+    for (const route of Routes.getRoutesByRegion(GameConstants.Region.alola)) {
+        const special = route.pokemon.special.filter(s => s.req instanceof DayOfWeekRequirement && s.req.DayOfWeekNum == date.getDay());
+        if (special.length) {
+            data.route.push({
+                name: route.routeName,
+                pokemon: special.flatMap(s => s.pokemon),
+            });
+        }
+    }
+
+    GameConstants.RegionDungeons[GameConstants.Region.alola].forEach((name) => {
+        const dungeon = dungeonList[name];
+        const pokemon = [];
+
+        const enemies = dungeon.enemyList.filter(e => typeof e === 'object'
+            && e.options.requirement instanceof DayOfWeekRequirement
+            && e.options.requirement.DayOfWeekNum == date.getDay());
+
+        if (enemies.length) {
+            pokemon.push(...enemies.flatMap(e => e.pokemon));
+        }
+
+        const bosses = dungeon.bossList.filter(b =>
+            b.options?.requirement instanceof DayOfWeekRequirement
+            && b.options.requirement.DayOfWeekNum == date.getDay());
+
+        if (bosses.length) {
+            pokemon.push(...bosses.flatMap(b => b.name));
+        }
+
+        if (pokemon.length) {
+            data.dungeon.push({
+                name: name,
+                pokemon: pokemon,
+            })
+        }
+    });
+
+    return data;
+};
+
 const selectedDailyDealItem = ko.observable();
 
 module.exports = {
@@ -13160,6 +13237,7 @@ module.exports = {
     selectedDailyDealItemNextTrades,
 
     generateForecasts,
+    generateDailySummary,
     getUpcomingWeather,
     getNextWeatherDate,
     getBerryMasterDeals,
@@ -13167,6 +13245,7 @@ module.exports = {
     getBerryMasterPokemonMinMaxCost,
     getUndergroundItemList,
     getNextOccurrenceUndergroundItems,
+    getIslandScanPokemonByDate,
 };
 },{}],41:[function(require,module,exports){
 const allSafariPokemon = ko.pureComputed(() => {
