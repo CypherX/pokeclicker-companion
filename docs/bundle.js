@@ -13117,7 +13117,7 @@ const generateForecasts = (date = new Date()) => {
     const berryMasterData = [];
     //const dailyDealData = [];
 
-    for (let day = 0; day < 365; day++) {
+    for (let day = 0; day < 180; day++) {
         const saveDate = new Date(date);
 
         // Unown
