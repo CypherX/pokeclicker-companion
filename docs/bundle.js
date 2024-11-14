@@ -12730,7 +12730,6 @@ module.exports = {
 };
 },{}],38:[function(require,module,exports){
 const UnobtainablePokemon = [
-    'Mega Medicham',
     'Mega Altaria',
     'Arceus (Fire)',
     'Arceus (Water)',
