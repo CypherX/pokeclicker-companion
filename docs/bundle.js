@@ -4180,10 +4180,12 @@ var LZUTF8;
 },{"_process":31,"buffer":3,"readable-stream":25,"timers":34}],7:[function(require,module,exports){
 'use strict'
 
+const { SymbolDispose } = require('../../ours/primordials')
 const { AbortError, codes } = require('../../ours/errors')
 const { isNodeStream, isWebStream, kControllerErrorFunction } = require('./utils')
 const eos = require('./end-of-stream')
 const { ERR_INVALID_ARG_TYPE } = codes
+let addAbortListener
 
 // This method is inlined here for readable-stream
 // It also does not allow for signal to not exist on the stream
@@ -4222,13 +4224,14 @@ module.exports.addAbortSignalNoValidate = function (signal, stream) {
   if (signal.aborted) {
     onAbort()
   } else {
-    signal.addEventListener('abort', onAbort)
-    eos(stream, () => signal.removeEventListener('abort', onAbort))
+    addAbortListener = addAbortListener || require('../../ours/util').addAbortListener
+    const disposable = addAbortListener(signal, onAbort)
+    eos(stream, disposable[SymbolDispose])
   }
   return stream
 }
 
-},{"../../ours/errors":26,"./end-of-stream":13,"./utils":22}],8:[function(require,module,exports){
+},{"../../ours/errors":26,"../../ours/primordials":27,"../../ours/util":28,"./end-of-stream":13,"./utils":22}],8:[function(require,module,exports){
 'use strict'
 
 const { StringPrototypeSlice, SymbolIterator, TypedArrayPrototypeSet, Uint8Array } = require('../../ours/primordials')
@@ -4464,7 +4467,7 @@ module.exports = function compose(...streams) {
   d = new Duplex({
     // TODO (ronag): highWaterMark?
     writableObjectMode: !!(head !== null && head !== undefined && head.writableObjectMode),
-    readableObjectMode: !!(tail !== null && tail !== undefined && tail.writableObjectMode),
+    readableObjectMode: !!(tail !== null && tail !== undefined && tail.readableObjectMode),
     writable,
     readable
   })
@@ -4598,7 +4601,7 @@ const {
   AbortError
 } = require('../../ours/errors')
 const { Symbol } = require('../../ours/primordials')
-const { kDestroyed, isDestroyed, isFinished, isServerRequest } = require('./utils')
+const { kIsDestroyed, isDestroyed, isFinished, isServerRequest } = require('./utils')
 const kDestroy = Symbol('kDestroy')
 const kConstruct = Symbol('kConstruct')
 function checkError(err, w, r) {
@@ -4864,7 +4867,7 @@ function destroyer(stream, err) {
     process.nextTick(emitCloseLegacy, stream)
   }
   if (!stream.destroyed) {
-    stream[kDestroyed] = true
+    stream[kIsDestroyed] = true
   }
 }
 module.exports = {
@@ -5036,7 +5039,9 @@ const {
   isNodeStream,
   isReadableNodeStream,
   isWritableNodeStream,
-  isDuplexNodeStream
+  isDuplexNodeStream,
+  isReadableStream,
+  isWritableStream
 } = require('./utils')
 const eos = require('./end-of-stream')
 const {
@@ -5046,6 +5051,7 @@ const {
 const { destroyer } = require('./destroy')
 const Duplex = require('./duplex')
 const Readable = require('./readable')
+const Writable = require('./writable')
 const { createDeferredPromise } = require('../../ours/util')
 const from = require('./from')
 const Blob = globalThis.Blob || bufferModule.Blob
@@ -5100,17 +5106,16 @@ module.exports = function duplexify(body, name) {
       readable: false
     })
   }
-
-  // TODO: Webstreams
-  // if (isReadableStream(body)) {
-  //   return _duplexify({ readable: Readable.fromWeb(body) });
-  // }
-
-  // TODO: Webstreams
-  // if (isWritableStream(body)) {
-  //   return _duplexify({ writable: Writable.fromWeb(body) });
-  // }
-
+  if (isReadableStream(body)) {
+    return _duplexify({
+      readable: Readable.fromWeb(body)
+    })
+  }
+  if (isWritableStream(body)) {
+    return _duplexify({
+      writable: Writable.fromWeb(body)
+    })
+  }
   if (typeof body === 'function') {
     const { value, write, final, destroy } = fromAsyncGen(body)
     if (isIterable(value)) {
@@ -5167,15 +5172,12 @@ module.exports = function duplexify(body, name) {
       writable: false
     })
   }
-
-  // TODO: Webstreams.
-  // if (
-  //   isReadableStream(body?.readable) &&
-  //   isWritableStream(body?.writable)
-  // ) {
-  //   return Duplexify.fromWeb(body);
-  // }
-
+  if (
+    isReadableStream(body === null || body === undefined ? undefined : body.readable) &&
+    isWritableStream(body === null || body === undefined ? undefined : body.writable)
+  ) {
+    return Duplexify.fromWeb(body)
+  }
   if (
     typeof (body === null || body === undefined ? undefined : body.writable) === 'object' ||
     typeof (body === null || body === undefined ? undefined : body.readable) === 'object'
@@ -5401,7 +5403,7 @@ function _duplexify(pair) {
   return d
 }
 
-},{"../../ours/errors":26,"../../ours/primordials":27,"../../ours/util":28,"./destroy":10,"./duplex":11,"./end-of-stream":13,"./from":14,"./readable":19,"./utils":22,"abort-controller":1,"buffer":3,"process/":31}],13:[function(require,module,exports){
+},{"../../ours/errors":26,"../../ours/primordials":27,"../../ours/util":28,"./destroy":10,"./duplex":11,"./end-of-stream":13,"./from":14,"./readable":19,"./utils":22,"./writable":23,"abort-controller":1,"buffer":3,"process/":31}],13:[function(require,module,exports){
 /* replacement start */
 
 const process = require('process/')
@@ -5415,7 +5417,7 @@ const { AbortError, codes } = require('../../ours/errors')
 const { ERR_INVALID_ARG_TYPE, ERR_STREAM_PREMATURE_CLOSE } = codes
 const { kEmptyObject, once } = require('../../ours/util')
 const { validateAbortSignal, validateFunction, validateObject, validateBoolean } = require('../validators')
-const { Promise, PromisePrototypeThen } = require('../../ours/primordials')
+const { Promise, PromisePrototypeThen, SymbolDispose } = require('../../ours/primordials')
 const {
   isClosed,
   isReadable,
@@ -5432,6 +5434,7 @@ const {
   willEmitClose: _willEmitClose,
   kIsClosedPromise
 } = require('./utils')
+let addAbortListener
 function isRequest(stream) {
   return stream.setHeader && typeof stream.abort === 'function'
 }
@@ -5616,12 +5619,13 @@ function eos(stream, options, callback) {
     if (options.signal.aborted) {
       process.nextTick(abort)
     } else {
+      addAbortListener = addAbortListener || require('../../ours/util').addAbortListener
+      const disposable = addAbortListener(options.signal, abort)
       const originalCallback = callback
       callback = once((...args) => {
-        options.signal.removeEventListener('abort', abort)
+        disposable[SymbolDispose]()
         originalCallback.apply(stream, args)
       })
-      options.signal.addEventListener('abort', abort)
     }
   }
   return cleanup
@@ -5642,12 +5646,13 @@ function eosWeb(stream, options, callback) {
     if (options.signal.aborted) {
       process.nextTick(abort)
     } else {
+      addAbortListener = addAbortListener || require('../../ours/util').addAbortListener
+      const disposable = addAbortListener(options.signal, abort)
       const originalCallback = callback
       callback = once((...args) => {
-        options.signal.removeEventListener('abort', abort)
+        disposable[SymbolDispose]()
         originalCallback.apply(stream, args)
       })
-      options.signal.addEventListener('abort', abort)
     }
   }
   const resolverFn = (...args) => {
@@ -5885,17 +5890,21 @@ const {
 } = require('../../ours/errors')
 const { validateAbortSignal, validateInteger, validateObject } = require('../validators')
 const kWeakHandler = require('../../ours/primordials').Symbol('kWeak')
+const kResistStopPropagation = require('../../ours/primordials').Symbol('kResistStopPropagation')
 const { finished } = require('./end-of-stream')
 const staticCompose = require('./compose')
 const { addAbortSignalNoValidate } = require('./add-abort-signal')
 const { isWritable, isNodeStream } = require('./utils')
+const { deprecate } = require('../../ours/util')
 const {
   ArrayPrototypePush,
+  Boolean,
   MathFloor,
   Number,
   NumberIsNaN,
   Promise,
   PromiseReject,
+  PromiseResolve,
   PromisePrototypeThen,
   Symbol
 } = require('../../ours/primordials')
@@ -5932,41 +5941,43 @@ function map(fn, options) {
   if ((options === null || options === undefined ? undefined : options.concurrency) != null) {
     concurrency = MathFloor(options.concurrency)
   }
-  validateInteger(concurrency, 'concurrency', 1)
+  let highWaterMark = concurrency - 1
+  if ((options === null || options === undefined ? undefined : options.highWaterMark) != null) {
+    highWaterMark = MathFloor(options.highWaterMark)
+  }
+  validateInteger(concurrency, 'options.concurrency', 1)
+  validateInteger(highWaterMark, 'options.highWaterMark', 0)
+  highWaterMark += concurrency
   return async function* map() {
-    var _options$signal, _options$signal2
-    const ac = new AbortController()
+    const signal = require('../../ours/util').AbortSignalAny(
+      [options === null || options === undefined ? undefined : options.signal].filter(Boolean)
+    )
     const stream = this
     const queue = []
-    const signal = ac.signal
     const signalOpt = {
       signal
     }
-    const abort = () => ac.abort()
-    if (
-      options !== null &&
-      options !== undefined &&
-      (_options$signal = options.signal) !== null &&
-      _options$signal !== undefined &&
-      _options$signal.aborted
-    ) {
-      abort()
-    }
-    options === null || options === undefined
-      ? undefined
-      : (_options$signal2 = options.signal) === null || _options$signal2 === undefined
-      ? undefined
-      : _options$signal2.addEventListener('abort', abort)
     let next
     let resume
     let done = false
-    function onDone() {
+    let cnt = 0
+    function onCatch() {
       done = true
+      afterItemProcessed()
+    }
+    function afterItemProcessed() {
+      cnt -= 1
+      maybeResume()
+    }
+    function maybeResume() {
+      if (resume && !done && cnt < concurrency && queue.length < highWaterMark) {
+        resume()
+        resume = null
+      }
     }
     async function pump() {
       try {
         for await (let val of stream) {
-          var _val
           if (done) {
             return
           }
@@ -5975,21 +5986,21 @@ function map(fn, options) {
           }
           try {
             val = fn(val, signalOpt)
+            if (val === kEmpty) {
+              continue
+            }
+            val = PromiseResolve(val)
           } catch (err) {
             val = PromiseReject(err)
           }
-          if (val === kEmpty) {
-            continue
-          }
-          if (typeof ((_val = val) === null || _val === undefined ? undefined : _val.catch) === 'function') {
-            val.catch(onDone)
-          }
+          cnt += 1
+          PromisePrototypeThen(val, afterItemProcessed, onCatch)
           queue.push(val)
           if (next) {
             next()
             next = null
           }
-          if (!done && queue.length && queue.length >= concurrency) {
+          if (!done && (queue.length >= highWaterMark || cnt >= concurrency)) {
             await new Promise((resolve) => {
               resume = resolve
             })
@@ -5998,20 +6009,14 @@ function map(fn, options) {
         queue.push(kEof)
       } catch (err) {
         const val = PromiseReject(err)
-        PromisePrototypeThen(val, undefined, onDone)
+        PromisePrototypeThen(val, afterItemProcessed, onCatch)
         queue.push(val)
       } finally {
-        var _options$signal3
         done = true
         if (next) {
           next()
           next = null
         }
-        options === null || options === undefined
-          ? undefined
-          : (_options$signal3 = options.signal) === null || _options$signal3 === undefined
-          ? undefined
-          : _options$signal3.removeEventListener('abort', abort)
       }
     }
     pump()
@@ -6029,17 +6034,13 @@ function map(fn, options) {
             yield val
           }
           queue.shift()
-          if (resume) {
-            resume()
-            resume = null
-          }
+          maybeResume()
         }
         await new Promise((resolve) => {
           next = resolve
         })
       }
     } finally {
-      ac.abort()
       done = true
       if (resume) {
         resume()
@@ -6058,13 +6059,13 @@ function asIndexedPairs(options = undefined) {
   return async function* asIndexedPairs() {
     let index = 0
     for await (const val of this) {
-      var _options$signal4
+      var _options$signal
       if (
         options !== null &&
         options !== undefined &&
-        (_options$signal4 = options.signal) !== null &&
-        _options$signal4 !== undefined &&
-        _options$signal4.aborted
+        (_options$signal = options.signal) !== null &&
+        _options$signal !== undefined &&
+        _options$signal.aborted
       ) {
         throw new AbortError({
           cause: options.signal.reason
@@ -6132,7 +6133,7 @@ class ReduceAwareErrMissingArgs extends ERR_MISSING_ARGS {
   }
 }
 async function reduce(reducer, initialValue, options) {
-  var _options$signal5
+  var _options$signal2
   if (typeof reducer !== 'function') {
     throw new ERR_INVALID_ARG_TYPE('reducer', ['Function', 'AsyncFunction'], reducer)
   }
@@ -6146,9 +6147,9 @@ async function reduce(reducer, initialValue, options) {
   if (
     options !== null &&
     options !== undefined &&
-    (_options$signal5 = options.signal) !== null &&
-    _options$signal5 !== undefined &&
-    _options$signal5.aborted
+    (_options$signal2 = options.signal) !== null &&
+    _options$signal2 !== undefined &&
+    _options$signal2.aborted
   ) {
     const err = new AbortError(undefined, {
       cause: options.signal.reason
@@ -6162,21 +6163,22 @@ async function reduce(reducer, initialValue, options) {
   if (options !== null && options !== undefined && options.signal) {
     const opts = {
       once: true,
-      [kWeakHandler]: this
+      [kWeakHandler]: this,
+      [kResistStopPropagation]: true
     }
     options.signal.addEventListener('abort', () => ac.abort(), opts)
   }
   let gotAnyItemFromStream = false
   try {
     for await (const value of this) {
-      var _options$signal6
+      var _options$signal3
       gotAnyItemFromStream = true
       if (
         options !== null &&
         options !== undefined &&
-        (_options$signal6 = options.signal) !== null &&
-        _options$signal6 !== undefined &&
-        _options$signal6.aborted
+        (_options$signal3 = options.signal) !== null &&
+        _options$signal3 !== undefined &&
+        _options$signal3.aborted
       ) {
         throw new AbortError()
       }
@@ -6206,13 +6208,13 @@ async function toArray(options) {
   }
   const result = []
   for await (const val of this) {
-    var _options$signal7
+    var _options$signal4
     if (
       options !== null &&
       options !== undefined &&
-      (_options$signal7 = options.signal) !== null &&
-      _options$signal7 !== undefined &&
-      _options$signal7.aborted
+      (_options$signal4 = options.signal) !== null &&
+      _options$signal4 !== undefined &&
+      _options$signal4.aborted
     ) {
       throw new AbortError(undefined, {
         cause: options.signal.reason
@@ -6251,24 +6253,24 @@ function drop(number, options = undefined) {
   }
   number = toIntegerOrInfinity(number)
   return async function* drop() {
-    var _options$signal8
+    var _options$signal5
     if (
       options !== null &&
       options !== undefined &&
-      (_options$signal8 = options.signal) !== null &&
-      _options$signal8 !== undefined &&
-      _options$signal8.aborted
+      (_options$signal5 = options.signal) !== null &&
+      _options$signal5 !== undefined &&
+      _options$signal5.aborted
     ) {
       throw new AbortError()
     }
     for await (const val of this) {
-      var _options$signal9
+      var _options$signal6
       if (
         options !== null &&
         options !== undefined &&
-        (_options$signal9 = options.signal) !== null &&
-        _options$signal9 !== undefined &&
-        _options$signal9.aborted
+        (_options$signal6 = options.signal) !== null &&
+        _options$signal6 !== undefined &&
+        _options$signal6.aborted
       ) {
         throw new AbortError()
       }
@@ -6287,37 +6289,40 @@ function take(number, options = undefined) {
   }
   number = toIntegerOrInfinity(number)
   return async function* take() {
-    var _options$signal10
+    var _options$signal7
     if (
       options !== null &&
       options !== undefined &&
-      (_options$signal10 = options.signal) !== null &&
-      _options$signal10 !== undefined &&
-      _options$signal10.aborted
+      (_options$signal7 = options.signal) !== null &&
+      _options$signal7 !== undefined &&
+      _options$signal7.aborted
     ) {
       throw new AbortError()
     }
     for await (const val of this) {
-      var _options$signal11
+      var _options$signal8
       if (
         options !== null &&
         options !== undefined &&
-        (_options$signal11 = options.signal) !== null &&
-        _options$signal11 !== undefined &&
-        _options$signal11.aborted
+        (_options$signal8 = options.signal) !== null &&
+        _options$signal8 !== undefined &&
+        _options$signal8.aborted
       ) {
         throw new AbortError()
       }
       if (number-- > 0) {
         yield val
-      } else {
+      }
+
+      // Don't get another item from iterator in case we reached the end
+      if (number <= 0) {
         return
       }
     }
   }.call(this)
 }
 module.exports.streamReturningOperators = {
-  asIndexedPairs,
+  asIndexedPairs: deprecate(asIndexedPairs, 'readable.asIndexedPairs will be removed in a future version.'),
   drop,
   filter,
   flatMap,
@@ -6334,7 +6339,7 @@ module.exports.promiseReturningOperators = {
   find
 }
 
-},{"../../ours/errors":26,"../../ours/primordials":27,"../validators":24,"./add-abort-signal":7,"./compose":9,"./end-of-stream":13,"./utils":22,"abort-controller":1}],17:[function(require,module,exports){
+},{"../../ours/errors":26,"../../ours/primordials":27,"../../ours/util":28,"../validators":24,"./add-abort-signal":7,"./compose":9,"./end-of-stream":13,"./utils":22,"abort-controller":1}],17:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6385,7 +6390,7 @@ const process = require('process/')
 // permission from the author, Mathias Buus (@mafintosh).
 
 ;('use strict')
-const { ArrayIsArray, Promise, SymbolAsyncIterator } = require('../../ours/primordials')
+const { ArrayIsArray, Promise, SymbolAsyncIterator, SymbolDispose } = require('../../ours/primordials')
 const eos = require('./end-of-stream')
 const { once } = require('../../ours/util')
 const destroyImpl = require('./destroy')
@@ -6410,11 +6415,12 @@ const {
   isTransformStream,
   isWebStream,
   isReadableStream,
-  isReadableEnded
+  isReadableFinished
 } = require('./utils')
 const AbortController = globalThis.AbortController || require('abort-controller').AbortController
 let PassThrough
 let Readable
+let addAbortListener
 function destroyer(stream, reading, writing) {
   let finished = false
   stream.on('close', () => {
@@ -6507,8 +6513,8 @@ async function pumpToNode(iterable, writable, finish, { end }) {
     }
     if (end) {
       writable.end()
+      await wait()
     }
-    await wait()
     finish()
   } catch (err) {
     finish(error !== err ? aggregateTwoErrors(error, err) : err)
@@ -6563,7 +6569,11 @@ function pipelineImpl(streams, callback, opts) {
   function abort() {
     finishImpl(new AbortError())
   }
-  outerSignal === null || outerSignal === undefined ? undefined : outerSignal.addEventListener('abort', abort)
+  addAbortListener = addAbortListener || require('../../ours/util').addAbortListener
+  let disposable
+  if (outerSignal) {
+    disposable = addAbortListener(outerSignal, abort)
+  }
   let error
   let value
   const destroys = []
@@ -6572,6 +6582,7 @@ function pipelineImpl(streams, callback, opts) {
     finishImpl(err, --finishCount === 0)
   }
   function finishImpl(err, final) {
+    var _disposable
     if (err && (!error || error.code === 'ERR_STREAM_PREMATURE_CLOSE')) {
       error = err
     }
@@ -6581,7 +6592,7 @@ function pipelineImpl(streams, callback, opts) {
     while (destroys.length) {
       destroys.shift()(error)
     }
-    outerSignal === null || outerSignal === undefined ? undefined : outerSignal.removeEventListener('abort', abort)
+    ;(_disposable = disposable) === null || _disposable === undefined ? undefined : _disposable[SymbolDispose]()
     ac.abort()
     if (final) {
       if (!error) {
@@ -6789,7 +6800,7 @@ function pipe(src, dst, finish, { end }) {
       ended = true
       dst.end()
     }
-    if (isReadableEnded(src)) {
+    if (isReadableFinished(src)) {
       // End the destination if the source has already ended.
       process.nextTick(endFn)
     } else {
@@ -6880,6 +6891,7 @@ const {
   ObjectSetPrototypeOf,
   Promise,
   SafeSet,
+  SymbolAsyncDispose,
   SymbolAsyncIterator,
   Symbol
 } = require('../../ours/primordials')
@@ -6904,7 +6916,8 @@ const {
     ERR_OUT_OF_RANGE,
     ERR_STREAM_PUSH_AFTER_EOF,
     ERR_STREAM_UNSHIFT_AFTER_END_EVENT
-  }
+  },
+  AbortError
 } = require('../../ours/errors')
 const { validateObject } = require('../validators')
 const kPaused = Symbol('kPaused')
@@ -6914,6 +6927,76 @@ ObjectSetPrototypeOf(Readable.prototype, Stream.prototype)
 ObjectSetPrototypeOf(Readable, Stream)
 const nop = () => {}
 const { errorOrDestroy } = destroyImpl
+const kObjectMode = 1 << 0
+const kEnded = 1 << 1
+const kEndEmitted = 1 << 2
+const kReading = 1 << 3
+const kConstructed = 1 << 4
+const kSync = 1 << 5
+const kNeedReadable = 1 << 6
+const kEmittedReadable = 1 << 7
+const kReadableListening = 1 << 8
+const kResumeScheduled = 1 << 9
+const kErrorEmitted = 1 << 10
+const kEmitClose = 1 << 11
+const kAutoDestroy = 1 << 12
+const kDestroyed = 1 << 13
+const kClosed = 1 << 14
+const kCloseEmitted = 1 << 15
+const kMultiAwaitDrain = 1 << 16
+const kReadingMore = 1 << 17
+const kDataEmitted = 1 << 18
+
+// TODO(benjamingr) it is likely slower to do it this way than with free functions
+function makeBitMapDescriptor(bit) {
+  return {
+    enumerable: false,
+    get() {
+      return (this.state & bit) !== 0
+    },
+    set(value) {
+      if (value) this.state |= bit
+      else this.state &= ~bit
+    }
+  }
+}
+ObjectDefineProperties(ReadableState.prototype, {
+  objectMode: makeBitMapDescriptor(kObjectMode),
+  ended: makeBitMapDescriptor(kEnded),
+  endEmitted: makeBitMapDescriptor(kEndEmitted),
+  reading: makeBitMapDescriptor(kReading),
+  // Stream is still being constructed and cannot be
+  // destroyed until construction finished or failed.
+  // Async construction is opt in, therefore we start as
+  // constructed.
+  constructed: makeBitMapDescriptor(kConstructed),
+  // A flag to be able to tell if the event 'readable'/'data' is emitted
+  // immediately, or on a later tick.  We set this to true at first, because
+  // any actions that shouldn't happen until "later" should generally also
+  // not happen before the first read call.
+  sync: makeBitMapDescriptor(kSync),
+  // Whenever we return null, then we set a flag to say
+  // that we're awaiting a 'readable' event emission.
+  needReadable: makeBitMapDescriptor(kNeedReadable),
+  emittedReadable: makeBitMapDescriptor(kEmittedReadable),
+  readableListening: makeBitMapDescriptor(kReadableListening),
+  resumeScheduled: makeBitMapDescriptor(kResumeScheduled),
+  // True if the error was already emitted and should not be thrown again.
+  errorEmitted: makeBitMapDescriptor(kErrorEmitted),
+  emitClose: makeBitMapDescriptor(kEmitClose),
+  autoDestroy: makeBitMapDescriptor(kAutoDestroy),
+  // Has it been destroyed.
+  destroyed: makeBitMapDescriptor(kDestroyed),
+  // Indicates whether the stream has finished destroying.
+  closed: makeBitMapDescriptor(kClosed),
+  // True if close has been emitted or would have been emitted
+  // depending on emitClose.
+  closeEmitted: makeBitMapDescriptor(kCloseEmitted),
+  multiAwaitDrain: makeBitMapDescriptor(kMultiAwaitDrain),
+  // If true, a maybeReadMore has been scheduled.
+  readingMore: makeBitMapDescriptor(kReadingMore),
+  dataEmitted: makeBitMapDescriptor(kDataEmitted)
+})
 function ReadableState(options, stream, isDuplex) {
   // Duplex streams are both readable and writable, but share
   // the same options object.
@@ -6922,10 +7005,13 @@ function ReadableState(options, stream, isDuplex) {
   // These options can be provided separately as readableXXX and writableXXX.
   if (typeof isDuplex !== 'boolean') isDuplex = stream instanceof require('./duplex')
 
+  // Bit map field to store ReadableState more effciently with 1 bit per field
+  // instead of a V8 slot per field.
+  this.state = kEmitClose | kAutoDestroy | kConstructed | kSync
   // Object stream flag. Used to make read(n) ignore n and to
   // make all the buffer merging and length checks go away.
-  this.objectMode = !!(options && options.objectMode)
-  if (isDuplex) this.objectMode = this.objectMode || !!(options && options.readableObjectMode)
+  if (options && options.objectMode) this.state |= kObjectMode
+  if (isDuplex && options && options.readableObjectMode) this.state |= kObjectMode
 
   // The point at which it stops calling _read() to fill the buffer
   // Note: 0 is a valid value, means "don't call _read preemptively ever"
@@ -6940,54 +7026,19 @@ function ReadableState(options, stream, isDuplex) {
   this.length = 0
   this.pipes = []
   this.flowing = null
-  this.ended = false
-  this.endEmitted = false
-  this.reading = false
-
-  // Stream is still being constructed and cannot be
-  // destroyed until construction finished or failed.
-  // Async construction is opt in, therefore we start as
-  // constructed.
-  this.constructed = true
-
-  // A flag to be able to tell if the event 'readable'/'data' is emitted
-  // immediately, or on a later tick.  We set this to true at first, because
-  // any actions that shouldn't happen until "later" should generally also
-  // not happen before the first read call.
-  this.sync = true
-
-  // Whenever we return null, then we set a flag to say
-  // that we're awaiting a 'readable' event emission.
-  this.needReadable = false
-  this.emittedReadable = false
-  this.readableListening = false
-  this.resumeScheduled = false
   this[kPaused] = null
 
-  // True if the error was already emitted and should not be thrown again.
-  this.errorEmitted = false
-
   // Should close be emitted on destroy. Defaults to true.
-  this.emitClose = !options || options.emitClose !== false
+  if (options && options.emitClose === false) this.state &= ~kEmitClose
 
   // Should .destroy() be called after 'end' (and potentially 'finish').
-  this.autoDestroy = !options || options.autoDestroy !== false
-
-  // Has it been destroyed.
-  this.destroyed = false
+  if (options && options.autoDestroy === false) this.state &= ~kAutoDestroy
 
   // Indicates whether the stream has errored. When true no further
   // _read calls, 'data' or 'readable' events should occur. This is needed
   // since when autoDestroy is disabled we need a way to tell whether the
   // stream has failed.
   this.errored = null
-
-  // Indicates whether the stream has finished destroying.
-  this.closed = false
-
-  // True if close has been emitted or would have been emitted
-  // depending on emitClose.
-  this.closeEmitted = false
 
   // Crypto is kind of old and crusty.  Historically, its default string
   // encoding is 'binary' so we have to make this configurable.
@@ -6997,11 +7048,6 @@ function ReadableState(options, stream, isDuplex) {
   // Ref the piped dest which we need a drain event on it
   // type: null | Writable | Set<Writable>.
   this.awaitDrainWriters = null
-  this.multiAwaitDrain = false
-
-  // If true, a maybeReadMore has been scheduled.
-  this.readingMore = false
-  this.dataEmitted = false
   this.decoder = null
   this.encoding = null
   if (options && options.encoding) {
@@ -7037,6 +7083,14 @@ Readable.prototype._destroy = function (err, cb) {
 Readable.prototype[EE.captureRejectionSymbol] = function (err) {
   this.destroy(err)
 }
+Readable.prototype[SymbolAsyncDispose] = function () {
+  let error
+  if (!this.destroyed) {
+    error = this.readableEnded ? null : new AbortError()
+    this.destroy(error)
+  }
+  return new Promise((resolve, reject) => eos(this, (err) => (err && err !== error ? reject(err) : resolve(null))))
+}
 
 // Manually shove something into the read() buffer.
 // This returns true if the highWaterMark has not been hit yet,
@@ -7054,7 +7108,7 @@ function readableAddChunk(stream, chunk, encoding, addToFront) {
   debug('readableAddChunk', chunk)
   const state = stream._readableState
   let err
-  if (!state.objectMode) {
+  if ((state.state & kObjectMode) === 0) {
     if (typeof chunk === 'string') {
       encoding = encoding || state.defaultEncoding
       if (state.encoding !== encoding) {
@@ -7079,11 +7133,11 @@ function readableAddChunk(stream, chunk, encoding, addToFront) {
   if (err) {
     errorOrDestroy(stream, err)
   } else if (chunk === null) {
-    state.reading = false
+    state.state &= ~kReading
     onEofChunk(stream, state)
-  } else if (state.objectMode || (chunk && chunk.length > 0)) {
+  } else if ((state.state & kObjectMode) !== 0 || (chunk && chunk.length > 0)) {
     if (addToFront) {
-      if (state.endEmitted) errorOrDestroy(stream, new ERR_STREAM_UNSHIFT_AFTER_END_EVENT())
+      if ((state.state & kEndEmitted) !== 0) errorOrDestroy(stream, new ERR_STREAM_UNSHIFT_AFTER_END_EVENT())
       else if (state.destroyed || state.errored) return false
       else addChunk(stream, state, chunk, true)
     } else if (state.ended) {
@@ -7091,7 +7145,7 @@ function readableAddChunk(stream, chunk, encoding, addToFront) {
     } else if (state.destroyed || state.errored) {
       return false
     } else {
-      state.reading = false
+      state.state &= ~kReading
       if (state.decoder && !encoding) {
         chunk = state.decoder.write(chunk)
         if (state.objectMode || chunk.length !== 0) addChunk(stream, state, chunk, false)
@@ -7101,7 +7155,7 @@ function readableAddChunk(stream, chunk, encoding, addToFront) {
       }
     }
   } else if (!addToFront) {
-    state.reading = false
+    state.state &= ~kReading
     maybeReadMore(stream, state)
   }
 
@@ -7114,7 +7168,7 @@ function addChunk(stream, state, chunk, addToFront) {
   if (state.flowing && state.length === 0 && !state.sync && stream.listenerCount('data') > 0) {
     // Use the guard to avoid creating `Set()` repeatedly
     // when we have multiple pipes.
-    if (state.multiAwaitDrain) {
+    if ((state.state & kMultiAwaitDrain) !== 0) {
       state.awaitDrainWriters.clear()
     } else {
       state.awaitDrainWriters = null
@@ -7126,7 +7180,7 @@ function addChunk(stream, state, chunk, addToFront) {
     state.length += state.objectMode ? 1 : chunk.length
     if (addToFront) state.buffer.unshift(chunk)
     else state.buffer.push(chunk)
-    if (state.needReadable) emitReadable(stream)
+    if ((state.state & kNeedReadable) !== 0) emitReadable(stream)
   }
   maybeReadMore(stream, state)
 }
@@ -7176,7 +7230,7 @@ function computeNewHighWaterMark(n) {
 // changes to the function body.
 function howMuchToRead(n, state) {
   if (n <= 0 || (state.length === 0 && state.ended)) return 0
-  if (state.objectMode) return 1
+  if ((state.state & kObjectMode) !== 0) return 1
   if (NumberIsNaN(n)) {
     // Only flow one buffer at a time.
     if (state.flowing && state.length) return state.buffer.first().length
@@ -7201,7 +7255,7 @@ Readable.prototype.read = function (n) {
 
   // If we're asking for more than the current hwm, then raise the hwm.
   if (n > state.highWaterMark) state.highWaterMark = computeNewHighWaterMark(n)
-  if (n !== 0) state.emittedReadable = false
+  if (n !== 0) state.state &= ~kEmittedReadable
 
   // If we're doing read(0) to trigger a readable event, but we
   // already have a bunch of data in the buffer, then just trigger
@@ -7247,7 +7301,7 @@ Readable.prototype.read = function (n) {
   // 3. Actually pull the requested chunks out of the buffer and return.
 
   // if we need a readable event, then we need to do some reading.
-  let doRead = state.needReadable
+  let doRead = (state.state & kNeedReadable) !== 0
   debug('need readable', doRead)
 
   // If we currently have less than the highWaterMark, then also read some.
@@ -7264,10 +7318,9 @@ Readable.prototype.read = function (n) {
     debug('reading, ended or constructing', doRead)
   } else if (doRead) {
     debug('do read')
-    state.reading = true
-    state.sync = true
+    state.state |= kReading | kSync
     // If the length is currently zero, then we *need* a readable event.
-    if (state.length === 0) state.needReadable = true
+    if (state.length === 0) state.state |= kNeedReadable
 
     // Call internal read method
     try {
@@ -7275,7 +7328,8 @@ Readable.prototype.read = function (n) {
     } catch (err) {
       errorOrDestroy(this, err)
     }
-    state.sync = false
+    state.state &= ~kSync
+
     // If _read pushed data synchronously, then `reading` will be false,
     // and we need to re-evaluate how much data we can return to the user.
     if (!state.reading) n = howMuchToRead(nOrig, state)
@@ -7554,9 +7608,7 @@ Readable.prototype.pipe = function (dest, pipeOpts) {
   // Start the flow if it hasn't been started already.
 
   if (dest.writableNeedDrain === true) {
-    if (state.flowing) {
-      pause()
-    }
+    pause()
   } else if (!state.flowing) {
     debug('pipe resume')
     src.resume()
@@ -8095,12 +8147,23 @@ Readable.wrap = function (src, options) {
 'use strict'
 
 const { MathFloor, NumberIsInteger } = require('../../ours/primordials')
+const { validateInteger } = require('../validators')
 const { ERR_INVALID_ARG_VALUE } = require('../../ours/errors').codes
+let defaultHighWaterMarkBytes = 16 * 1024
+let defaultHighWaterMarkObjectMode = 16
 function highWaterMarkFrom(options, isDuplex, duplexKey) {
   return options.highWaterMark != null ? options.highWaterMark : isDuplex ? options[duplexKey] : null
 }
 function getDefaultHighWaterMark(objectMode) {
-  return objectMode ? 16 : 16 * 1024
+  return objectMode ? defaultHighWaterMarkObjectMode : defaultHighWaterMarkBytes
+}
+function setDefaultHighWaterMark(objectMode, value) {
+  validateInteger(value, 'value', 0)
+  if (objectMode) {
+    defaultHighWaterMarkObjectMode = value
+  } else {
+    defaultHighWaterMarkBytes = value
+  }
 }
 function getHighWaterMark(state, options, duplexKey, isDuplex) {
   const hwm = highWaterMarkFrom(options, isDuplex, duplexKey)
@@ -8117,10 +8180,11 @@ function getHighWaterMark(state, options, duplexKey, isDuplex) {
 }
 module.exports = {
   getHighWaterMark,
-  getDefaultHighWaterMark
+  getDefaultHighWaterMark,
+  setDefaultHighWaterMark
 }
 
-},{"../../ours/errors":26,"../../ours/primordials":27}],21:[function(require,module,exports){
+},{"../../ours/errors":26,"../../ours/primordials":27,"../validators":24}],21:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8305,11 +8369,17 @@ Transform.prototype._read = function () {
 },{"../../ours/errors":26,"../../ours/primordials":27,"./duplex":11,"./state":20}],22:[function(require,module,exports){
 'use strict'
 
-const { Symbol, SymbolAsyncIterator, SymbolIterator, SymbolFor } = require('../../ours/primordials')
-const kDestroyed = Symbol('kDestroyed')
-const kIsErrored = Symbol('kIsErrored')
-const kIsReadable = Symbol('kIsReadable')
-const kIsDisturbed = Symbol('kIsDisturbed')
+const { SymbolAsyncIterator, SymbolIterator, SymbolFor } = require('../../ours/primordials')
+
+// We need to use SymbolFor to make these globally available
+// for interopt with readable-stream, i.e. readable-stream
+// and node core needs to be able to read/write private state
+// from each other for proper interoperability.
+const kIsDestroyed = SymbolFor('nodejs.stream.destroyed')
+const kIsErrored = SymbolFor('nodejs.stream.errored')
+const kIsReadable = SymbolFor('nodejs.stream.readable')
+const kIsWritable = SymbolFor('nodejs.stream.writable')
+const kIsDisturbed = SymbolFor('nodejs.stream.disturbed')
 const kIsClosedPromise = SymbolFor('nodejs.webstream.isClosedPromise')
 const kControllerErrorFunction = SymbolFor('nodejs.webstream.controllerErrorFunction')
 function isReadableNodeStream(obj, strict = false) {
@@ -8392,7 +8462,7 @@ function isDestroyed(stream) {
   const wState = stream._writableState
   const rState = stream._readableState
   const state = wState || rState
-  return !!(stream.destroyed || stream[kDestroyed] || (state !== null && state !== undefined && state.destroyed))
+  return !!(stream.destroyed || stream[kIsDestroyed] || (state !== null && state !== undefined && state.destroyed))
 }
 
 // Have been end():d.
@@ -8440,6 +8510,7 @@ function isReadable(stream) {
   return isReadableNodeStream(stream) && stream.readable && !isReadableFinished(stream)
 }
 function isWritable(stream) {
+  if (stream && stream[kIsWritable] != null) return stream[kIsWritable]
   if (typeof (stream === null || stream === undefined ? undefined : stream.writable) !== 'boolean') return null
   if (isDestroyed(stream)) return false
   return isWritableNodeStream(stream) && stream.writable && !isWritableEnded(stream)
@@ -8592,7 +8663,8 @@ function isErrored(stream) {
   )
 }
 module.exports = {
-  kDestroyed,
+  isDestroyed,
+  kIsDestroyed,
   isDisturbed,
   kIsDisturbed,
   isErrored,
@@ -8601,8 +8673,8 @@ module.exports = {
   kIsReadable,
   kIsClosedPromise,
   kControllerErrorFunction,
+  kIsWritable,
   isClosed,
-  isDestroyed,
   isDuplexNodeStream,
   isFinished,
   isIterable,
@@ -9497,7 +9569,6 @@ const modeDesc = 'must be a 32-bit unsigned integer or an octal string'
  * converted to 32-bit unsigned integers or non-negative signed integers in the
  * C++ land, but any value higher than 0o777 will result in platform-specific
  * behaviors.
- *
  * @param {*} value Values to be validated
  * @param {string} name Name of the argument
  * @param {number} [def] If specified, will be returned for invalid values
@@ -9752,6 +9823,26 @@ function validateBooleanArray(value, name) {
 }
 
 /**
+ * @callback validateAbortSignalArray
+ * @param {*} value
+ * @param {string} name
+ * @returns {asserts value is AbortSignal[]}
+ */
+
+/** @type {validateAbortSignalArray} */
+function validateAbortSignalArray(value, name) {
+  validateArray(value, name)
+  for (let i = 0; i < value.length; i++) {
+    const signal = value[i]
+    const indexedName = `${name}[${i}]`
+    if (signal == null) {
+      throw new ERR_INVALID_ARG_TYPE(indexedName, 'AbortSignal', signal)
+    }
+    validateAbortSignal(signal, indexedName)
+  }
+}
+
+/**
  * @param {*} signal
  * @param {string} [name='signal']
  * @returns {asserts signal is keyof signals}
@@ -9935,6 +10026,7 @@ module.exports = {
   validateArray,
   validateStringArray,
   validateBooleanArray,
+  validateAbortSignalArray,
   validateBoolean,
   validateBuffer,
   validateDictionary,
@@ -10410,6 +10502,9 @@ module.exports = {
   PromiseReject(err) {
     return Promise.reject(err)
   },
+  PromiseResolve(val) {
+    return Promise.resolve(val)
+  },
   ReflectApply: Reflect.apply,
   RegExpPrototypeTest(self, value) {
     return self.test(value)
@@ -10433,9 +10528,12 @@ module.exports = {
   SymbolAsyncIterator: Symbol.asyncIterator,
   SymbolHasInstance: Symbol.hasInstance,
   SymbolIterator: Symbol.iterator,
+  SymbolDispose: Symbol.dispose || Symbol('Symbol.dispose'),
+  SymbolAsyncDispose: Symbol.asyncDispose || Symbol('Symbol.asyncDispose'),
   TypedArrayPrototypeSet(self, buf, len) {
     return self.set(buf, len)
   },
+  Boolean: Boolean,
   Uint8Array
 }
 
@@ -10443,6 +10541,9 @@ module.exports = {
 'use strict'
 
 const bufferModule = require('buffer')
+const { kResistStopPropagation, SymbolDispose } = require('./primordials')
+const AbortSignal = globalThis.AbortSignal || require('abort-controller').AbortSignal
+const AbortController = globalThis.AbortController || require('abort-controller').AbortController
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor
 const Blob = globalThis.Blob || bufferModule.Blob
 /* eslint-disable indent */
@@ -10456,6 +10557,15 @@ const isBlob =
         return false
       }
 /* eslint-enable indent */
+
+const validateAbortSignal = (signal, name) => {
+  if (signal !== undefined && (signal === null || typeof signal !== 'object' || !('aborted' in signal))) {
+    throw new ERR_INVALID_ARG_TYPE(name, 'AbortSignal', signal)
+  }
+}
+const validateFunction = (value, name) => {
+  if (typeof value !== 'function') throw new ERR_INVALID_ARG_TYPE(name, 'Function', value)
+}
 
 // This is a simplified version of AggregateError
 class AggregateError extends Error {
@@ -10565,11 +10675,71 @@ module.exports = {
       return ArrayBuffer.isView(arr)
     }
   },
-  isBlob
+  isBlob,
+  deprecate(fn, message) {
+    return fn
+  },
+  addAbortListener:
+    require('events').addAbortListener ||
+    function addAbortListener(signal, listener) {
+      if (signal === undefined) {
+        throw new ERR_INVALID_ARG_TYPE('signal', 'AbortSignal', signal)
+      }
+      validateAbortSignal(signal, 'signal')
+      validateFunction(listener, 'listener')
+      let removeEventListener
+      if (signal.aborted) {
+        queueMicrotask(() => listener())
+      } else {
+        signal.addEventListener('abort', listener, {
+          __proto__: null,
+          once: true,
+          [kResistStopPropagation]: true
+        })
+        removeEventListener = () => {
+          signal.removeEventListener('abort', listener)
+        }
+      }
+      return {
+        __proto__: null,
+        [SymbolDispose]() {
+          var _removeEventListener
+          ;(_removeEventListener = removeEventListener) === null || _removeEventListener === undefined
+            ? undefined
+            : _removeEventListener()
+        }
+      }
+    },
+  AbortSignalAny:
+    AbortSignal.any ||
+    function AbortSignalAny(signals) {
+      // Fast path if there is only one signal.
+      if (signals.length === 1) {
+        return signals[0]
+      }
+      const ac = new AbortController()
+      const abort = () => ac.abort()
+      signals.forEach((signal) => {
+        validateAbortSignal(signal, 'signals')
+        signal.addEventListener('abort', abort, {
+          once: true
+        })
+      })
+      ac.signal.addEventListener(
+        'abort',
+        () => {
+          signals.forEach((signal) => signal.removeEventListener('abort', abort))
+        },
+        {
+          once: true
+        }
+      )
+      return ac.signal
+    }
 }
 module.exports.promisify.custom = Symbol.for('nodejs.util.promisify.custom')
 
-},{"buffer":3}],29:[function(require,module,exports){
+},{"./primordials":27,"abort-controller":1,"buffer":3,"events":4}],29:[function(require,module,exports){
 /* replacement start */
 
 const { Buffer } = require('buffer')
@@ -10606,6 +10776,7 @@ const {
   codes: { ERR_ILLEGAL_CONSTRUCTOR }
 } = require('./ours/errors')
 const compose = require('./internal/streams/compose')
+const { setDefaultHighWaterMark, getDefaultHighWaterMark } = require('./internal/streams/state')
 const { pipeline } = require('./internal/streams/pipeline')
 const { destroyer } = require('./internal/streams/destroy')
 const eos = require('./internal/streams/end-of-stream')
@@ -10613,9 +10784,11 @@ const internalBuffer = {}
 const promises = require('./stream/promises')
 const utils = require('./internal/streams/utils')
 const Stream = (module.exports = require('./internal/streams/legacy').Stream)
+Stream.isDestroyed = utils.isDestroyed
 Stream.isDisturbed = utils.isDisturbed
 Stream.isErrored = utils.isErrored
 Stream.isReadable = utils.isReadable
+Stream.isWritable = utils.isWritable
 Stream.Readable = require('./internal/streams/readable')
 for (const key of ObjectKeys(streamReturningOperators)) {
   const op = streamReturningOperators[key]
@@ -10675,6 +10848,8 @@ Stream.addAbortSignal = addAbortSignal
 Stream.finished = eos
 Stream.destroy = destroyer
 Stream.compose = compose
+Stream.setDefaultHighWaterMark = setDefaultHighWaterMark
+Stream.getDefaultHighWaterMark = getDefaultHighWaterMark
 ObjectDefineProperty(Stream, 'promises', {
   __proto__: null,
   configurable: true,
@@ -10707,7 +10882,7 @@ Stream._uint8ArrayToBuffer = function _uint8ArrayToBuffer(chunk) {
   return Buffer.from(chunk.buffer, chunk.byteOffset, chunk.byteLength)
 }
 
-},{"./internal/streams/add-abort-signal":7,"./internal/streams/compose":9,"./internal/streams/destroy":10,"./internal/streams/duplex":11,"./internal/streams/end-of-stream":13,"./internal/streams/legacy":15,"./internal/streams/operators":16,"./internal/streams/passthrough":17,"./internal/streams/pipeline":18,"./internal/streams/readable":19,"./internal/streams/transform":21,"./internal/streams/utils":22,"./internal/streams/writable":23,"./ours/errors":26,"./ours/primordials":27,"./ours/util":28,"./stream/promises":30,"buffer":3}],30:[function(require,module,exports){
+},{"./internal/streams/add-abort-signal":7,"./internal/streams/compose":9,"./internal/streams/destroy":10,"./internal/streams/duplex":11,"./internal/streams/end-of-stream":13,"./internal/streams/legacy":15,"./internal/streams/operators":16,"./internal/streams/passthrough":17,"./internal/streams/pipeline":18,"./internal/streams/readable":19,"./internal/streams/state":20,"./internal/streams/transform":21,"./internal/streams/utils":22,"./internal/streams/writable":23,"./ours/errors":26,"./ours/primordials":27,"./ours/util":28,"./stream/promises":30,"buffer":3}],30:[function(require,module,exports){
 'use strict'
 
 const { ArrayPrototypePop, Promise } = require('../ours/primordials')
@@ -11384,15 +11559,16 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 },{"process/browser.js":31,"timers":34}],35:[function(require,module,exports){
 module.exports={
   "name": "pokeclicker",
-  "version": "0.10.21",
+  "version": "0.10.22",
   "description": "PokéClicker repository",
   "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=development gulp",
     "build": "cross-env NODE_ENV=development gulp build",
-    "test": "npm run ts-test && npm run eslint && npm run stylelint && npm run vitest",
-    "ts-test": "gulp scripts",
+    "test": "npm-run-all --continue-on-error test-scripts eslint stylelint",
+    "test-scripts": "gulp scripts && npm run vitest-nocoverage",
     "vitest": "vitest --run",
+    "vitest-nocoverage": "vitest --run --coverage false",
     "eslint": "eslint --ext ts ./src/scripts ./src/modules",
     "eslint-fix": "eslint --ext ts --fix ./src/scripts ./src/modules",
     "stylelint": "stylelint \"./src/**/*.less\" --cache",
@@ -11427,7 +11603,7 @@ module.exports={
     "@types/sortablejs": "^1.10.5",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.50.0",
-    "@vitest/coverage-c8": "^0.29.8",
+    "@vitest/coverage-v8": "^2.1.1",
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
@@ -11436,6 +11612,7 @@ module.exports={
     "cross-env": "^7.0.2",
     "del": "^5.1.0",
     "es6-promise": "^4.2.8",
+    "eslint": "^7.32.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-plugin-import": "^2.22.1",
     "gh-pages": "^4.0.0",
@@ -11462,21 +11639,22 @@ module.exports={
     "gulp-typescript": "^5.0.1",
     "gulp-util": "^3.0.7",
     "husky": "^4.3.8",
+    "jsdom": "^25.0.0",
     "natives": "^1.1.6",
+    "npm-run-all2": "^6.2.0",
     "postcss-less": "^6.0.0",
     "stylelint": "^15.10.1",
     "stylelint-config-standard-less": "^1.0.0",
     "ts-loader": "^8.0.4",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5",
-    "vitest": "^0.29.8",
+    "vitest": "^2.1.1",
     "webpack": "^5.76.0",
     "webpack-cli": "^5.0.1",
     "webpack-stream": "^6.1.0"
   },
   "dependencies": {
     "bootstrap": "^4.5.3",
-    "eslint": "^7.4.0",
     "i18next": "^21.9.2",
     "i18next-browser-languagedetector": "^6.1.5",
     "i18next-chained-backend": "^3.1.0",
@@ -12640,6 +12818,7 @@ const pokemonRegionOverride = {
     ...Object.fromEntries(
         pokemonList.filter(p => Math.floor(p.id) == 25 && p.id > 25).map(p => [p.name, GameConstants.Region.alola])
     ),
+    'Pikachu (Palaeontologist)': GameConstants.Region.kanto,
     'Detective Pikachu': GameConstants.Region.kalos,
     'Detective Raichu': GameConstants.Region.kalos,
     'Pikachu (World Cap)': GameConstants.Region.galar,
@@ -12667,6 +12846,7 @@ const pokemonRegionOverride = {
             .map(p => [p.name, GameConstants.Region.galar])
     ),
 
+    'Meowth (Phanpy)': GameConstants.Region.johto,
     'Unown (E)': GameConstants.Region.sinnoh,
     'Unown (!)': GameConstants.Region.hoenn,
     'Unown (?)': GameConstants.Region.hoenn,
@@ -12917,7 +13097,7 @@ const unownForecast = ko.observableArray();
 const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
-const dailyDeals = ko.observableArray();
+//const dailyDeals = ko.observableArray();
 const enigmaDirection = ko.observableArray();
 
 const summaryDate = ko.observable(new Date());
@@ -12926,7 +13106,7 @@ const summary = ko.observable({
     weather: [],
     boostedRoutes: [],
     berryTrades: [],
-    dailyDeals: [],
+    //dailyDeals: [],
     islandScan: {},
 });
 
@@ -12936,7 +13116,7 @@ const generateForecasts = (date = new Date()) => {
     const weatherData = [];
     const boostedRouteData = [];
     const berryMasterData = [];
-    const dailyDealData = [];
+    //const dailyDealData = [];
 
     for (let day = 0; day < 365; day++) {
         const saveDate = new Date(date);
@@ -12954,10 +13134,10 @@ const generateForecasts = (date = new Date()) => {
         });
 
         // Daily Deals
-        dailyDealData.push({
+        /*dailyDealData.push({
             date: saveDate,
             deals: getDailyDealsByDate(date),
-        });
+        });*/
 
         // Weather
         weatherData.push(...getRegionalWeatherByDate(date));
@@ -12985,7 +13165,7 @@ const generateForecasts = (date = new Date()) => {
     weatherForecast(weatherData);
     boostedRoutes(boostedRouteData.slice(0, 6));
     berryMasters(berryMasterData);
-    dailyDeals(dailyDealData);
+    //dailyDeals(dailyDealData);
 };
 
 const generateDailySummary = (date = new Date()) => {
@@ -12995,7 +13175,7 @@ const generateDailySummary = (date = new Date()) => {
         weather: getRegionalWeatherByDate(date),
         boostedRoutes: getBoostedRoutesByDate(date),
         berryTrades: getBerryDealsByDate(date),
-        dailyDeals: getDailyDealsByDate(date),
+        //dailyDeals: getDailyDealsByDate(date),
         islandScan: getIslandScanPokemonByDate(date),
     });
 };
@@ -13014,10 +13194,10 @@ const getBerryDealsByDate = (date = new Date()) => {
     return Object.values(BerryDeal.list).map((d) => [...d()]);
 };
 
-const getDailyDealsByDate = (date = new Date()) => {
+/*const getDailyDealsByDate = (date = new Date()) => {
     DailyDeal.generateDeals(5, date);
     return [...DailyDeal.list()];
-};
+};*/
 
 const getRegionalWeatherByDate = (date = new Date()) => {
     const weatherData = [];
@@ -13119,7 +13299,7 @@ const getBerryMasterNextPokemonCost = (berryTrader, pokemonName, cost) => {
     return getBerryMasterDeals(berryTrader).find(t => t.deals.find(d => d.item.itemType.name == pokemonName && d.berries[0].amount == cost))?.date;
 };
 
-const getUndergroundItemList = () => {
+/*const getUndergroundItemList = () => {
     return UndergroundItems.list
         .filter(i => i.valueType !== UndergroundItemValueType.MegaStone)
         .map(i => i.name)
@@ -13175,7 +13355,7 @@ const findNextTradesForItem = (itemName, days = 1095) => {
     }
 
     return deals;
-};
+};*/
 
 const getIslandScanPokemonByDate = (date = new Date()) => {
     const data = { route: [], dungeon: [] };
@@ -13221,20 +13401,20 @@ const getIslandScanPokemonByDate = (date = new Date()) => {
     return data;
 };
 
-const selectedDailyDealItem = ko.observable();
+//const selectedDailyDealItem = ko.observable();
 
 module.exports = {
     unownForecast,
     weatherForecast,
     boostedRoutes,
     berryMasters,
-    dailyDeals,
+    //dailyDeals,
     enigmaDirection,
     summary,
     summaryDate,
 
-    selectedDailyDealItem,
-    selectedDailyDealItemNextTrades,
+    //selectedDailyDealItem,
+    //selectedDailyDealItemNextTrades,
 
     generateForecasts,
     generateDailySummary,
@@ -13243,8 +13423,8 @@ module.exports = {
     getBerryMasterDeals,
     getBerryMasterNextItemDate,
     getBerryMasterPokemonMinMaxCost,
-    getUndergroundItemList,
-    getNextOccurrenceUndergroundItems,
+    //getUndergroundItemList,
+    //getNextOccurrenceUndergroundItems,
     getIslandScanPokemonByDate,
 };
 },{}],41:[function(require,module,exports){
@@ -13303,6 +13483,7 @@ module.exports = {
 };
 },{}],42:[function(require,module,exports){
 Notifier.notify = () => {};
+SortModules = () => {};
 
 const initGame = () => {
   player = new Player();
