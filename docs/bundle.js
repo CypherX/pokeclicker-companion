@@ -11559,7 +11559,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 },{"process/browser.js":31,"timers":34}],35:[function(require,module,exports){
 module.exports={
   "name": "pokeclicker",
-  "version": "0.10.22",
+  "version": "0.10.23",
   "description": "PokéClicker repository",
   "main": "index.js",
   "scripts": {
