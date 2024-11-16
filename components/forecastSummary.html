@@ -7,7 +7,7 @@
 
         <div class="col col-md-8">
             <div class="row">
-                <div class="col-6">
+                <div class="col-12">
                     <div class="card mb-2">
                         <div class="card-header bg-primary">Unown</div>
                         <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
@@ -21,23 +21,7 @@
                                 <tbody data-bind="foreach: Forecast.summary().unown">
                                     <tr>
                                         <td data-bind="text: Companion.data.unownDungeonList[$index()]"></td>
-                                        <td class="text-center" data-bind="text: $data"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="card mb-2">
-                        <div class="card-header bg-primary">Daily Deals</div>
-                        <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
-                            <table class="table table-sm small mb-0">
-                                <tbody data-bind="foreach: Forecast.summary().dailyDeals">
-                                    <tr class="text-center align-middle">
-                                        <td data-bind="text: `${amount1} × ${item1.name}`"></td>
-                                        <td>→</td>
-                                        <td data-bind="text: `${amount2} × ${item2.name}`"></td>
+                                        <td class="text-center" data-bind="text: $data.join(' ')"></td>
                                     </tr>
                                 </tbody>
                             </table>

@@ -1,5 +1,4 @@
 const UnobtainablePokemon = [
-    'Mega Medicham',
     'Mega Altaria',
     'Arceus (Fire)',
     'Arceus (Water)',
@@ -87,6 +86,7 @@ const pokemonRegionOverride = {
     ...Object.fromEntries(
         pokemonList.filter(p => Math.floor(p.id) == 25 && p.id > 25).map(p => [p.name, GameConstants.Region.alola])
     ),
+    'Pikachu (Palaeontologist)': GameConstants.Region.kanto,
     'Detective Pikachu': GameConstants.Region.kalos,
     'Detective Raichu': GameConstants.Region.kalos,
     'Pikachu (World Cap)': GameConstants.Region.galar,
@@ -114,6 +114,7 @@ const pokemonRegionOverride = {
             .map(p => [p.name, GameConstants.Region.galar])
     ),
 
+    'Meowth (Phanpy)': GameConstants.Region.johto,
     'Unown (E)': GameConstants.Region.sinnoh,
     'Unown (!)': GameConstants.Region.hoenn,
     'Unown (?)': GameConstants.Region.hoenn,

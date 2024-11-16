@@ -2,7 +2,7 @@ const unownForecast = ko.observableArray();
 const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
-const dailyDeals = ko.observableArray();
+//const dailyDeals = ko.observableArray();
 const enigmaDirection = ko.observableArray();
 
 const summaryDate = ko.observable(new Date());
@@ -11,7 +11,7 @@ const summary = ko.observable({
     weather: [],
     boostedRoutes: [],
     berryTrades: [],
-    dailyDeals: [],
+    //dailyDeals: [],
     islandScan: {},
 });
 
@@ -21,9 +21,9 @@ const generateForecasts = (date = new Date()) => {
     const weatherData = [];
     const boostedRouteData = [];
     const berryMasterData = [];
-    const dailyDealData = [];
+    //const dailyDealData = [];
 
-    for (let day = 0; day < 365; day++) {
+    for (let day = 0; day < 180; day++) {
         const saveDate = new Date(date);
 
         // Unown
@@ -39,10 +39,10 @@ const generateForecasts = (date = new Date()) => {
         });
 
         // Daily Deals
-        dailyDealData.push({
+        /*dailyDealData.push({
             date: saveDate,
             deals: getDailyDealsByDate(date),
-        });
+        });*/
 
         // Weather
         weatherData.push(...getRegionalWeatherByDate(date));
@@ -70,7 +70,7 @@ const generateForecasts = (date = new Date()) => {
     weatherForecast(weatherData);
     boostedRoutes(boostedRouteData.slice(0, 6));
     berryMasters(berryMasterData);
-    dailyDeals(dailyDealData);
+    //dailyDeals(dailyDealData);
 };
 
 const generateDailySummary = (date = new Date()) => {
@@ -80,7 +80,7 @@ const generateDailySummary = (date = new Date()) => {
         weather: getRegionalWeatherByDate(date),
         boostedRoutes: getBoostedRoutesByDate(date),
         berryTrades: getBerryDealsByDate(date),
-        dailyDeals: getDailyDealsByDate(date),
+        //dailyDeals: getDailyDealsByDate(date),
         islandScan: getIslandScanPokemonByDate(date),
     });
 };
@@ -88,10 +88,16 @@ const generateDailySummary = (date = new Date()) => {
 const getUnownByDate = (date = new Date()) => {
     SeededDateRand.seedWithDate(date);
     return [
-        SeededDateRand.fromArray(AlphUnownList),
-        SeededDateRand.fromArray(TanobyUnownList),
-        SeededDateRand.fromArray(SolaceonUnownList),
+        getDailyUnown(date, AlphUnownList),
+        getDailyUnown(date, TanobyUnownList),
+        getDailyUnown(date, SolaceonUnownList),
     ];
+};
+
+const getDailyUnown = (date, unownList) => {
+    SeededRand.seedWithDate(date);
+    const shuffled = SeededRand.shuffleArray([...Array(unownList.length).keys()]);
+    return shuffled.slice(0, 3).map(idx => unownList[idx]);
 };
 
 const getBerryDealsByDate = (date = new Date()) => {
@@ -99,10 +105,10 @@ const getBerryDealsByDate = (date = new Date()) => {
     return Object.values(BerryDeal.list).map((d) => [...d()]);
 };
 
-const getDailyDealsByDate = (date = new Date()) => {
+/*const getDailyDealsByDate = (date = new Date()) => {
     DailyDeal.generateDeals(5, date);
     return [...DailyDeal.list()];
-};
+};*/
 
 const getRegionalWeatherByDate = (date = new Date()) => {
     const weatherData = [];
@@ -204,7 +210,7 @@ const getBerryMasterNextPokemonCost = (berryTrader, pokemonName, cost) => {
     return getBerryMasterDeals(berryTrader).find(t => t.deals.find(d => d.item.itemType.name == pokemonName && d.berries[0].amount == cost))?.date;
 };
 
-const getUndergroundItemList = () => {
+/*const getUndergroundItemList = () => {
     return UndergroundItems.list
         .filter(i => i.valueType !== UndergroundItemValueType.MegaStone)
         .map(i => i.name)
@@ -260,7 +266,7 @@ const findNextTradesForItem = (itemName, days = 1095) => {
     }
 
     return deals;
-};
+};*/
 
 const getIslandScanPokemonByDate = (date = new Date()) => {
     const data = { route: [], dungeon: [] };
@@ -306,20 +312,20 @@ const getIslandScanPokemonByDate = (date = new Date()) => {
     return data;
 };
 
-const selectedDailyDealItem = ko.observable();
+//const selectedDailyDealItem = ko.observable();
 
 module.exports = {
     unownForecast,
     weatherForecast,
     boostedRoutes,
     berryMasters,
-    dailyDeals,
+    //dailyDeals,
     enigmaDirection,
     summary,
     summaryDate,
 
-    selectedDailyDealItem,
-    selectedDailyDealItemNextTrades,
+    //selectedDailyDealItem,
+    //selectedDailyDealItemNextTrades,
 
     generateForecasts,
     generateDailySummary,
@@ -328,7 +334,7 @@ module.exports = {
     getBerryMasterDeals,
     getBerryMasterNextItemDate,
     getBerryMasterPokemonMinMaxCost,
-    getUndergroundItemList,
-    getNextOccurrenceUndergroundItems,
+    //getUndergroundItemList,
+    //getNextOccurrenceUndergroundItems,
     getIslandScanPokemonByDate,
 };
