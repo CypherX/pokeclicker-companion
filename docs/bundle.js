@@ -13180,27 +13180,18 @@ const generateDailySummary = (date = new Date()) => {
 };
 
 const getUnownByDate = (date = new Date()) => {
-    //SeededDateRand.seedWithDate(date);
+    SeededDateRand.seedWithDate(date);
     return [
-        //SeededDateRand.fromArray(AlphUnownList),
-        //SeededDateRand.fromArray(TanobyUnownList),
-        //SeededDateRand.fromArray(SolaceonUnownList),
-        AlphUnownList.filter((u, i) => {
-            SeededRand.seedWithDate(date);
-            const selected = SeededRand.shuffleArray([...Array(AlphUnownList.length).keys()]).slice(0, 3)
-            return selected.includes(i);
-        }),
-        TanobyUnownList.filter((u, i) => {
-            SeededRand.seedWithDate(date);
-            const selected = SeededRand.shuffleArray([...Array(TanobyUnownList.length).keys()]).slice(0, 3)
-            return selected.includes(i);
-        }),
-        SolaceonUnownList.filter((u, i) => {
-            SeededRand.seedWithDate(date);
-            const selected = SeededRand.shuffleArray([...Array(SolaceonUnownList.length).keys()]).slice(0, 3)
-            return selected.includes(i);
-        }),
+        getDailyUnown(date, AlphUnownList),
+        getDailyUnown(date, TanobyUnownList),
+        getDailyUnown(date, SolaceonUnownList),
     ];
+};
+
+const getDailyUnown = (date, unownList) => {
+    SeededRand.seedWithDate(date);
+    const shuffled = SeededRand.shuffleArray([...Array(unownList.length).keys()]);
+    return shuffled.slice(0, 3).map(idx => unownList[idx]);
 };
 
 const getBerryDealsByDate = (date = new Date()) => {
