@@ -22,6 +22,7 @@ const loadSaveData = (saveString, fileName = null) => {
     player.highestRegion(saveFile.player.highestRegion);
     player.trainerId = saveFile.player.trainerId;
     App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
+    Settings.setSettingByName('breedingEfficiencyAllModifiers', false);
 
     Enigma.revealHintsCounter(0);
     VitaminTracker.highestRegion(player.highestRegion());
