@@ -7,7 +7,7 @@
 
         <div class="col col-md-8">
             <div class="row">
-                <div class="col-12">
+                <div class="col-12 col-sm-6">
                     <div class="card mb-2">
                         <div class="card-header bg-primary">Unown</div>
                         <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
@@ -23,6 +23,48 @@
                                         <td data-bind="text: Companion.data.unownDungeonList[$index()]"></td>
                                         <td class="text-center" data-bind="text: $data.join(' ')"></td>
                                     </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="card mb-2">
+                        <div class="card-header bg-primary">Alola Island Scan</div>
+                        <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
+                            <table class="table table-sm small mb-0" data-bind="with: Forecast.summary().islandScan">
+                                <thead>
+                                    <tr class="table-dark">
+                                        <td colspan="2" class="text-center">Routes</td>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-center align-middle">
+                                    <!-- ko ifnot: $data.route?.length -->
+                                    <tr><td colspan="2">-</td></tr>
+                                    <!-- /ko -->
+                                    <!-- ko foreach: $data.route -->
+                                    <tr>
+                                        <td class="w-50" data-bind="text: $data.name"></td>
+                                        <td class="w-50" data-bind="text: $data.pokemon.join(', ')"></td>
+                                    </tr>
+                                    <!-- /ko -->
+                                </tbody>
+        
+                                <thead>
+                                    <tr class="table-dark">
+                                        <td colspan="2" class="text-center">Dungeons</td>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-center align-middle">
+                                    <!-- ko ifnot: $data.dungeon?.length -->
+                                    <tr><td colspan="2">-</td></tr>
+                                    <!-- /ko -->
+                                    <!-- ko foreach: $data.dungeon -->
+                                    <tr>
+                                        <td class="w-50" data-bind="text: $data.name"></td>
+                                        <td class="w-50" data-bind="text: $data.pokemon.join(', ')"></td>
+                                    </tr>
+                                    <!-- /ko -->
                                 </tbody>
                             </table>
                         </div>
@@ -87,46 +129,6 @@
             </div>
         </div>
         <div class="col col-md-4">
-            <div class="card mb-2">
-                <div class="card-header bg-primary">Alola Island Scan</div>
-                <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
-                    <table class="table table-sm small mb-0" data-bind="with: Forecast.summary().islandScan">
-                        <thead>
-                            <tr class="table-dark">
-                                <td colspan="2" class="text-center">Routes</td>
-                            </tr>
-                        </thead>
-                        <tbody class="text-center align-middle">
-                            <!-- ko ifnot: $data.route?.length -->
-                            <tr><td colspan="2">-</td></tr>
-                            <!-- /ko -->
-                            <!-- ko foreach: $data.route -->
-                            <tr>
-                                <td class="w-50" data-bind="text: $data.name"></td>
-                                <td class="w-50" data-bind="text: $data.pokemon.join(', ')"></td>
-                            </tr>
-                            <!-- /ko -->
-                        </tbody>
-
-                        <thead>
-                            <tr class="table-dark">
-                                <td colspan="2" class="text-center">Dungeons</td>
-                            </tr>
-                        </thead>
-                        <tbody class="text-center align-middle">
-                            <!-- ko ifnot: $data.dungeon?.length -->
-                            <tr><td colspan="2">-</td></tr>
-                            <!-- /ko -->
-                            <!-- ko foreach: $data.dungeon -->
-                            <tr>
-                                <td class="w-50" data-bind="text: $data.name"></td>
-                                <td class="w-50" data-bind="text: $data.pokemon.join(', ')"></td>
-                            </tr>
-                            <!-- /ko -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
             <div class="card mb-2">
                 <div class="card-header bg-primary">Berry Trades</div>
                 <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
