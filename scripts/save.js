@@ -2,6 +2,15 @@ const file = ko.observable();
 const prevLoadedSaves = ko.observableArray();
 const isDamageLoaded = ko.observable(false);
 
+let pokeclickerWindow = null;
+const pokeclickerSaveList = ko.observable();
+const autoLoadGameSaveList = ko.observable(false);
+const autoLoadGameSave = ko.observable();
+const loadedSaveKey = ko.observable();
+
+autoLoadGameSaveList.subscribe((value) => localStorage.setItem('autoLoadGameSaveList', +value));
+autoLoadGameSave.subscribe((value) => localStorage.setItem('autoLoadGameSave', value));
+
 const loadFile = (file) => {
     const fileName = file.name;
     const fileReader = new FileReader();
@@ -89,6 +98,14 @@ const loadSaveData = (saveString, fileName = null) => {
     }
 
     bananaCheck(saveFile);
+
+    Util.notify({
+        title: 'Save Loaded',
+        message: `Save file '${file().save.profile?.name ?? 'Trainer'}' loaded.`,
+        type: 'dark',
+        headerType: 'primary',
+        timeout: 5000
+    });
 };
 
 const getMonoType = (party) => {
@@ -175,6 +192,27 @@ const initialize = () => {
     prevLoadedSaves.subscribe((value) => {
         localStorage.setItem('prevLoadedSaves', JSON.stringify(value));
     });
+
+    if (+localStorage.getItem('autoLoadGameSaveList')) {
+        autoLoadGameSaveList(true);
+    }
+
+    if (localStorage.getItem('autoLoadGameSave')) {
+        autoLoadGameSave(localStorage.getItem('autoLoadGameSave'));
+    }
+
+    pokeclickerWindow = document.getElementById('pokeclickerFrame').contentWindow;
+    window.addEventListener('message', handleMessage);
+
+    setTimeout(() => {
+        if (autoLoadGameSaveList()) {
+            listPokeClickerSaves();
+        }
+    
+        if (autoLoadGameSave()) {
+            loadPokeClickerSave(autoLoadGameSave());
+        }
+    }, 0);
 };
 
 const origAchievementBonus = AchievementHandler.achievementBonus;
@@ -258,6 +296,35 @@ const loadAttackData = () => {
     isDamageLoaded(true);
 };
 
+const handleMessage = (message) => {
+    if (message.source !== pokeclickerWindow) {
+        return;
+    }
+
+    //console.log('message received');
+    //console.log(message.data);
+    switch (message.data.type) {
+        case 'listSaves':
+            // { saveKey, name, trainerId }
+            pokeclickerSaveList(message.data.saves);
+            break;
+        case 'getSave':
+            const saveData = message.data.saveData;
+            loadSaveData(saveData);
+            loadedSaveKey(message.data.saveKey);
+            break;
+    }
+};
+
+const listPokeClickerSaves = () => {
+    pokeclickerWindow.postMessage({ type: 'listSaves' }, '*');
+};
+
+const loadPokeClickerSave = (saveKey) => {
+    pokeclickerWindow.postMessage({ type: 'getSave', saveKey: saveKey }, '*');
+};
+
+
 module.exports = {
     file,
     prevLoadedSaves,
@@ -273,4 +340,10 @@ module.exports = {
 
     initialize,
     isDamageLoaded,
+
+    listPokeClickerSaves,
+    loadPokeClickerSave,
+    pokeclickerSaveList,
+    autoLoadGameSaveList,
+    autoLoadGameSave,
 }

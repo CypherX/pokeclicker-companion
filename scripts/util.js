@@ -77,11 +77,12 @@ const notify = ({
     timeout = 5000,
     title = '',
     onHideFunction = undefined,
+    headerType = 'dark',
 }) => {
     const toastId = Rand.string(7);
     const toastHtml =
     `<div id="${toastId}" class="toast bg-${type}" data-bs-autohide="false">
-        ${title ? `<div class="toast-header">
+        ${title ? `<div class="toast-header bg-${headerType}">
             <strong class="me-auto">${title}</strong>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>` : ''}

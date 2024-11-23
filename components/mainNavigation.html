@@ -36,20 +36,27 @@
             </ul>
         </div>
         <div class="d-none d-md-block position-absolute end-0 me-2">
-            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal"
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#settingsModal"
                 data-bind="tooltip: { title: 'Companion Settings', placement: 'bottom', trigger: 'hover' }">
-                <img src="assets/gear-solid.svg" class="d-flex my-1 align-self-center"
+                <img src="assets/gear-solid.svg" class=""
                     style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />
             </button>
-            <div class="input-group" style="display: inline-flex; vertical-align: middle; width: unset;">
-                <span class="input-group-text text-white" style="border-color: #444; user-select: none;">PokéClicker Save</span>
+            <div class="input-group input-group-sm" style="display: inline-flex; vertical-align: middle; width: unset;">
+                <span class="input-group-text text-white" style="border-color: #444; user-select: none;">Load PokéClicker Save:</span>
                 <button class="btn btn-primary btn-save-selector" type="button"
                     data-bind="tooltip: { title: 'Browse for and select a save file to load. Drag-and-drop anywhere on this page is also supported.', placement: 'bottom', trigger: 'hover' }">
-                    <img src="assets/file-import-solid.svg" width="16" style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />
+                    <!--<img src="assets/file-import-solid.svg" width="16" style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />-->
+                    File
                 </button>
                 <button class="btn btn-primary btn-save-clipboard" type="button" data-bs-toggle="modal" data-bs-target="#loadFromClipboardModal"
                     data-bind="tooltip: { title: 'Import file from text/clipboard. Save can be copied to the clipboard in-game from the Save menu.', placement: 'bottom', trigger: 'hover' }">
-                    <img src="assets/paste-regular.svg" width="16" style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />
+                    <!--<img src="assets/paste-regular.svg" width="16" style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />-->
+                    Text
+                </button>
+                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#loadFromGameModal"
+                    data-bind="tooltip: { title: 'Attempt to load a save directly from PokéClicker.', placement: 'bottom', trigger: 'hover' }">
+                    <!--<img src="assets/paste-regular.svg" width="16" style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />-->
+                    Game
                 </button>
             </div>
         </div>
