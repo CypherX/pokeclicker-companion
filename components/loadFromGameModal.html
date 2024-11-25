@@ -2,10 +2,11 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Load PokéClicker Save Data</h5>
+                <h5 class="modal-title">Load PokéClicker Save Data [BETA]</h5>
               </div>
             <div class="modal-body text-center">
                 <div class="small mb-2">
+                    <div class="text-warning">This is an experimental feature.</div>
                     Attempt to fetch your save data from PokéClicker.<br />
                     Browser - Companion must be opened in the same browser used to play.<br />
                     Client - Companion must be opened from within the desktop client.
@@ -20,7 +21,7 @@
                         <div class="card border-warning">
                             <div class="card-body">
                                 <div data-bind="text: $data.name"></div>
-                                <div data-bind="text: `#${$data.trainerId}`"></div>
+                                <div class="small" data-bind="text: `#${$data.trainerId}`"></div>
                                 <div class="mt-2">
                                     <div class="form-check form-check-inline form-switch small">
                                         <input class="form-check-input" type="checkbox" role="switch" name="chkAutoLoadSave" autocomplete="off"
@@ -28,7 +29,7 @@
                                         <label class="form-check-label" data-bind="attr: { for: `autoLoadSave${$index()}` }">Auto Load</label>
                                     </div>
                                     <button type="button" class="btn btn-primary btn-sm"
-                                        data-bind="click: () => { SaveData.loadPokeClickerSave($data.saveKey); $('#loadFromClipboardModal').modal('hide') }">
+                                        data-bind="click: () => { SaveData.loadPokeClickerSave($data.saveKey); $('#loadFromGameModal').modal('hide') }">
                                         Select
                                     </button>
                                 </div>

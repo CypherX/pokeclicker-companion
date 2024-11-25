@@ -201,18 +201,32 @@ const initialize = () => {
         autoLoadGameSave(localStorage.getItem('autoLoadGameSave'));
     }
 
-    pokeclickerWindow = document.getElementById('pokeclickerFrame').contentWindow;
-    window.addEventListener('message', handleMessage);
+    const pokeclickerFrame = document.getElementById('pokeclickerFrame');
+    pokeclickerFrame.addEventListener('load', () => {
+        pokeclickerWindow = document.getElementById('pokeclickerFrame').contentWindow;
+        window.addEventListener('message', handleMessage);
 
-    setTimeout(() => {
-        if (autoLoadGameSaveList()) {
-            listPokeClickerSaves();
-        }
-    
-        if (autoLoadGameSave()) {
-            loadPokeClickerSave(autoLoadGameSave());
-        }
-    }, 0);
+        setTimeout(() => {
+            if (autoLoadGameSaveList()) {
+                listPokeClickerSaves();
+            }
+        
+            if (autoLoadGameSave()) {
+                loadPokeClickerSave(autoLoadGameSave());
+            }
+        }, 0);
+    }, { once: true });
+
+    pokeclickerFrame.src = 'http://localhost:3000';
+};
+
+const getPokeClickerUrl = () => {
+    if (App.isUsingClient) {
+        // windows, need to figure out linux
+        return '%APPDATA%/pokeclicker-desktop/pokeclicker-master/docs/index.html';
+    }
+
+    return 'https://pokeclicker.com';
 };
 
 const origAchievementBonus = AchievementHandler.achievementBonus;
@@ -312,6 +326,9 @@ const handleMessage = (message) => {
             const saveData = message.data.saveData;
             loadSaveData(saveData);
             loadedSaveKey(message.data.saveKey);
+            break;
+        default:
+            console.warn(`Unknown message`, message);
             break;
     }
 };
