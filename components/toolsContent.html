@@ -89,6 +89,7 @@
                             <thead>
                                 <tr class="table-dark">
                                     <th>Gym</th>
+                                    <th class="text-center">Town</th>
                                     <th class="text-center">Region</th>
                                     <th class="text-center">Pokémon</th>
                                     <th class="text-center">Total HP</th>
@@ -101,7 +102,8 @@
                             <!-- ko using: BattleCalculator.getBattleData -->
                             <tbody data-bind="foreach: $data.gyms">
                                 <tr class="align-middle">
-                                    <td data-bind="text: $data.town"></td>
+                                    <td data-bind="text: $data.leaderName"></td>
+                                    <td class="text-center" data-bind="text: $data.townObj.name"></td>
                                     <td class="text-center" data-bind="text: Util.getRegionNameText($data.townObj.region, $data.townObj.subRegion)"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
@@ -116,7 +118,7 @@
                                     </td>
                                 </tr>
                                 <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }" style="transition: none !important;">
-                                    <td colspan="8">
+                                    <td colspan="9">
                                         <table class="table table-sm small mb-0">
                                             <thead>
                                                 <tr class="table-dark">
@@ -142,7 +144,7 @@
                             </tbody>
                             <tbody data-bind="visible: $data.gyms.length == 0">
                                 <tr>
-                                    <td class="text-center" colspan="8">No data to display. Check above settings.</td>
+                                    <td class="text-center" colspan="9">No data to display. Check above settings.</td>
                                 </tr>
                             </tbody>
                             <!-- /ko -->
