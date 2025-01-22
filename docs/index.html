@@ -1418,6 +1418,7 @@
                             <thead>
                                 <tr class="table-dark">
                                     <th>Gym</th>
+                                    <th class="text-center">Town</th>
                                     <th class="text-center">Region</th>
                                     <th class="text-center">Pokémon</th>
                                     <th class="text-center">Total HP</th>
@@ -1430,7 +1431,8 @@
                             <!-- ko using: BattleCalculator.getBattleData -->
                             <tbody data-bind="foreach: $data.gyms">
                                 <tr class="align-middle">
-                                    <td data-bind="text: $data.town"></td>
+                                    <td data-bind="text: $data.leaderName"></td>
+                                    <td class="text-center" data-bind="text: $data.townObj.name"></td>
                                     <td class="text-center" data-bind="text: Util.getRegionNameText($data.townObj.region, $data.townObj.subRegion)"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
                                     <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
