@@ -125,9 +125,9 @@ const getBattleData = ko.pureComputed(() => {
     // gyms
     const gymBattles = [...gymList()];
     gymBattles.forEach(g => {
-        if (!g.pokemonList) {
+        //if (!g.pokemonList) {
             g.pokemonList = g.getPokemonList();
-        }
+        //}
 
         const town = TownList[g.parent?.name ?? g.town];
         g.townObj = town;
@@ -156,9 +156,9 @@ const getBattleData = ko.pureComputed(() => {
     // temp battles
     const tempBattles = [...tempBattleList()];
     tempBattles.forEach(tb => {
-        if (!tb.pokemonList) {
+        //if (!tb.pokemonList) {
             tb.pokemonList = tb.getPokemonList();
-        }
+        //}
 
         const town = tb.getTown();
         regionMultiplierOverride = town.region;
