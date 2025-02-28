@@ -285,17 +285,37 @@ const getIslandScanPokemonByDate = (date = new Date()) => {
         const dungeon = dungeonList[name];
         const pokemon = [];
 
-        const enemies = dungeon.enemyList.filter(e => typeof e === 'object'
-            && e.options.requirement instanceof DayOfWeekRequirement
-            && e.options.requirement.DayOfWeekNum == date.getDay());
+        const enemies = dungeon.enemyList.filter(e => {
+            if (typeof e !== 'object') {
+                return false;
+            }
+
+            const req = e.options.requirement instanceof DayOfWeekRequirement
+                ? e.options.requirement
+                : e.options.requirement?.requirements?.find(r => r instanceof DayOfWeekRequirement);
+
+            if (req?.DayOfWeekNum !== date.getDay()) {
+                return false;
+            }
+
+            return true;
+        });
 
         if (enemies.length) {
             pokemon.push(...enemies.flatMap(e => e.pokemon));
         }
 
-        const bosses = dungeon.bossList.filter(b =>
-            b.options?.requirement instanceof DayOfWeekRequirement
-            && b.options.requirement.DayOfWeekNum == date.getDay());
+        const bosses = dungeon.bossList.filter(b => {
+            const req = b.options?.requirement instanceof DayOfWeekRequirement
+                ? b.options?.requirement
+                : b.options?.requirement?.requirements?.find(r => r instanceof DayOfWeekRequirement);
+
+            if (req?.DayOfWeekNum !== date.getDay()) {
+                return false;
+            }
+
+            return true;
+        });
 
         if (bosses.length) {
             pokemon.push(...bosses.flatMap(b => b.name));
