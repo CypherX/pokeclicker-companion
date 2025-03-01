@@ -724,10 +724,18 @@
 <div class="tab-pane show active" id="forecastSummary">
     <h4 class="mb-4">
         Daily Summary
-        <small class="text-muted float-end" data-bind="text: Forecast.summaryDate().toDateString()"></small>
+        <!--<small class="text-muted float-end" data-bind="text: Forecast.summaryDate().toDateString()"></small>-->
+        <div class="float-end h5">
+            <input type="date" data-bind="value: Util.formatDate(new Date())" onchange="((e) => {
+                // This is ugly but the time needs to be set with the date or it assumes UTC.
+                const s = e.value.split('-');
+                const now = new Date();
+                const date = new Date(s[0], +s[1] - 1, s[2], now.getHours(), now.getMinutes(), now.getSeconds());
+                Forecast.generateDailySummary(date);
+            })(this)" autocomplete="off" />
+        </div>
     </h4>
     <div class="row">
-
         <div class="col col-md-8">
             <div class="row">
                 <div class="col-12 col-sm-6">
@@ -1661,7 +1669,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?t=1740764038343"></script>
+        <script src="./bundle.js?t=1740867945419"></script>
     </body>
 </html>
 
