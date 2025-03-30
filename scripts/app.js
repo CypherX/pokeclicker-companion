@@ -527,28 +527,9 @@ const calculateTypeDamageDistribution = () => {
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#mySaveContent');
 
-let rotateDeg = Rand.intBetween(0, 359);
+
 
 $(document).ready(() => {
-    $('body').css('transform', `rotate(${rotateDeg}deg)`);
-
-    $(document).on('keydown', (e) => {
-        switch (e.key) {
-            case 'q':
-            case 'Q':
-                rotateDeg -= 1;
-                break;
-            case 'e':
-            case 'E':
-                rotateDeg += 1;
-                break;
-            default:
-                return;
-        }
-
-        $('body').css('transform', `rotate(${rotateDeg}deg)`);
-    });
-
     const container = document.getElementById('container');
     ko.applyBindings({}, container);
     container.classList.remove('d-none');
@@ -596,6 +577,35 @@ $(document).ready(() => {
     Util.createNotifications();
 
     updateNavigationHash();
+
+    const now = new Date();
+    if (now.getMonth() == 3 && now.getDate() == 1) {
+        let rotateDeg = Rand.intBetween(0, 359);
+        $('body').css('transform', `rotate(${rotateDeg}deg)`);
+
+        $(document).on('keydown', (e) => {
+            switch (e.key) {
+                case 'q':
+                case 'Q':
+                case 'a':
+                case 'A':
+                case 'ArrowLeft':
+                    rotateDeg -= 1;
+                    break;
+                case 'e':
+                case 'E':
+                case 'd':
+                case 'D':
+                case 'ArrowRight':
+                    rotateDeg += 1;
+                    break;
+                default:
+                    return;
+            }
+
+            $('body').css('transform', `rotate(${rotateDeg}deg)`);
+        });
+    }
 });
 
 const updateNavigationHash = () => {
