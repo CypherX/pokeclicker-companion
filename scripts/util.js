@@ -124,6 +124,14 @@ const notifications = [
         timeout: 30000,
         expires: new Date(2024, 2, 22),
     },
+    {
+        id: 'newforecastsummary',
+        title: 'Daily Summary',
+        message: `Check out the <a class="text-dark text-decoration-underline" href="/#!Forecast/Summary" onclick="$('#tab-forecasts').click(); $('#tab-summary').click(); return false;">Daily Summary</a> on the Forecasts tab for a quick look at daily occurrences all in one place!`,
+        type: 'info',
+        timeout: 30000,
+        expires: new Date(2024, 9, 16),
+    },
 ];
 
 const createNotifications = () => {

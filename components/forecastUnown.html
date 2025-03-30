@@ -1,5 +1,6 @@
-<div class="tab-pane show active" id="forecastUnown">
-    <h4 class="mb-2">Current & Upcoming</h4>
+<div class="tab-pane" id="forecastUnown">
+    <h4 class="mb-1">Current & Upcoming</h4>
+    <div class="small text-muted mb-1">Each dungeon has 3 random Unown per day, with the second and third unlocked at 100 and 250 clears respectively.</div>
     <div class="table-responsive mb-4">
         <table class="table table-bordered table-hover table-sm small" data-bind="with: Forecast.unownForecast().slice(0, 8)">
             <thead>
@@ -14,7 +15,7 @@
                 <tr>
                     <td class="table-dark" data-bind="text: $data"></td>
                     <!-- ko foreach: $parent -->
-                    <td class="text-center align-middle" data-bind="text: $data.unowns[$parentContext.$index()]"></td>
+                    <td class="text-center align-middle" data-bind="text: $data.unowns[$parentContext.$index()].join(' ')"></td>
                     <!-- /ko -->
                 </tr>
             </tbody>
@@ -36,9 +37,9 @@
                         <tbody data-bind="foreach: Companion.data.unownList">
                             <tr>
                                 <td class="text-center" data-bind="text: $data"></td>
-                                <!-- ko let: { day: Forecast.unownForecast().find(f => f.unowns.some(u => u == $data)) } -->
+                                <!-- ko let: { day: Forecast.unownForecast().find(f => f.unowns.flat().some(u => u == $data)) } -->
                                 <td class="text-center" data-bind="text: Util.formatDate(day?.startDate) || '-'"></td>
-                                <td class="text-center" data-bind="text: Companion.data.unownDungeonList[day?.unowns.findIndex(u => u == $data)] || '-'"></td>
+                                <td class="text-center" data-bind="text: Companion.data.unownDungeonList[day?.unowns.findIndex(u => u.includes($data))] || '-'"></td>
                                 <!-- /ko -->
                             </tr>
                         </tbody>
@@ -62,7 +63,7 @@
                                 <td class="text-center" data-bind="text: $data"></td>
                                 <!-- ko foreach: Companion.data.unownDungeonList -->
                                 <td class="text-center" data-bind="
-                                    text: Util.formatDate(Forecast.unownForecast().find(f => f.unowns[$index()] == $parent)?.startDate) || '-'"></td>
+                                    text: Util.formatDate(Forecast.unownForecast().find(f => f.unowns[$index()].includes($parent))?.startDate) || '-'"></td>
                                 <!-- /ko -->
                             </tr>
                         </tbody>

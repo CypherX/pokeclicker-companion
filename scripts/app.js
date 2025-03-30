@@ -538,6 +538,18 @@ $(document).ready(() => {
         document.getElementById('file-selector').click();
     });
 
+    $('#loadFromClipboard').click(() => {
+        const data = $('#saveDataInput').val().trim();
+        if (data.length) {
+            SaveData.loadSaveData(atob(data));
+            $('#loadFromClipboardModal').modal('hide');
+        }
+    });
+
+    $('#loadFromClipboardModal').on('shown.bs.modal', () => {
+        document.getElementById('saveDataInput').focus();
+    });
+
     $(document).on('shown.bs.tab', 'button[data-bs-toggle="pill"]', (e) => {
         tabVisited({ ...tabVisited(), [$(e.target).data('bs-target')]: true });
     });
@@ -570,9 +582,40 @@ $(document).ready(() => {
         updateNavigationHash();
     });
 
+    $(document).on('dragover', (event) => {
+        event.preventDefault();
+    });
+
+    document.addEventListener('dragenter', (event) => {
+        //$('#flex-container').addClass('drag-drop-border');
+        //$('#drag-drop-overlay, #drag-drop-message').removeClass('d-none');
+    });
+
+    document.addEventListener('dragleave', (event) => {
+        //$('#flex-container').removeClass('drag-drop-border');
+        //$('#drag-drop-overlay, #drag-drop-message').addClass('d-none');
+    });
+
+    document.addEventListener('drop', (event) => {
+        event.preventDefault();
+
+        let files = [];
+        if (event.dataTransfer.items) {
+            files = [...event.dataTransfer.items].filter((item) => item.kind === 'file').map((item) => item.getAsFile());
+        } else {
+            files = [...event.dataTransfer.files];
+        }
+
+        const file = files.find((file) => file.name?.toLowerCase().endsWith('.txt'));
+        if (file) {
+            SaveData.loadFile(file);
+        }
+    });
+
     Companion.settings.initialize();
     SaveData.initialize();
     Forecast.generateForecasts();
+    Forecast.generateDailySummary();
 
     Util.createNotifications();
 

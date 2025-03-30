@@ -36,31 +36,21 @@
             </ul>
         </div>
         <div class="d-none d-md-block position-absolute end-0 me-2">
-            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal">
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal"
+                data-bind="tooltip: { title: 'Companion Settings', placement: 'bottom', trigger: 'hover' }">
                 <img src="assets/gear-solid.svg" class="d-flex my-1 align-self-center"
                     style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />
             </button>
-            <div class="btn-group">
-                <button class="btn btn-primary btn-save-selector" type="button">Load PokéClicker Save</button>
-                <!-- ko if: SaveData.prevLoadedSaves().length -->
-                <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="visually-hidden">Toggle Dropdown</span>
+            <div class="input-group" style="display: inline-flex; vertical-align: middle; width: unset;">
+                <span class="input-group-text text-white" style="border-color: #444; user-select: none;">Load PokéClicker Save:</span>
+                <button class="btn btn-primary btn-save-selector" type="button"
+                    data-bind="tooltip: { title: 'Browse for and select a save file to load. Drag-and-drop anywhere on this page is also supported.', placement: 'bottom', trigger: 'hover' }">
+                    File
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li class="small"><a class="dropdown-item disabled" href="#">Previously Loaded Saves</a></li>
-                    <!-- ko foreach: SaveData.prevLoadedSaves -->
-                    <li class="small">
-                        <div class="d-flex align-items-center">
-                            <a class="dropdown-item flex-grow-1 pe-2" href="#" data-bind="text: $data.name, click: () => { SaveData.loadPreviousFile($index()) }"></a>
-                            <div class="text-danger ms-2 me-3" style="cursor: pointer;"
-                                data-bind="click: (_, e) => { SaveData.prevLoadedSaves.splice($index(), 1); e.stopPropagation(); }">x</div>
-                        </div>
-                    </li>
-                    <!-- /ko -->
-                    <li><hr class="dropdown-divider"></li>
-                    <li class="small"><a class="dropdown-item" href="#" data-bind="click: () => { SaveData.prevLoadedSaves([]); }">Remove All</a></li>
-                </ul>
-                <!-- /ko -->
+                <button class="btn btn-primary btn-save-clipboard" type="button" data-bs-toggle="modal" data-bs-target="#loadFromClipboardModal"
+                    data-bind="tooltip: { title: 'Import file from text/clipboard. Save can be copied to the clipboard in-game from the Save menu.', placement: 'bottom', trigger: 'hover' }">
+                    Text
+                </button>
             </div>
         </div>
     </div>

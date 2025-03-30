@@ -1,4 +1,5 @@
 Notifier.notify = () => {};
+SortModules = () => {};
 
 const initGame = () => {
   player = new Player();
