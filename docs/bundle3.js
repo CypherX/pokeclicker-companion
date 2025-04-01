@@ -12335,7 +12335,7 @@ $(document).ready(() => {
                 $('#main').css('animation', `zoom-out 20s linear forwards`);
                 break;
             case 'rotate':
-                let rotateDeg = Rand.intBetween(0, 359);
+                const rotateDeg = Rand.intBetween(0, 359);
                 $('#main').css('transform', `rotate(${rotateDeg}deg)`);
                 break;
             case 'flip':
