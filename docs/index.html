@@ -24,10 +24,12 @@
         <div id="drag-drop-message" class="d-none position-absolute bottom-0 start-50 translate-middle-x h3 text-warning">
             Drag-and-drop PokéClicker Save File
         </div>-->
-        <div id="container" class="d-none">
-            <div class="d-flex flex-column" id="flex-container" style="height: 100vh;">
-                <div id="header" class="mb-4">
-                    <!-- import "mainNavigation.html" -->
+
+        <div id="main">
+            <div id="container" class="d-none">
+                <div class="d-flex flex-column" id="flex-container" style="height: 100vh;">
+                    <div id="header" class="mb-4">
+                        <!-- import "mainNavigation.html" -->
 <nav class="navbar navbar-expand-md bg-dark" data-bs-theme="dark">
     <div class="container-fluid">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
@@ -181,15 +183,15 @@
 </nav>
 <!-- import end -->
 <!-- import end -->
-
-                    <div class="alert alert-danger rounded-0 p-2 text-center" data-bind="visible: SaveData.isOlderVersion">
-                        The loaded save is from an older version of PokéClicker and may result in incorrect data and statistics.
+    
+                        <div class="alert alert-danger rounded-0 p-2 text-center" data-bind="visible: SaveData.isOlderVersion">
+                            The loaded save is from an older version of PokéClicker and may result in incorrect data and statistics.
+                        </div>
                     </div>
-                </div>
-
-                <div id="main-content" class="tab-content flex-grow-1" style="overflow: auto;">
-
-                    <!-- import "mySaveContent.html" -->
+    
+                    <div id="main-content" class="tab-content flex-grow-1" style="overflow: auto;">
+    
+                        <!-- import "mySaveContent.html" -->
 <div class="tab-pane active h-100" id="mySaveContent">
     <div data-bind="template: { name: 'load-save-template' }"></div>
 
@@ -716,8 +718,8 @@
     </div>
 </div>
 <!-- import end -->
-
-                    <!-- import "forecastContent.html" -->
+    
+                        <!-- import "forecastContent.html" -->
 <div class="tab-pane h-100" id="forecastContent">
     <div class="tab-content container-xxl h-100">
         <!-- import "forecastSummary.html" -->
@@ -1199,8 +1201,8 @@
     </div>
 </div>
 <!-- import end -->
-
-                    <!-- import "vitaminTracker.html" -->
+    
+                        <!-- import "vitaminTracker.html" -->
 <div class="tab-pane h-100 container-xxl" id="vitaminTracker">
     <div class="d-flex flex-column h-100">
         <div class="row align-items-center">
@@ -1334,8 +1336,8 @@
     </div>
 </div>
 <!-- import end -->
-                    
-                    <!-- import "toolsContent.html" -->
+                        
+                        <!-- import "toolsContent.html" -->
 <div class="tab-pane h-100 container-xxl" id="toolsContent">
     <div class="tab-content h-100 container-xxl">
         <div class="tab-pane h-100 container-xxl show active" id="tools-battle-calculator">
@@ -1598,11 +1600,11 @@
     </div>
 </div>
 <!-- import end -->
-
+    
+                    </div>
                 </div>
-            </div>
-
-            <!-- import "settingsModal.html" -->
+    
+                <!-- import "settingsModal.html" -->
 <div class="modal fade" id="settingsModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -1646,22 +1648,27 @@
     </div>
 </div>
 <!-- import end -->
-
-        </div>
-
-        <div class="modal" id="loadFromClipboardModal">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <p>Paste PokéClicker Save Data</p>
-                        <textarea id="saveDataInput" class="form-control" rows="5" autocomplete="off"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" id="loadFromClipboard" class="btn btn-primary">Load</button>
+    
+            </div>
+    
+            <div class="modal" id="loadFromClipboardModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <p>Paste PokéClicker Save Data</p>
+                            <textarea id="saveDataInput" class="form-control" rows="5" autocomplete="off"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" id="loadFromClipboard" class="btn btn-primary">Load</button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div id="makeitstop" class="position-absolute bottom-0 start-50 translate-middle-x d-none">
+            <button class="btn btn-danger">MAKE IT STOP</button>
         </div>
 
         <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -1670,7 +1677,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle2.js?v=1743441889239"></script>
+        <script src="./bundle.js?v=1743485523420"></script>
     </body>
 </html>
 

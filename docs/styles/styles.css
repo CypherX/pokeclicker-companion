@@ -98,3 +98,36 @@ table.custom-borders > tbody > tr:not(:first-child):not(.collapse) > td {
 #drag-drop-message {
     z-index: 1001;
 }
+
+
+@-moz-keyframes spin-cw { 
+    100% { -moz-transform: rotate(360deg); } 
+}
+@-webkit-keyframes spin-cw { 
+    100% { -webkit-transform: rotate(360deg); } 
+}
+@keyframes spin-cw { 
+    100% { 
+        -webkit-transform: rotate(360deg); 
+        transform:rotate(360deg); 
+    } 
+}
+
+@-moz-keyframes spin-ccw { 
+    100% { -moz-transform: rotate(-360deg); } 
+}
+@-webkit-keyframes spin-ccw { 
+    100% { -webkit-transform: rotate(-360deg); } 
+}
+@keyframes spin-ccw { 
+    100% { 
+        -webkit-transform: rotate(-360deg); 
+        transform:rotate(-360deg); 
+    } 
+}
+
+@keyframes zoom-out {
+    100% {
+        scale: 0%;
+    }
+}

@@ -12293,7 +12293,7 @@ $(document).ready(() => {
 
     const now = new Date();
     if (now.getMonth() == 3 && now.getDate() == 1) {
-        let rotateDeg = Rand.intBetween(0, 359);
+        /*let rotateDeg = Rand.intBetween(0, 359);
         $('body').css('transform', `rotate(${rotateDeg}deg)`);
 
         $(document).on('keydown', (e) => {
@@ -12317,7 +12317,38 @@ $(document).ready(() => {
             }
 
             $('body').css('transform', `rotate(${rotateDeg}deg)`);
+        });*/
+
+        $('#makeitstop').click(() => {
+            $('#main').css('animation', `none`);
+            $('#main').css('transform', `none`);
+            $('#makeitstop').remove();
         });
+
+        switch (Rand.fromArray(['spin', 'zoom', 'rotate', 'flip', 'mirror'])) {
+            case 'spin':
+                const dir = Rand.fromArray(['cw', 'ccw']);
+                const speed = Rand.intBetween(5, 20);
+                $('#main').css('animation', `spin-${dir} ${speed}s linear infinite`);
+                break;
+            case 'zoom':
+                $('#main').css('animation', `zoom-out 20s linear forwards`);
+                break;
+            case 'rotate':
+                let rotateDeg = Rand.intBetween(0, 359);
+                $('#main').css('transform', `rotate(${rotateDeg}deg)`);
+                break;
+            case 'flip':
+                $('#main').css('transform', `rotate(180deg)`);
+                break;
+            case 'mirror':
+                $('#main').css('transform', `scaleX(-1)`);
+                break;
+        }
+
+        setTimeout(() => {
+            $('#makeitstop').removeClass('d-none');
+        }, 60000);
     }
 });
 
