@@ -100,7 +100,7 @@ table.custom-borders > tbody > tr:not(:first-child):not(.collapse) > td {
 }
 
 
-@-moz-keyframes spin-cw { 
+/*@-moz-keyframes spin-cw { 
     100% { -moz-transform: rotate(360deg); } 
 }
 @-webkit-keyframes spin-cw { 
@@ -130,4 +130,4 @@ table.custom-borders > tbody > tr:not(:first-child):not(.collapse) > td {
     100% {
         scale: 0%;
     }
-}
+}*/
