@@ -28,8 +28,23 @@
                                 </thead>
                                 <tbody data-bind="foreach: Forecast.summary().unown">
                                     <tr>
-                                        <td data-bind="text: Companion.data.unownDungeonList[$index()]"></td>
+                                        <td class="align-middle" data-bind="text: Companion.data.unownDungeonList[$index()]"></td>
+                                        <!-- ko ifnot: SaveData.file()?.save.keyItems.Pokerus_virus -->
                                         <td class="text-center" data-bind="text: $data.join(' ')"></td>
+                                        <!-- /ko -->
+                                        <!-- ko if: SaveData.file()?.save.keyItems.Pokerus_virus -->
+                                        <td class="text-center align-middle">
+                                            <div class="d-flex justify-content-center gap-1" data-bind="foreach: $data">
+                                                <div class="d-flex flex-column">
+                                                    <div data-bind="text: $data"></div>
+                                                    <img height="12" src="" data-bind="
+                                                        attr: { src: Companion.getPokerusImage(`Unown (${$data})`) },
+                                                        visible: Companion.hasPokerus(`Unown (${$data})`)">
+                                                    <div style="width: 40px" data-bind="hidden: Companion.hasPokerus(`Unown (${$data})`)"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <!-- /ko -->
                                     </tr>
                                 </tbody>
                             </table>
