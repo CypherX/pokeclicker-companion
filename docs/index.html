@@ -752,8 +752,23 @@
                                 </thead>
                                 <tbody data-bind="foreach: Forecast.summary().unown">
                                     <tr>
-                                        <td data-bind="text: Companion.data.unownDungeonList[$index()]"></td>
+                                        <td class="align-middle" data-bind="text: Companion.data.unownDungeonList[$index()]"></td>
+                                        <!-- ko ifnot: SaveData.file()?.save.keyItems.Pokerus_virus -->
                                         <td class="text-center" data-bind="text: $data.join(' ')"></td>
+                                        <!-- /ko -->
+                                        <!-- ko if: SaveData.file()?.save.keyItems.Pokerus_virus -->
+                                        <td class="text-center align-middle">
+                                            <div class="d-flex justify-content-center gap-1" data-bind="foreach: $data">
+                                                <div class="d-flex flex-column">
+                                                    <div data-bind="text: $data"></div>
+                                                    <img height="12" src="" data-bind="
+                                                        attr: { src: Companion.getPokerusImage(`Unown (${$data})`) },
+                                                        visible: Companion.hasPokerus(`Unown (${$data})`)">
+                                                    <div style="width: 40px" data-bind="hidden: Companion.hasPokerus(`Unown (${$data})`)"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <!-- /ko -->
                                     </tr>
                                 </tbody>
                             </table>
@@ -907,9 +922,23 @@
             </thead>
             <tbody data-bind="foreach: Companion.data.unownDungeonList">
                 <tr>
-                    <td class="table-dark" data-bind="text: $data"></td>
+                    <td class="table-dark align-middle" data-bind="text: $data"></td>
                     <!-- ko foreach: $parent -->
-                    <td class="text-center align-middle" data-bind="text: $data.unowns[$parentContext.$index()].join(' ')"></td>
+                        <!-- ko ifnot: SaveData.file()?.save.keyItems.Pokerus_virus -->
+                        <td class="text-center align-middle" data-bind="text: $data.unowns[$parentContext.$index()].join(' ')"></td>
+                        <!-- /ko -->
+                        <!-- ko if: SaveData.file()?.save.keyItems.Pokerus_virus -->
+                        <td class="text-center align-middle">
+                            <div class="d-flex justify-content-center gap-1" data-bind="foreach: $data.unowns[$parentContext.$index()]">
+                                <div class="d-flex flex-column">
+                                    <div data-bind="text: $data"></div>
+                                    <img height="12" src="" data-bind="attr: { src: Companion.getPokerusImage(`Unown (${$data})`) },
+                                        visible: Companion.hasPokerus(`Unown (${$data})`)">
+                                    <div style="width: 40px" data-bind="hidden: Companion.hasPokerus(`Unown (${$data})`)"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <!-- /ko -->
                     <!-- /ko -->
                 </tr>
             </tbody>
@@ -924,6 +953,9 @@
                         <thead>
                             <tr class="table-dark">
                                 <th class="text-center">Unown</th>
+                                <!-- ko if: SaveData.file()?.save.keyItems.Pokerus_virus -->
+                                <th></th>
+                                <!-- /ko -->
                                 <th class="text-center">When</th>
                                 <th class="text-center">Where</th>
                             </tr>
@@ -931,6 +963,12 @@
                         <tbody data-bind="foreach: Companion.data.unownList">
                             <tr>
                                 <td class="text-center" data-bind="text: $data"></td>
+                                <!-- ko if: SaveData.file()?.save.keyItems.Pokerus_virus -->
+                                <td class="align-middle" style="width: 1px;">
+                                    <img height="12" src="" data-bind="attr: { src: Companion.getPokerusImage(`Unown (${$data})`) },
+                                        visible: Companion.hasPokerus(`Unown (${$data})`)">
+                                </td>
+                                <!-- /ko -->
                                 <!-- ko let: { day: Forecast.unownForecast().find(f => f.unowns.flat().some(u => u == $data)) } -->
                                 <td class="text-center" data-bind="text: Util.formatDate(day?.startDate) || '-'"></td>
                                 <td class="text-center" data-bind="text: Companion.data.unownDungeonList[day?.unowns.findIndex(u => u.includes($data))] || '-'"></td>
@@ -947,6 +985,9 @@
                         <thead>
                             <tr class="table-dark">
                                 <th class="text-center">Unown</th>
+                                <!-- ko if: SaveData.file()?.save.keyItems.Pokerus_virus -->
+                                <th></th>
+                                <!-- /ko -->
                                 <!-- ko foreach: Companion.data.unownDungeonList -->
                                 <th class="text-center" data-bind="text: $data"></th>
                                 <!-- /ko -->
@@ -955,6 +996,12 @@
                         <tbody data-bind="foreach: Companion.data.unownList">
                             <tr>
                                 <td class="text-center" data-bind="text: $data"></td>
+                                <!-- ko if: SaveData.file()?.save.keyItems.Pokerus_virus -->
+                                <td class="align-middle" style="width: 1px;">
+                                    <img height="12" src="" data-bind="attr: { src: Companion.getPokerusImage(`Unown (${$data})`) },
+                                        visible: Companion.hasPokerus(`Unown (${$data})`)">
+                                </td>
+                                <!-- /ko -->
                                 <!-- ko foreach: Companion.data.unownDungeonList -->
                                 <td class="text-center" data-bind="
                                     text: Util.formatDate(Forecast.unownForecast().find(f => f.unowns[$index()].includes($parent))?.startDate) || '-'"></td>
@@ -1671,7 +1718,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?t=1743562960998"></script>
+        <script src="./bundle.js?t=1743648265878"></script>
     </body>
 </html>
 
