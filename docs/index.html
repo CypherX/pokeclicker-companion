@@ -1427,7 +1427,10 @@
                     <div class="row align-items-center justify-content-center mt-3" data-bind="with: BattleCalculator.settings">
                         <div class="col-auto">
                             <div class="input-group">
-                                <div class="input-group-text">Clicks/second</div>
+                                <div class="input-group-text" data-bind="tooltip: {
+                                    title: 'Include your click damage in attack calculations.',
+                                    trigger: 'hover'
+                                }">Clicks/second</div>
                                 <input class="form-control" type="number" min="0" max="20" style="width: 75px;" data-bind="value: $data.clicksPerSecond" />
                             </div>
                         </div>
@@ -1440,7 +1443,11 @@
                         <div class="col-auto">
                             <div class="form-check form-check-inline form-switch me-3">
                                 <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorRockyHelmet" data-bind="checked: $data.rockyHelmetEnabled">
-                                <label class="form-check-label" for="BattleCalculatorRockyHelmet">Rocky Helmet</label>
+                                <label class="form-check-label" for="BattleCalculatorRockyHelmet" data-bind="tooltip: {
+                                    html: true,
+                                    title: 'Uses the Rocky Helmet bonus from its current level in your save file.',
+                                    trigger: 'hover'
+                                }">Rocky Helmet</label>
                             </div>
                         </div>
                         <div class="col-auto">
@@ -1546,7 +1553,11 @@
                                                     <td data-bind="text: name"></td>
                                                     <td class="text-center" data-bind="text: pokemonMap[$data.name].type.map(t => PokemonType[t]).join(' / ')"></td>
                                                     <td class="text-center" data-bind="text: maxHealth.toLocaleString()"></td>
-                                                    <td class="text-center" data-bind="text: partyDamage.toLocaleString()"></td>
+                                                    <td class="text-center">
+                                                        <knockout data-bind="text: partyDamage.toLocaleString()"></knockout>
+                                                        <knockout class="small text-warning" data-bind="text: `(${$parent.clickDamage.toLocaleString()})`,
+                                                            visible: $parent.clickDamage > 0"></knockout>
+                                                    </td>
                                                     <td class="text-center" data-bind="text: secondsToDefeat.toLocaleString()"></td>
                                                 </tr>
                                             </tbody>
@@ -1744,7 +1755,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?t=1743912075975"></script>
+        <script src="./bundle.js?t=1743961730959"></script>
     </body>
 </html>
 
