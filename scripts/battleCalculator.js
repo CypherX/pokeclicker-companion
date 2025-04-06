@@ -138,7 +138,8 @@ const getBattleData = ko.pureComputed(() => {
         toggleFlute(flute, settings.activeFlutes().includes(flute));
     });
 
-    const clickAttack = calcClickAttack();
+    const clickDamage = calcClickAttack();
+    const mkjclickDamage = calcClickAttack(GameConstants.Region.alola, GameConstants.AlolaSubRegions.MagikarpJump);
 
     damageCache.clear();
     const gymsDefeated = SaveData.file().save.statistics.gymsDefeated;
@@ -159,8 +160,13 @@ const getBattleData = ko.pureComputed(() => {
         g.isCompleted = gymsDefeated[GameConstants.getGymIndex(g.town)] > 0;
         g.secondsToWin = 0;
 
+        g.clickDamage = clickDamage;
+        if (town.region === GameConstants.Region.alola && town.subRegion === GameConstants.AlolaSubRegions.MagikarpJump) {
+            g.clickDamage = mkjclickDamage;
+        }
+
         g.pokemonList.forEach(p => {
-            const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0) + clickAttack;
+            const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0) + g.clickDamage;
             p.partyDamage = damage;
             p.secondsToDefeat = Math.max(1, Math.ceil(p.maxHealth / damage));
             if (damage > 0) {
@@ -188,8 +194,13 @@ const getBattleData = ko.pureComputed(() => {
         tb.isCompleted = temporaryBattleDefeated[GameConstants.getTemporaryBattlesIndex(tb.name)] > 0;
         tb.secondsToWin = 0;
 
+        tb.clickDamage = clickDamage;
+        if (town.region === GameConstants.Region.alola && town.subRegion === GameConstants.AlolaSubRegions.MagikarpJump) {
+            tb.clickDamage = mkjclickDamage;
+        }
+
         tb.pokemonList.forEach(p => {
-            const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0) + clickAttack;
+            const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0) + tb.clickDamage;
             p.partyDamage = damage;
             p.secondsToDefeat = Math.max(1, Math.ceil(p.maxHealth / damage));
             if (damage > 0) {
@@ -208,14 +219,17 @@ const getBattleData = ko.pureComputed(() => {
     return battleData;
 }).extend({ rateLimit: 50 });
 
-const calcClickAttack = ko.pureComputed(() => {
-    let clickAttack = 0;
+const calcClickAttack = (region = 0, subRegion = 0) => {
     const clicksPerSecond = settings.clicksPerSecond();
-    if (clicksPerSecond > 0) {
-        clickAttack = App.game.party.calculateClickAttack() * Math.floor(clicksPerSecond);
-    }
-    return clickAttack;
-});
+    if (clicksPerSecond <= 0)
+        return 0;
+
+    const caughtPokemon = App.game.party.partyPokemonActiveInSubRegion(region, subRegion);
+    const baseClickAttack = Math.pow(caughtPokemon.reduce((total, p) => total + p.clickAttackBonus(), 1), 1.4);
+    const bonus = App.game.multiplier.getBonus('clickAttack', false);
+    const clickAttack = Math.floor(baseClickAttack * bonus);
+    return clickAttack * Math.floor(clicksPerSecond);
+};
 
 const timeFluteEnabled = ko.pureComputed(() => {
     return settings.activeFlutes().includes('Time_Flute');
