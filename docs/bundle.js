@@ -12213,6 +12213,7 @@ $(document).ready(() => {
         if (data.length) {
             SaveData.loadSaveData(atob(data));
             $('#loadFromClipboardModal').modal('hide');
+            $('#saveDataInput').val('');
         }
     });
 
