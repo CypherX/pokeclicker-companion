@@ -12463,7 +12463,7 @@ const settings = {
     hideLocked: ko.observable(false),
     activeFlutes: ko.observableArray([]),
     allFlutesToggle: ko.observable(false),
-    clicksPerSecond: ko.observable(0).extend({ numeric: 0 }),
+    clicksPerSecond: ko.observable(0),
     xClickEnabled: ko.observable(false),
     rockyHelmetEnabled: ko.observable(false),
 };
