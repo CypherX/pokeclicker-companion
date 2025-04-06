@@ -140,6 +140,13 @@ const loadAttackData = () => {
         return;
     }
 
+    Object.values(App.game.multiplier.multipliers).forEach((multiplier) => {
+        const index = multiplier.findIndex(b => b.source == 'Achievements');
+        if (index > -1) {
+            multiplier.splice(index, 1);
+        }
+    });
+
     AchievementHandler.achievementList = [];
     AchievementHandler.achievementBonus = origAchievementBonus;
     AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
@@ -179,7 +186,7 @@ const loadAttackData = () => {
     FluteEffectRunner.initialize(App.game.multiplier);
 
     // everything we need to load to calculate true damage
-    const thingsToLoad = ['breeding', 'keyItems', 'badgeCase', 'oakItems', 'party', 'gems', 'farming', 'statistics', 'quests', 'challenges', 'multiplier'];
+    const thingsToLoad = ['breeding', 'keyItems', 'badgeCase', 'oakItems', 'party', 'gems', 'farming', 'statistics', 'quests', 'challenges', 'multiplier', 'underground'];
 
     Object.keys(App.game).filter(key => thingsToLoad.includes(key)).filter(key => App.game[key]?.saveKey).forEach(key => {
     //Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
@@ -203,13 +210,17 @@ const loadAttackData = () => {
             a.isCompleted = () => false;
         }
     });
-    const bonus = AchievementHandler.achievementBonus();
-    AchievementHandler.achievementBonus = () => bonus;
+
+    //const bonus = AchievementHandler.achievementBonus();
+    //AchievementHandler.achievementBonus = () => bonus;
 
     // set all pokemon to max level to handle attack calculations better
     App.game.party.caughtPokemon.forEach(p => p.level = App.game.badgeCase.maxLevel());
 
     BattleCalculator.settings.xAttackEnabled(false);
+    BattleCalculator.settings.xClickEnabled(false);
+    BattleCalculator.settings.rockyHelmetEnabled(false);
+    BattleCalculator.settings.clicksPerSecond(0);
     BattleCalculator.settings.activeFlutes([]);
 
     isDamageLoaded(true);

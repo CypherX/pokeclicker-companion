@@ -5,6 +5,9 @@ const settings = {
     hideLocked: ko.observable(false),
     activeFlutes: ko.observableArray([]),
     allFlutesToggle: ko.observable(false),
+    clicksPerSecond: ko.observable(0).extend({ numeric: 0 }),
+    xClickEnabled: ko.observable(false),
+    rockyHelmetEnabled: ko.observable(false),
 };
 
 settings.allFlutesToggle.subscribe((value) => {
@@ -13,6 +16,20 @@ settings.allFlutesToggle.subscribe((value) => {
     } else {
         settings.activeFlutes([]);
     }
+});
+
+settings.clicksPerSecond.subscribe((value) => {
+    if (isNaN(value) || value < 0 || !value?.length) {
+        settings.clicksPerSecond(0);
+    }
+    if (value > 20) {
+        settings.clicksPerSecond(20);
+    }
+});
+
+settings.rockyHelmetEnabled.subscribe((value) => {
+    const item = App.game.oakItems.itemList.find(i => i.name == OakItemType.Rocky_Helmet);
+    item.isActiveKO(!!value);
 });
 
 let regionMultiplierOverride = -1;
@@ -113,10 +130,15 @@ const getBattleData = ko.pureComputed(() => {
     // xAttack
     player.effectList['xAttack'](settings.xAttackEnabled() ? 1 : 0);
 
+    // xClick
+    player.effectList['xClick'](settings.xClickEnabled() ? 1 : 0);
+
     // Flutes
     Object.values(GameConstants.FluteItemType).forEach((flute) => {
         toggleFlute(flute, settings.activeFlutes().includes(flute));
     });
+
+    const clickAttack = calcClickAttack();
 
     damageCache.clear();
     const gymsDefeated = SaveData.file().save.statistics.gymsDefeated;
@@ -138,7 +160,7 @@ const getBattleData = ko.pureComputed(() => {
         g.secondsToWin = 0;
 
         g.pokemonList.forEach(p => {
-            const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0);
+            const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0) + clickAttack;
             p.partyDamage = damage;
             p.secondsToDefeat = Math.max(1, Math.ceil(p.maxHealth / damage));
             if (damage > 0) {
@@ -167,7 +189,7 @@ const getBattleData = ko.pureComputed(() => {
         tb.secondsToWin = 0;
 
         tb.pokemonList.forEach(p => {
-            const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0);
+            const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0) + clickAttack;
             p.partyDamage = damage;
             p.secondsToDefeat = Math.max(1, Math.ceil(p.maxHealth / damage));
             if (damage > 0) {
@@ -185,6 +207,15 @@ const getBattleData = ko.pureComputed(() => {
 
     return battleData;
 }).extend({ rateLimit: 50 });
+
+const calcClickAttack = ko.pureComputed(() => {
+    let clickAttack = 0;
+    const clicksPerSecond = settings.clicksPerSecond();
+    if (clicksPerSecond > 0) {
+        clickAttack = App.game.party.calculateClickAttack() * Math.floor(clicksPerSecond);
+    }
+    return clickAttack;
+});
 
 const timeFluteEnabled = ko.pureComputed(() => {
     return settings.activeFlutes().includes('Time_Flute');
@@ -305,4 +336,5 @@ module.exports = {
     getGymBattleTime,
     getTempBattleTime,
     formattedSecondsToWin,
+    calcClickAttack,
 };
