@@ -1424,6 +1424,32 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row align-items-center justify-content-center mt-3" data-bind="with: BattleCalculator.settings">
+                        <div class="col-auto">
+                            <div class="input-group">
+                                <div class="input-group-text">Clicks/second</div>
+                                <input class="form-control" type="number" min="0" max="20" style="width: 75px;" data-bind="value: $data.clicksPerSecond" />
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorxClick" data-bind="checked: $data.xClickEnabled">
+                                <label class="form-check-label" for="BattleCalculatorxClick">xClick</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check form-check-inline form-switch me-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorRockyHelmet" data-bind="checked: $data.rockyHelmetEnabled">
+                                <label class="form-check-label" for="BattleCalculatorRockyHelmet">Rocky Helmet</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="input-group">
+                                <div class="input-group-text">Click Damage/second</div>
+                                <label class="input-group-text" data-bind="text: BattleCalculator.calcClickAttack().toLocaleString()">0</label>
+                            </div>
+                        </div>
+                    </div>
                     <div class="row justify-content-center mt-3">
                         <!-- ko foreach: Object.values(GameConstants.FluteItemType) -->
                         <div class="col-auto" data-bind="tooltip: {
@@ -1718,7 +1744,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?t=1743648265878"></script>
+        <script src="./bundle.js?t=1743912075975"></script>
     </body>
 </html>
 
