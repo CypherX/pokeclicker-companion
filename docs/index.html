@@ -1383,7 +1383,7 @@
 </div>
 <!-- import end -->
                     
-                    <!-- import "toolsContent.html" -->
+                    <!-- import "toolsContent2.html" -->
 <div class="tab-pane h-100 container-xxl" id="toolsContent">
     <div class="tab-content h-100 container-xxl">
         <div class="tab-pane h-100 container-xxl show active" id="tools-battle-calculator">
@@ -1391,11 +1391,12 @@
 
             <div class="d-flex flex-column h-100" data-bind="if: SaveData.isLoaded">
                 <div class="mx-auto text-center mt-5" data-bind="hidden: SaveData.isDamageLoaded">
-                    <button type="button" class="btn btn-primary" data-bind="click: () => SaveData.loadAttackData()">Calculate Battles</button>
+                    <button type="button" class="btn btn-primary" data-bind="click: () => BattleCalculator.calculate()">Calculate Battles</button>
                     <div class="form-text">Additional data must be loaded from your save file. This may take a few seconds.</div>
                 </div>
 
-                <div class="control-row mx-auto mb-3" data-bind="visible: SaveData.isDamageLoaded">
+                <!-- ko if: BattleCalculator.showData() -->
+                <div class="control-row mx-auto mb-3">
                     <div class="row align-items-center justify-content-center" data-bind="with: BattleCalculator.settings">
                         <div class="col-auto">
                             <div class="form-check form-check-inline form-switch me-3">
@@ -1484,7 +1485,6 @@
                     <div class="text-muted small text-center">Damage calculations include all Pokémon in your party at the current max level. Being in the hatchery or not max level will not affect these calculations.</div>
                 </div>
 
-                <!-- ko if: SaveData.isDamageLoaded -->
                 <ul class="nav nav-tabs container-xxl mb-2" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="gym-elite4-tab" data-bs-toggle="pill" data-bs-target="#gym-e4" type="button" role="tab" aria-controls="gym-e4" aria-selected="false">
@@ -1518,17 +1518,17 @@
                                     <th></th>
                                 </tr>
                             </thead>
-                            <!-- ko using: BattleCalculator.getBattleData -->
-                            <tbody data-bind="foreach: $data.gyms">
-                                <tr class="align-middle">
+
+                            <tbody data-bind="foreach: BattleCalculator.gymList">
+                                <tr class="align-middle" data-bind="visible: $data.isVisible">
                                     <td data-bind="text: $data.leaderName"></td>
                                     <td class="text-center" data-bind="text: $data.townObj.name"></td>
                                     <td class="text-center" data-bind="text: Util.getRegionNameText($data.townObj.region, $data.townObj.subRegion)"></td>
-                                    <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
-                                    <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
+                                    <td class="text-center" data-bind="text: pokemonList.length"></td>
+                                    <td class="text-center" data-bind="text: pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
                                     <td class="text-center" data-bind="text: Number(BattleCalculator.getGymBattleTime().toFixed(1))"></td>
-                                    <td class="text-center" data-bind="text: BattleCalculator.formattedSecondsToWin($data.secondsToWin),
-                                        class: $data.secondsToWin <= BattleCalculator.getGymBattleTime() ? 'text-success' : 'text-danger'"></td>
+                                    <td class="text-center" data-bind="text: BattleCalculator.formattedSecondsToWin($data.secondsToWin()),
+                                        class: $data.secondsToWin() <= BattleCalculator.getGymBattleTime() ? 'text-success' : 'text-danger'"></td>
                                     <td class="text-center" data-bind="text: $data.isCompleted ? 'Yes' : 'No',
                                         class: $data.isCompleted ? 'text-success' : 'text-danger'"></td>
                                     <td class="text-center">
@@ -1536,7 +1536,7 @@
                                             data-bind="attr: { 'data-bs-target': `#gym-collapse${$index()}` }"></button>
                                     </td>
                                 </tr>
-                                <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }" style="transition: none !important;">
+                                <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }, visible: $data.isVisible" style="transition: none !important;">
                                     <td colspan="9">
                                         <table class="table table-sm small mb-0">
                                             <thead>
@@ -1548,29 +1548,28 @@
                                                     <th class="text-center">Seconds To Defeat</th>
                                                 </tr>
                                             </thead>
-                                            <tbody data-bind="foreach: $data.pokemonList">
+                                            <tbody data-bind="foreach: pokemonList">
                                                 <tr>
                                                     <td data-bind="text: name"></td>
                                                     <td class="text-center" data-bind="text: pokemonMap[$data.name].type.map(t => PokemonType[t]).join(' / ')"></td>
                                                     <td class="text-center" data-bind="text: maxHealth.toLocaleString()"></td>
                                                     <td class="text-center">
-                                                        <knockout data-bind="text: partyDamage.toLocaleString()"></knockout>
-                                                        <knockout class="small text-warning" data-bind="text: `(${$parent.clickDamage.toLocaleString()})`,
-                                                            visible: $parent.clickDamage > 0"></knockout>
+                                                        <knockout data-bind="text: partyDamage().toLocaleString()"></knockout>
+                                                        <knockout class="small text-warning" data-bind="text: `(${$parent.clickDamage().toLocaleString()})`,
+                                                            visible: $parent.clickDamage() > 0"></knockout>
                                                     </td>
-                                                    <td class="text-center" data-bind="text: secondsToDefeat.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: secondsToDefeat().toLocaleString()"></td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </td>
                                 </tr>
                             </tbody>
-                            <tbody data-bind="visible: $data.gyms.length == 0">
+                            <tbody data-bind="visible: !BattleCalculator.gymList().some(g => g.isVisible())">
                                 <tr>
                                     <td class="text-center" colspan="9">No data to display. Check above settings.</td>
                                 </tr>
                             </tbody>
-                            <!-- /ko -->
                         </table>
                     </div>
                     <div class="tab-pane" id="temp-battles" role="tabpanel" aria-labelledby="temp-battles-tab">
@@ -1592,16 +1591,16 @@
                                     <th></th>
                                 </tr>
                             </thead>
-                            <!-- ko using: BattleCalculator.getBattleData -->
-                            <tbody data-bind="foreach: $data.tempBattles">
-                                <tr class="align-middle">
+                            
+                            <tbody data-bind="foreach: BattleCalculator.tempBattleList">
+                                <tr class="align-middle" data-bind="visible: $data.isVisible">
                                     <td data-bind="text: $data.name"></td>
                                     <td class="text-center" data-bind="text: Util.getRegionNameText($data.getTown().region, $data.getTown().subRegion)"></td>
-                                    <td class="text-center" data-bind="text: $data.pokemonList.length"></td>
-                                    <td class="text-center" data-bind="text: $data.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
+                                    <td class="text-center" data-bind="text: pokemonList.length"></td>
+                                    <td class="text-center" data-bind="text: pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
                                     <td class="text-center" data-bind="text: Number(BattleCalculator.getTempBattleTime().toFixed(1))"></td>
-                                    <td class="text-center" data-bind="text: BattleCalculator.formattedSecondsToWin($data.secondsToWin),
-                                        class: $data.secondsToWin <= BattleCalculator.getTempBattleTime() ? 'text-success' : 'text-danger'"></td>
+                                    <td class="text-center" data-bind="text: BattleCalculator.formattedSecondsToWin($data.secondsToWin()),
+                                        class: $data.secondsToWin() <= BattleCalculator.getTempBattleTime() ? 'text-success' : 'text-danger'"></td>
                                     <td class="text-center" data-bind="text: $data.optionalArgs.resetDaily ? 'Resets Daily' : $data.isCompleted ? 'Yes' : 'No',
                                         class: $data.optionalArgs.resetDaily ? 'text-body small' : $data.isCompleted ? 'text-success' : 'text-danger'"></td>
                                     <td class="text-center">
@@ -1609,7 +1608,7 @@
                                             data-bind="attr: { 'data-bs-target': `#tb-collapse${$index()}` }"></button>
                                     </td>
                                 </tr>
-                                <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }" style="transition: none !important;">
+                                <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }, visible: $data.isVisible" style="transition: none !important;">
                                     <td colspan="8">
                                         <table class="table table-sm small mb-0">
                                             <thead>
@@ -1621,25 +1620,24 @@
                                                     <th class="text-center">Seconds To Defeat</th>
                                                 </tr>
                                             </thead>
-                                            <tbody data-bind="foreach: $data.pokemonList">
+                                            <tbody data-bind="foreach: pokemonList">
                                                 <tr>
                                                     <td data-bind="text: name"></td>
                                                     <td class="text-center" data-bind="text: pokemonMap[$data.name].type.map(t => PokemonType[t]).join(' / ')"></td>
                                                     <td class="text-center" data-bind="text: maxHealth.toLocaleString()"></td>
-                                                    <td class="text-center" data-bind="text: partyDamage.toLocaleString()"></td>
-                                                    <td class="text-center" data-bind="text: secondsToDefeat.toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: partyDamage().toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: secondsToDefeat().toLocaleString()"></td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </td>
                                 </tr>
                             </tbody>
-                            <tbody data-bind="visible: $data.tempBattles.length == 0">
+                            <tbody data-bind="visible: !BattleCalculator.tempBattleList().some(g => g.isVisible())">
                                 <tr>
                                     <td class="text-center" colspan="8">No data to display. Check above settings.</td>
                                 </tr>
                             </tbody>
-                            <!-- /ko -->
                         </table>
                     </div>
                 </div>
@@ -1755,7 +1753,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?t=1743975422740"></script>
+        <script src="./bundle.js?t=1744040989347"></script>
     </body>
 </html>
 
