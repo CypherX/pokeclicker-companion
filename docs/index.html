@@ -1625,7 +1625,14 @@
                                                     <td data-bind="text: name"></td>
                                                     <td class="text-center" data-bind="text: pokemonMap[$data.name].type.map(t => PokemonType[t]).join(' / ')"></td>
                                                     <td class="text-center" data-bind="text: maxHealth.toLocaleString()"></td>
-                                                    <td class="text-center" data-bind="text: partyDamage().toLocaleString()"></td>
+                                                    <!--<td class="text-center" data-bind="text: partyDamage().toLocaleString()"></td>
+                                                    <td class="text-center" data-bind="text: secondsToDefeat().toLocaleString()"></td>-->
+
+                                                    <td class="text-center">
+                                                        <knockout data-bind="text: partyDamage().toLocaleString()"></knockout>
+                                                        <knockout class="small text-warning" data-bind="text: `(${$parent.clickDamage().toLocaleString()})`,
+                                                            visible: $parent.clickDamage() > 0"></knockout>
+                                                    </td>
                                                     <td class="text-center" data-bind="text: secondsToDefeat().toLocaleString()"></td>
                                                 </tr>
                                             </tbody>
@@ -1753,7 +1760,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?t=1744040989347"></script>
+        <script src="./bundle.js?t=1744291770327"></script>
     </body>
 </html>
 

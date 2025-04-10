@@ -12990,6 +12990,7 @@ const calcBattleData = () => {
             const damage = calcPokemonDamage(pokemon.name, town.region, town.subRegion ?? 0) + tb.clickDamage();
             pokemon.partyDamage(damage);
             const secondsToDefeat = Math.max(1, Math.ceil(pokemon.maxHealth / damage));
+            pokemon.secondsToDefeat(secondsToDefeat);
             if (damage > 0) {
                 tb.secondsToWin(tb.secondsToWin() + secondsToDefeat);
             }
