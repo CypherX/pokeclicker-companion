@@ -27,6 +27,7 @@ const loadSaveData = (saveString, fileName = null) => {
     Enigma.revealHintsCounter(0);
     VitaminTracker.highestRegion(player.highestRegion());
     Companion.typeDamageDistribution(undefined);
+    BattleCalculator.showData(false);
     isDamageLoaded(false);
 
     file(saveFile);
@@ -177,6 +178,9 @@ const loadAttackData = () => {
         }
     }
 
+    player.effectList['xAttack'](0);
+    player.effectList['xClick'](0);
+
     GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
         player.effectList[flute](0);
         player.itemList[flute](1);
@@ -222,6 +226,7 @@ const loadAttackData = () => {
     BattleCalculator.settings.rockyHelmetEnabled(false);
     BattleCalculator.settings.clicksPerSecond(0);
     BattleCalculator.settings.activeFlutes([]);
+    BattleCalculator.settings.allFlutesToggle(false);
 
     isDamageLoaded(true);
 };
