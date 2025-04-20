@@ -14617,7 +14617,13 @@ const getVitaminPokemonList = ko.pureComputed(() => {
         p.vitaminEggSteps = regionVitamins.vitaminEggSteps;
         p.attackBonus = regionVitamins.attackBonus;
         p.vitaminText = p.bestVitamins.map((v, i) => {
-            return saveLoaded ? `${Companion.partyList()[p.id]?.vitaminsUsed[i]() ?? 0} | ${v}` : `${v}`;
+            //return saveLoaded ? `${Companion.partyList()[p.id]?.vitaminsUsed[i]() ?? 0} | ${v}` : `${v}`;
+            if (!saveLoaded) {
+                return v;
+            }
+
+            const current = Companion.partyList()[p.id]?.vitaminsUsed[i]() ?? 0;
+            return current === v ? v : `${current} <span class="text-warning">(${v})</span>`;
         });
     });
 
@@ -14666,17 +14672,41 @@ const getSortedVitaminList = ko.pureComputed(() => {
 });
 
 const getTotalVitaminsNeeded = ko.pureComputed(() => {
-    const vitaminCount = [0, 0, 0];
+    const region = highestRegion();
+    const amountNeeded = pokemonVitaminList.reduce((sum, p) => {
+        if (p.obtainRegion <= region) {
+            const bestVitamins = p.regionVitamins[region].bestVitamins;
+            bestVitamins.forEach((count, i) => sum[i] += count);
+        }
+        return sum;
+    }, [0, 0, 0]);
 
-    getVitaminPokemonList().forEach((p) => {
-        p.bestVitamins.forEach((count, i) => vitaminCount[i] += count);
-    });
+    const amountOwned = [0, 0, 0];
 
-    const totalPrice = vitaminCount.reduce((sum, count, i) => {
+    if (SaveData.isLoaded()) {
+        GameHelper.enumStrings(GameConstants.VitaminType).forEach((v, i) => {
+            amountOwned[i] += SaveData.file().player._itemList[v] ?? 0;
+        });
+
+        SaveData.file().save.party.caughtPokemon.forEach((pokemon) => {
+            const vitaminsUsed = pokemon[PartyPokemonSaveKeys['vitaminsUsed']];
+            Object.values(vitaminsUsed).forEach((n, i) => amountOwned[i] += n);
+        });
+    }
+
+    const totalPriceAll = amountNeeded.reduce((sum, count, i) => {
         return sum += ItemList[GameConstants.VitaminType[i]].totalPrice(count);
     }, 0);
 
-    return { vitaminCount: vitaminCount, totalCost: totalPrice };
+    const totalPriceOwned = amountOwned.reduce((sum, count, i) => {
+        return sum += ItemList[GameConstants.VitaminType[i]].totalPrice(count);
+    }, 0);
+
+    amountNeeded.forEach((v, i) => {
+        amountNeeded[i] = Math.max(0, v - amountOwned[i]);
+    });
+
+    return { vitaminCount: amountNeeded, totalCost: Math.max(0, totalPriceAll - totalPriceOwned) };
 });
 
 const exportData = () => {

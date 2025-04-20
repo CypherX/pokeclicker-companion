@@ -1251,6 +1251,12 @@
                     <!-- import "vitaminTracker.html" -->
 <div class="tab-pane h-100 container-xxl" id="vitaminTracker">
     <div class="d-flex flex-column h-100">
+        <!-- ko if: SaveData.isLoaded -->
+        <div class="alert alert-primary alert-dismissible fade show small mb-1">
+            The [Total Vitamins Needed] section has been updated to include your already purchased and distributed vitamins in the calculation. Report any issues or incorrect calculations on the <a href="https://discord.gg/a6DFe4p" target="_blank">PokéClicker discord</a>.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <!-- /ko -->
         <div class="row align-items-center">
             <div class="col-12 col-lg-8 col-sm-6">
                 <div class="row mb-2">
@@ -1313,7 +1319,7 @@
                 <div class="text-end small mt-2">* Load a save file to view the vitamins your Pokémon currently have</div>
                 <!-- /ko -->
                 <!-- ko if: SaveData.isLoaded -->
-                <div class="text-end small mt-2">* Above totals do not include vitamins you have already purchased</div>
+                <div class="text-end small mt-2">* Above totals take into consideration the amount of vitamins you have already purchased and distributed.</div>
                 <!-- /ko -->
             </div>
         </div>
@@ -1353,7 +1359,11 @@
                         </tr>
                         <!-- ko if: SaveData.isLoaded -->
                         <tr class="table-dark fw-normal border-top-0 align-middle">
-                            <th colspan="3" class="text-center p-1 border-top-0 border-start-0">Current | Optimal</th>
+                            <th colspan="3" class="text-center p-1 border-top-0 border-start-0" data-bind="tooltip: {
+                                title: 'When the amount of vitamins a Pokémon has differs from the optimal amount, the optimal amount will be displayed in parenthesis next to the current amount.',
+                                trigger: 'hover',
+                                placement: 'top'
+                            }">Current (Optimal)</th>
                         </tr>
                         <!-- /ko -->
                     </thead>
@@ -1366,9 +1376,9 @@
                             <td class="text-center" data-bind="text: $data.attack"></td>
                             <td class="text-center" data-bind="text: $data.baseAttackBonus.toFixed(2).toLocaleString()"></td>
                             <td class="text-center" data-bind="text: $data.baseEggSteps.toLocaleString()"></td>
-                            <td class="text-center bg-vitamin-0" data-bind="text: $data.vitaminText[0]"></td>
-                            <td class="text-center bg-vitamin-1" data-bind="text: $data.vitaminText[1]"></td>
-                            <td class="text-center bg-vitamin-2" data-bind="text: $data.vitaminText[2]"></td>
+                            <td class="text-center bg-vitamin-0" data-bind="html: $data.vitaminText[0]"></td>
+                            <td class="text-center bg-vitamin-1" data-bind="html: $data.vitaminText[1]"></td>
+                            <td class="text-center bg-vitamin-2" data-bind="html: $data.vitaminText[2]"></td>
                             <td class="text-center" data-bind="text: $data.attackBonus.toFixed(2).toLocaleString()"></td>
                             <td class="text-center" data-bind="text: $data.vitaminEggSteps.toLocaleString()"></td>
                             <td class="text-center" data-bind="text: $data.breedingEfficiency.toFixed(2).toLocaleString()"></td>
@@ -1759,7 +1769,7 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?t=1745108461695"></script>
+        <script src="./bundle.js?t=1745113248373"></script>
     </body>
 </html>
 
