@@ -12291,40 +12291,6 @@ $(document).ready(() => {
     Util.createNotifications();
 
     updateNavigationHash();
-
-    /*const now = new Date();
-    if (now.getMonth() == 3 && now.getDate() == 1) {
-        $('#makeitstop').click(() => {
-            $('#main').css('animation', `none`);
-            $('#main').css('transform', `none`);
-            $('#makeitstop').remove();
-        });
-
-        switch (Rand.fromArray(['spin', 'zoom', 'rotate', 'flip', 'mirror'])) {
-            case 'spin':
-                const dir = Rand.fromArray(['cw', 'ccw']);
-                const speed = Rand.intBetween(5, 20);
-                $('#main').css('animation', `spin-${dir} ${speed}s linear infinite`);
-                break;
-            case 'zoom':
-                $('#main').css('animation', `zoom-out 20s linear forwards`);
-                break;
-            case 'rotate':
-                const rotateDeg = Rand.intBetween(0, 359);
-                $('#main').css('transform', `rotate(${rotateDeg}deg)`);
-                break;
-            case 'flip':
-                $('#main').css('transform', `rotate(180deg)`);
-                break;
-            case 'mirror':
-                $('#main').css('transform', `scaleX(-1)`);
-                break;
-        }
-
-        setTimeout(() => {
-            $('#makeitstop').removeClass('d-none');
-        }, 60000);
-    }*/
 });
 
 const updateNavigationHash = () => {
@@ -12822,9 +12788,7 @@ const updateFluteActiveGemTypes = () => {
     [...gemTypes].forEach(x => FluteEffectRunner.activeGemTypes.push(x));
 };
 
-//const lol = Rand.intBetween(1, 20);
 const formattedSecondsToWin = (secondsToWin) => {
-    //return lol == 1 && secondsToWin === Infinity ? 'hahaHAHAha' : secondsToWin.toLocaleString();
     return secondsToWin.toLocaleString();
 };
 
@@ -14156,6 +14120,7 @@ const loadAttackData = () => {
     BattleCalculator.settings.rockyHelmetEnabled(false);
     BattleCalculator.settings.clicksPerSecond(0);
     BattleCalculator.settings.activeFlutes([]);
+    BattleCalculator.settings.allFlutesToggle(false);
 
     isDamageLoaded(true);
 };
