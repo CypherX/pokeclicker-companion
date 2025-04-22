@@ -35,6 +35,7 @@
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
     "gulp-html-imports": "^1.0.6",
+    "gulp-replace": "^1.1.4",
     "vinyl-source-stream": "^2.0.0",
     "watchify": "^4.0.0"
   },
