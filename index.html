@@ -24,6 +24,7 @@
         <div id="drag-drop-message" class="d-none position-absolute bottom-0 start-50 translate-middle-x h3 text-warning">
             Drag-and-drop PokéClicker Save File
         </div>-->
+
         <div id="container" class="d-none">
             <div class="d-flex flex-column" id="flex-container" style="height: 100vh;">
                 <div id="header" class="mb-4">
@@ -72,7 +73,18 @@
             </symbol>
         </svg>
 
-        <script src="./bundle.js?v=20241116"></script>
+        <!-- dummy elements to get rid of console errors -->
+        <div class="d-none">
+            <span id="safari-dpad-up"></span>
+            <span id="safari-dpad-left"></span>
+            <span id="safari-dpad-down"></span>
+            <span id="safari-dpad-right"></span>
+            <span id="use-our-client-message"></span>
+            <span id="breedingModal"></span>
+            <span id="pokedexModal"></span>
+        </div>
+
+        <script src="./bundle.js?t={timestamp}"></script>
     </body>
 </html>
 

@@ -1,4 +1,5 @@
 const gulp = require('gulp');
+const replace = require('gulp-replace');
 const browserify = require('browserify');
 const browserSync = require('browser-sync');
 const htmlImport = require('gulp-html-imports');
@@ -46,6 +47,7 @@ gulp.task('html_imports', (done) => {
         componentsPath: './components/',
         nestedIncludes: true,
       }))
+      .pipe(replace('{timestamp}', new Date().getTime()))
       .pipe(gulp.dest(dests.base))
       .pipe(browserSync.reload({stream: true}));
     done();
@@ -58,7 +60,7 @@ gulp.task('scripts', () =>
         .pipe(gulp.dest(dests.base))
         .pipe(browserSync.reload({stream: true})));
 
-gulp.task('pokeclicker', (done) => {
+/*gulp.task('pokeclicker', (done) => {
     gulp.src([
         'pokeclicker/docs/scripts/modules.min.js',
         'pokeclicker/docs/scripts/script.min.js',
@@ -72,6 +74,29 @@ gulp.task('pokeclicker', (done) => {
     .pipe(gulp.dest('build/pokeclicker/libs'));
 
     done();
+});*/
+
+gulp.task('pokeclicker-scripts', () => {
+    return gulp.src([
+        'pokeclicker/docs/scripts/modules.min.js',
+        'pokeclicker/docs/scripts/script.min.js',
+    ])
+    .pipe(gulp.dest('build/pokeclicker/scripts'));
+});
+
+gulp.task('pokeclicker-libs', () => {
+    return gulp.src([
+        'pokeclicker/docs/libs/jquery.min.js',
+        'pokeclicker/docs/libs/knockout-latest.js',
+    ])
+    .pipe(gulp.dest('build/pokeclicker/libs'));
+});
+
+gulp.task('pokeclicker-assets', () => {
+    return gulp.src([
+        'pokeclicker/docs/assets/sounds/*.mp3',
+    ])
+    .pipe(gulp.dest('build/assets/sounds'));
 });
 
 gulp.task('styles', () => gulp.src(srcs.styles)
@@ -94,7 +119,7 @@ gulp.task('browserSync', () => {
 });
 
 gulp.task('build', done => {
-    gulp.series('copy', 'assets', 'html_imports', 'scripts', 'styles', 'pokeclicker')(done);
+    gulp.series('copy', 'assets', 'html_imports', 'scripts', 'styles', 'pokeclicker-scripts', 'pokeclicker-libs', 'pokeclicker-assets')(done);
 });
 
 gulp.task('clean', () => del([dests.base]));
