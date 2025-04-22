@@ -1,4 +1,5 @@
 Notifier.notify = () => {};
+SaveSelector.loadSaves = () => {};
 SortModules = () => {};
 
 const initGame = () => {
