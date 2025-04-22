@@ -13770,6 +13770,7 @@ module.exports = {
 };
 },{}],42:[function(require,module,exports){
 Notifier.notify = () => {};
+SaveSelector.loadSaves = () => {};
 SortModules = () => {};
 
 const initGame = () => {
