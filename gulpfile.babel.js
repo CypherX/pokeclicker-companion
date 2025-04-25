@@ -28,6 +28,8 @@ const dests = {
     githubPages: 'docs/',
 };
 
+const timestamp = new Date().getTime();
+
 gulp.task('copy', (done) => {
     gulp.src('./package.json').pipe(gulp.dest(`${dests.base}/`));
 
@@ -47,7 +49,7 @@ gulp.task('html_imports', (done) => {
         componentsPath: './components/',
         nestedIncludes: true,
       }))
-      .pipe(replace('{timestamp}', new Date().getTime()))
+      .pipe(replace('{timestamp}', timestamp))
       .pipe(gulp.dest(dests.base))
       .pipe(browserSync.reload({stream: true}));
     done();
@@ -56,7 +58,7 @@ gulp.task('html_imports', (done) => {
 gulp.task('scripts', () =>  
     browserify('scripts/main.js')
         .bundle()
-        .pipe(source('bundle.js'))
+        .pipe(source(`bundle-${timestamp}.js`))
         .pipe(gulp.dest(dests.base))
         .pipe(browserSync.reload({stream: true})));
 
