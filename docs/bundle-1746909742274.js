@@ -12198,44 +12198,6 @@ $(document).on('mouseout', '.table-column-row-hover tbody td', (e) => {
     $(cell).closest('tbody').find(`td:nth-child(${cell.cellIndex + 1})`).css('background-color', '');
 });
 
-const test = () => {
-    const order = [];
-
-    const towns = Object.values(TownList).filter(t => t.region === GameConstants.Region.kanto);
-    const routes = Routes.getRoutesByRegion(GameConstants.Region.kanto);
-    const gyms = GameConstants.RegionGyms[GameConstants.Region.kanto].map(g => GymList[g]);
-    const tempBattles = Object.values(TemporaryBattleList).filter(tb => tb.getTown().region === GameConstants.Region.kanto);
-
-    for (const town of towns) {
-        if (town.startingTown === true) {
-            order.splice(0, 0, town);
-            continue;
-        }
-
-        order.push(town);
-    }
-
-    for (const route of routes) {
-        if (!route.requirements?.length) {
-            const startingTownIndex = order.findIndex(o => o.startingTown === true);
-            order.splice(startingTownIndex + 1, 0, route);
-            continue;
-        }
-
-        for (const req of route.requirements) {
-            if (req instanceof RouteKillRequirement) {
-                const requiredRoute = Routes.getRoute(req.region, req.route);
-                const index = order.findIndex(o => o === requiredRoute);
-                
-            }
-        }
-    }
-
-
-
-    return order;
-};
-
 module.exports = {
     getMissingPokemon,
     getTotalMissingPokemonCount,
@@ -12283,8 +12245,6 @@ module.exports = {
 
     tabVisited,
     activeTab,
-
-    test,
 };
 
 },{}],37:[function(require,module,exports){
@@ -13401,10 +13361,11 @@ const getBerryMasterDeals = (berryTrader, days = undefined) => {
 
 const getBerryMasterNextItemDate = (berryTrader) => {
     const items = {};
+    const timestamp = new Date().setHours(0, 0, 0, 0);
 
     getBerryMasterDeals(berryTrader).forEach((t) => t.deals.forEach((d) => {
         const itemName = d.item.itemType.name;
-        if (!items[itemName]) {
+        if (!items[itemName] && t.date.setHours(0, 0, 0, 0) > timestamp) {
             items[itemName] = {
                 date: t.date,
                 item: d.item.itemType._displayName || itemName,
