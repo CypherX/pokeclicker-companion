@@ -140,7 +140,7 @@ const getFilteredVitaminList = () => {
         }
 
         if (hidePokemonOptimalVitamins()) {
-            if (partyPokemon && GameHelper.enumNumbers(GameConstants.VitaminType).every((v) => pokemon.bestVitamins[v] == partyPokemon.vitaminsUsed[v]())) {
+            if (partyPokemon && GameHelper.enumNumbers(GameConstants.VitaminType).every((v) => pokemon.regionVitamins[region].bestVitamins[v] == partyPokemon.vitaminsUsed[v]())) {
                 return false;
             }
         }
