@@ -180,10 +180,11 @@ const getBerryMasterDeals = (berryTrader, days = undefined) => {
 
 const getBerryMasterNextItemDate = (berryTrader) => {
     const items = {};
+    const timestamp = new Date().setHours(0, 0, 0, 0);
 
     getBerryMasterDeals(berryTrader).forEach((t) => t.deals.forEach((d) => {
         const itemName = d.item.itemType.name;
-        if (!items[itemName]) {
+        if (!items[itemName] && t.date.setHours(0, 0, 0, 0) > timestamp) {
             items[itemName] = {
                 date: t.date,
                 item: d.item.itemType._displayName || itemName,
@@ -195,6 +196,11 @@ const getBerryMasterNextItemDate = (berryTrader) => {
 
     return Object.values(items).sort((a, b) => a.item.localeCompare(b.item));
 };
+
+const isAvailableFromBerryMasterToday = (berryTrader, item) => {
+    const deals = getBerryMasterDeals(berryTrader, 1)[0].deals;
+    return deals?.some(d => (d.item.itemType._displayName || d.item.itemType.name) == item) ?? false;
+}
 
 const getBerryMasterPokemonMinMaxCost = (berryTrader) => {
     const pokemonList = [...Companion.data.berryMasterPokemonCosts[berryTrader]];
@@ -354,6 +360,7 @@ module.exports = {
     getBerryMasterDeals,
     getBerryMasterNextItemDate,
     getBerryMasterPokemonMinMaxCost,
+    isAvailableFromBerryMasterToday,
     //getUndergroundItemList,
     //getNextOccurrenceUndergroundItems,
     getIslandScanPokemonByDate,
