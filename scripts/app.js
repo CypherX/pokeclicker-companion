@@ -57,11 +57,11 @@ const getMissingPokemon = ko.pureComputed(() => {
             })
     };
 
-    missingPokemon[-2] = {
+    /*missingPokemon[-2] = {
         region: -2,
         regionName: 'Event / Discord / Client',
         pokemon: []
-    };
+    };*/
 
     const saveData = SaveData.file();
     const showRequiredOnly = Companion.settings.showRequiredOnly();

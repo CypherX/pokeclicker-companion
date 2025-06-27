@@ -114,7 +114,10 @@
                     <tbody data-bind="foreach: $data">
                         <tr>
                             <td class="text-center" data-bind="text: $data.id"></td>
-                            <td data-bind="text: $data.name"></td>
+                            <td>
+                                <knockout data-bind="text: $data.name"></knockout>
+                                <knockout data-bind="if: Companion.isEventDiscordClientPokemon($data.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
+                            </td>
                             <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[$data.nativeRegion])"></td>
                             <td class="text-center" data-bind="text: $data.attack"></td>
                             <td class="text-center" data-bind="text: $data.baseAttackBonus.toFixed(2).toLocaleString()"></td>
