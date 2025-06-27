@@ -248,7 +248,10 @@
                                 <td class="text-center" data-bind="text: $data.id"></td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <knockout class="flex-grow-1" data-bind="text: $data.name"></knockout>
+                                        <div class="flex-grow-1">
+                                            <knockout data-bind="text: $data.name"></knockout>
+                                            <knockout data-bind="if: Companion.isEventDiscordClientPokemon($data.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
+                                        </div>
                                         <a class="small" href="#" target="_blank"
                                             data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pok%C3%A9mon/${$data.name}` }">wiki</a>
                                     </div>
@@ -1365,7 +1368,10 @@
                     <tbody data-bind="foreach: $data">
                         <tr>
                             <td class="text-center" data-bind="text: $data.id"></td>
-                            <td data-bind="text: $data.name"></td>
+                            <td>
+                                <knockout data-bind="text: $data.name"></knockout>
+                                <knockout data-bind="if: Companion.isEventDiscordClientPokemon($data.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
+                            </td>
                             <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[$data.nativeRegion])"></td>
                             <td class="text-center" data-bind="text: $data.attack"></td>
                             <td class="text-center" data-bind="text: $data.baseAttackBonus.toFixed(2).toLocaleString()"></td>
@@ -1774,7 +1780,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1746910773514.js"></script>
+        <script src="./bundle-1750996815917.js"></script>
     </body>
 </html>
 

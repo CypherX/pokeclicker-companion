@@ -11552,11 +11552,11 @@ const getMissingPokemon = ko.pureComputed(() => {
             })
     };
 
-    missingPokemon[-2] = {
+    /*missingPokemon[-2] = {
         region: -2,
         regionName: 'Event / Discord / Client',
         pokemon: []
-    };
+    };*/
 
     const saveData = SaveData.file();
     const showRequiredOnly = Companion.settings.showRequiredOnly();
@@ -12945,7 +12945,16 @@ const pokemonRegionOverride = {
     'Magearna (Original Color)': GameConstants.Region.galar,
 
     // Event / Discord / Client
-    ...Object.fromEntries(EventDiscordClientPokemon.map(p => [p, -2]))
+    //...Object.fromEntries(EventDiscordClientPokemon.map(p => [p, -2]))
+    'Bulbasaur (Rose)': GameConstants.Region.sinnoh,
+    'Ivysaur (Rose)': GameConstants.Region.sinnoh,
+    'Venusaur (Rose)': GameConstants.Region.sinnoh,
+    'Pikachu (Gengar)': GameConstants.Region.hoenn,
+    'Flying Pikachu': GameConstants.Region.kanto,
+    'Surfing Pikachu': GameConstants.Region.kanto,
+    'Let\'s Go Pikachu': GameConstants.Region.kanto,
+    'Pikachu (Clone)': GameConstants.Region.kanto,
+    'Pikachu (Easter)': GameConstants.Region.kanto,
 }
 
 const DungeonListOverride = [
