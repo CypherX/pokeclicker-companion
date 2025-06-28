@@ -12954,7 +12954,8 @@ const pokemonRegionOverride = {
     'Surfing Pikachu': GameConstants.Region.kanto,
     'Let\'s Go Pikachu': GameConstants.Region.kanto,
     'Pikachu (Clone)': GameConstants.Region.kanto,
-    'Pikachu (Easter)': GameConstants.Region.kanto,
+    'Pikachu (Easter)': GameConstants.Region.hoenn,
+    'Togepi (Flowering Crown)': GameConstants.Region.hoenn,
 }
 
 const DungeonListOverride = [
