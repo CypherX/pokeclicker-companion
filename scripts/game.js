@@ -57,6 +57,7 @@ const initGame = () => {
 
 initGame();
 
+GenericDeal.generateDeals();
 AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
 SafariPokemonList.generateSafariLists();
 
