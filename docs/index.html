@@ -13,8 +13,8 @@
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
-        <script src="./pokeclicker/scripts/modules.min.js?v=0.10.23"></script>
-        <script src="./pokeclicker/scripts/script.min.js?v=0.10.23"></script>
+        <script src="./pokeclicker/scripts/modules.min.js?v=0.10.24"></script>
+        <script src="./pokeclicker/scripts/script.min.js?v=0.10.24"></script>
         <script type="text/javascript" src="./libs/bootstrap.bundle.min.js"></script>
     </head>
     <body>
@@ -153,11 +153,11 @@
                     Daily Deals
                 </button>
             </li>-->
-            <li class="nav-item mx-1">
+            <!--<li class="nav-item mx-1">
                 <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecastEnigmaDirection" data-path="Enigma" type="button" role="tab">
                     Enigma Direction
                 </button>
-            </li>
+            </li>-->
         </ul>
     </div>
 </nav>
@@ -1225,28 +1225,6 @@
     </div>
 </div>
 <!-- import end -->
-
-        <!-- import "forecastEnigmaDirection.html" -->
-<div class="tab-pane" id="forecastEnigmaDirection">
-    <h5 class="text-center text-warning mb-4">Note that if you are missing other berries you are <u>NOT</u> guaranteed to get an Enigma hint.</h5>
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped table-hover table-sm small">
-            <thead>
-                <tr class="table-dark text-center" data-bind="foreach: ['North', 'South', 'East', 'West']">
-                    <th data-bind="text: $data"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr data-bind="foreach: ['North', 'South', 'East', 'West']">
-                    <td class="text-center" data-bind="foreach: Forecast.enigmaDirection().filter(d => d.direction == $data).slice(0, 5)">
-                        <div data-bind="text: Util.formatDate($data.date)"></div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-<!-- import end -->
     </div>
 </div>
 <!-- import end -->
@@ -1780,7 +1758,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1751146998173.js"></script>
+        <script src="./bundle-1751611380813.js"></script>
     </body>
 </html>
 

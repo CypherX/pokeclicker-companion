@@ -11384,7 +11384,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 },{"process/browser.js":31,"timers":34}],35:[function(require,module,exports){
 module.exports={
   "name": "pokeclicker",
-  "version": "0.10.23",
+  "version": "0.10.24",
   "description": "PokéClicker repository",
   "main": "index.js",
   "scripts": {
@@ -11410,7 +11410,7 @@ module.exports={
   },
   "babel": {
     "presets": [
-      "env"
+      "@babel/preset-env"
     ]
   },
   "author": "RedSparr0w",
@@ -11420,6 +11420,9 @@ module.exports={
   },
   "homepage": "https://github.com/pokeclicker/pokeclicker#readme",
   "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/register": "^7.0.0",
     "@types/bootstrap": "^4.3.1",
     "@types/bootstrap-notify": "^3.1.34",
     "@types/intro.js": "^2.4.7",
@@ -11428,32 +11431,26 @@ module.exports={
     "@types/sortablejs": "^1.10.5",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.50.0",
-    "@vitest/coverage-v8": "^2.1.1",
-    "babel-core": "^6.26.3",
-    "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.26.0",
+    "@vitest/coverage-v8": "^3.1.3",
     "bootstrap-notify": "^3.1.3",
-    "browser-sync": "^2.28.3",
+    "browser-sync": "^3.0.2",
     "cross-env": "^7.0.2",
     "del": "^5.1.0",
     "es6-promise": "^4.2.8",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-plugin-import": "^2.22.1",
-    "gh-pages": "^4.0.0",
+    "gh-pages": "^6.1.1",
     "gulp": "^4.0.2",
-    "gulp-autoprefixer": "^7.0.1",
+    "gulp-autoprefixer": "^8.0.0",
     "gulp-changed": "^4.0.2",
     "gulp-clean": "^0.4.0",
+    "gulp-clean-css": "^4.3.0",
     "gulp-concat": "^2.6.0",
-    "gulp-connect": "^5.7.0",
     "gulp-ejs": "^5.1.0",
     "gulp-file-include": "^2.2.2",
     "gulp-filter": "^6.0.0",
-    "gulp-html-import": "^0.0.2",
-    "gulp-less": "^4.0.1",
-    "gulp-minify-css": "^1.2.1",
-    "gulp-minify-html": "^1.0.4",
+    "gulp-less": "^5.0.0",
     "gulp-plumber": "^1.2.1",
     "gulp-rename": "^2.0.0",
     "gulp-replace": "^1.0.0",
@@ -11462,10 +11459,8 @@ module.exports={
     "gulp-stream-to-promise": "^0.1.0",
     "gulp-strip-debug": "^3.0.0",
     "gulp-typescript": "^5.0.1",
-    "gulp-util": "^3.0.7",
     "husky": "^4.3.8",
     "jsdom": "^25.0.0",
-    "natives": "^1.1.6",
     "npm-run-all2": "^6.2.0",
     "postcss-less": "^6.0.0",
     "stylelint": "^15.10.1",
@@ -11473,10 +11468,10 @@ module.exports={
     "ts-loader": "^8.0.4",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5",
-    "vitest": "^2.1.1",
+    "vitest": "^3.1.3",
     "webpack": "^5.76.0",
     "webpack-cli": "^5.0.1",
-    "webpack-stream": "^6.1.0"
+    "webpack-stream": "^7.0.0"
   },
   "dependencies": {
     "bootstrap": "^4.5.3",
@@ -11489,6 +11484,9 @@ module.exports={
     "knockout": "^3.5.1",
     "popper.js": "^1.16.0",
     "sortablejs": "^1.10.2"
+  },
+  "overrides": {
+    "clean-css": ">=5.3.1"
   }
 }
 
@@ -13194,7 +13192,7 @@ const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
 //const dailyDeals = ko.observableArray();
-const enigmaDirection = ko.observableArray();
+//const enigmaDirection = ko.observableArray();
 
 const summaryDate = ko.observable(new Date());
 const summary = ko.observable({
@@ -13245,10 +13243,10 @@ const generateForecasts = (date = new Date()) => {
         }
 
         // Enigma Direction
-        enigmaDirection.push({
+        /*enigmaDirection.push({
             date: saveDate,
             direction: getEnigmaDirectionByDate(date),
-        });
+        });*/
 
         date.setDate(date.getDate() + 1);
     }
@@ -13537,7 +13535,7 @@ module.exports = {
     boostedRoutes,
     berryMasters,
     //dailyDeals,
-    enigmaDirection,
+    //enigmaDirection,
     summary,
     summaryDate,
 
@@ -13614,6 +13612,8 @@ module.exports = {
 Notifier.notify = () => {};
 SaveSelector.loadSaves = () => {};
 SortModules = () => {};
+
+EnigmaMutation.prototype.fromJSON = () => {};
 
 const initGame = () => {
   player = new Player();
