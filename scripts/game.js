@@ -2,6 +2,8 @@ Notifier.notify = () => {};
 SaveSelector.loadSaves = () => {};
 SortModules = () => {};
 
+EnigmaMutation.prototype.fromJSON = () => {};
+
 const initGame = () => {
   player = new Player();
   player.highestRegion(0);

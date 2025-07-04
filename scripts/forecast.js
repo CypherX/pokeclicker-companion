@@ -3,7 +3,7 @@ const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
 //const dailyDeals = ko.observableArray();
-const enigmaDirection = ko.observableArray();
+//const enigmaDirection = ko.observableArray();
 
 const summaryDate = ko.observable(new Date());
 const summary = ko.observable({
@@ -54,10 +54,10 @@ const generateForecasts = (date = new Date()) => {
         }
 
         // Enigma Direction
-        enigmaDirection.push({
+        /*enigmaDirection.push({
             date: saveDate,
             direction: getEnigmaDirectionByDate(date),
-        });
+        });*/
 
         date.setDate(date.getDate() + 1);
     }
@@ -346,7 +346,7 @@ module.exports = {
     boostedRoutes,
     berryMasters,
     //dailyDeals,
-    enigmaDirection,
+    //enigmaDirection,
     summary,
     summaryDate,
 
