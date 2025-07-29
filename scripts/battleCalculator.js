@@ -309,12 +309,16 @@ const calcPokemonDamage = (pokemonName, battleRegion, battleSubRegion) => {
 const calcPartyAttack = (type1, type2, region, weather, playerRegion = 0, playerSubRegion = 0) => {
     let attack = 0;
     for (const pokemon of App.game.party.caughtPokemon) {
-        if (region == GameConstants.Region.alola && playerRegion == GameConstants.Region.alola && playerSubRegion == GameConstants.AlolaSubRegions.MagikarpJump
-            && Math.floor(pokemon.id) != 129) {
-            // Only magikarps can attack in magikarp jump
-            continue;
+        let ignoreRegionMultiplier = false;
+        if (region == GameConstants.Region.alola && playerRegion == GameConstants.Region.alola && playerSubRegion == GameConstants.AlolaSubRegions.MagikarpJump) {
+            if (Math.floor(pokemon.id) == 129) {
+                ignoreRegionMultiplier = true;
+            } else {
+                // Only magikarps can attack in magikarp jump
+                continue;
+            }
         }
-        attack += App.game.party.calculateOnePokemonAttack(pokemon, type1, type2, region, false, true, false, weather, false, true);
+        attack += App.game.party.calculateOnePokemonAttack(pokemon, type1, type2, region, ignoreRegionMultiplier, true, false, weather, false, true);
     }
 
     const bonus = App.game.party.multiplier.getBonus('pokemonAttack');
