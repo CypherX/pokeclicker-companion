@@ -1105,17 +1105,92 @@
         <!-- import "forecastBerryMaster.html" -->
 <div class="tab-pane h-100" id="forecastBerryMaster">
     <div class="d-flex flex-column h-100">
-        <ul class="nav nav-tabs mb-4" role="tablist" data-bind="foreach: GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None')">
+        <ul class="nav nav-tabs mb-4" role="tablist" data-bind="foreach: Forecast.berryMasterList">
             <li class="nav-item">
                 <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
                     data-bind="text: $data, css: { active: $index() == 0 },
                         attr: { id: `berrymaster-${$index()}-tab`, 'data-bs-target': `#berrymaster-${$index()}`, 'data-path': $data.replace(/\s+/g, '') }"></button>
             </li>
         </ul>
-        <div class="tab-content flex-grow-1" style="overflow: auto;" data-bind="foreach: GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None')">
+        <div class="tab-content flex-grow-1" style="overflow: auto;" data-bind="foreach: Forecast.berryMasterList">
             <div class="tab-pane" role="tabpanel" data-bind="css: { active: $index() == 0 }, attr: { id: `berrymaster-${$index()}` }">
-                <div class="container-xxl">
-                    <!-- ko if: Forecast.berryMasters().length -->
+                <div class="container-xxl" data-bind="if: Forecast.berryMasters().length">
+
+                    <!-- ko ifnot: Companion.data.berryMasterPokemonLocations.includes($index()) -->
+
+                    <div class="alert alert-primary alert-dismissible fade show small">
+                        Testing a new UI/UX layout for this page. Provide any feedback in the PokéClicker discord server.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <div class="control-row mb-2">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <input class="form-control form-control-sm" type="text" placeholder="Search" data-bind="textInput: Forecast.berryMasterSearchSetting[$index()]">
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text">Display</div>
+                                    <select class="form-select form-select-sm"
+                                        data-bind="options: [
+                                            { name: 'Alphabetical', value: 'alpha' },
+                                            { name: 'Next Occurrence', value: 'next' }
+                                        ], optionsText: 'name', optionsValue: 'value', value: Forecast.berryMasterDisplaySetting[$index()]">
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- ko ifnot: SaveData.isLoaded -->
+                            <div class="col-auto ms-auto text-muted small">
+                                * Load a save file to see how many trades you can currently afford.
+                            </div>
+                            <!-- /ko -->
+                        </div>
+                    </div>
+
+                    <div class="row small" data-bind="foreach: Forecast.getItemListByBerryMaster($index())">
+                        <div class="col-12 col-md-6 col-lg-4 mb-3">
+                            <div class="card">
+                                <div class="card-header text-center" data-bind="text: item"></div>
+                                <div class="card-body p-0">
+                                    <table class="table table-bordered table-sm mb-0">
+                                        <thead>
+                                            <tr class="table-dark align-middle">
+                                                <th>Date</th>
+                                                <th class="text-center">Amt</th>
+                                                <th class="text-center w-50">Cost</th>
+                                                <!-- ko if: SaveData.isLoaded -->
+                                                <th class="text-center">Afford</th>
+                                                <!-- /ko -->
+                                            </tr>
+                                        </thead>
+                                        <tbody data-bind="foreach: deals.slice(0, 3)">
+                                            <tr class="align-middle">
+                                                <td data-bind="text: Util.formatDate(date)"></td>
+                                                <td class="text-center" data-bind="text: amount"></td>
+                                                <td class="text-center w-50">
+                                                    <div class="d-flex flex-wrap justify-content-evenly gap-1" data-bind="foreach: berries">
+                                                        <!-- ko if: $index() == 3 -->
+                                                        <div class="w-100"></div>
+                                                        <!-- /ko -->
+                                                        <div class="d-flex flex-column" style="line-height: 1.25;">
+                                                            <span data-bind="text: amount"></span>
+                                                            <span data-bind="text: BerryType[berryType]"></span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <!-- ko if: SaveData.isLoaded -->
+                                                <td class="text-center" data-bind="text: Forecast.calcBerryMasterDealAfford($data.berries).toLocaleString()">0</td>
+                                                <!-- /ko -->
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /ko -->
+
+                    <!-- ko if: Companion.data.berryMasterPokemonLocations.includes($index()) -->
                     <div class="row">
                         <div class="col-12 col-md-6 mb-3">
                             <h4 class="mb-2">Current & Upcoming</h4>
@@ -1149,32 +1224,6 @@
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
-                            <!-- ko ifnot: Companion.data.berryMasterPokemonLocations.includes($index())  -->
-                            <h4 class="mb-2">Next Occurrence</h4>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-hover table-striped table-sm small">
-                                    <thead>
-                                        <tr class="table-dark">
-                                            <th>Item</th>
-                                            <th class="text-center">Date</th>
-                                            <th class="text-center">Cost</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody data-bind="foreach: Forecast.getBerryMasterNextItemDate($index())">
-                                        <tr>
-                                            <td class="align-middle" data-bind="text: `${item} × ${amount}`, css: { 'text-warning': Forecast.isAvailableFromBerryMasterToday($parentContext.$index(), $data.item) }"></td>
-                                            <td class="text-center align-middle" data-bind="text: Util.formatDate(date)"></td>
-                                            <td class="align-middle">
-                                                <div class="d-flex justify-content-evenly text-center" data-bind="foreach: berries">
-                                                    <div class="px-2" data-bind="text: `${amount} × ${BerryType[berryType]}`"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!-- /ko -->
-                            <!-- ko if: Companion.data.berryMasterPokemonLocations.includes($index()) -->
                             <div data-bind="with: Forecast.getBerryMasterPokemonMinMaxCost($index())">
                                 <h4 class="mb-2">Next Minimum Cost</h4>
                                 <div class="table-responsive">
@@ -1215,7 +1264,6 @@
                                     </table>
                                 </div>
                             </div>
-                            <!-- /ko -->
                         </div>
                     </div>
                     <!-- /ko -->
@@ -1758,7 +1806,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1753832734653.js"></script>
+        <script src="./bundle-1754166032574.js"></script>
     </body>
 </html>
 
