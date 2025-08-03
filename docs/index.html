@@ -1118,6 +1118,8 @@
 
                     <!-- ko ifnot: Companion.data.berryMasterPokemonLocations.includes($index()) -->
 
+                    <!-- ko let: { tradesToShow: ko.observable(3) } -->
+
                     <div class="alert alert-primary alert-dismissible fade show small">
                         Testing a new UI/UX layout for this page. Provide any feedback in the PokéClicker discord server.
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -1136,6 +1138,14 @@
                                             { name: 'Alphabetical', value: 'alpha' },
                                             { name: 'Next Occurrence', value: 'next' }
                                         ], optionsText: 'name', optionsValue: 'value', value: Forecast.berryMasterDisplaySetting[$index()]">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text">Trades</div>
+                                    <select class="form-select form-select-sm"
+                                        data-bind="options: Array.from({length: 10}, (_, i) => i + 1), value: tradesToShow">
                                     </select>
                                 </div>
                             </div>
@@ -1163,7 +1173,7 @@
                                                 <!-- /ko -->
                                             </tr>
                                         </thead>
-                                        <tbody data-bind="foreach: deals.slice(0, 3)">
+                                        <tbody data-bind="foreach: deals.slice(0, tradesToShow())">
                                             <tr class="align-middle">
                                                 <td class="text-center" data-bind="text: Util.formatDate(date)"></td>
                                                 <td class="text-center" data-bind="text: amount"></td>
@@ -1188,6 +1198,7 @@
                             </div>
                         </div>
                     </div>
+                    <!-- /ko -->
                     <!-- /ko -->
 
                     <!-- ko if: Companion.data.berryMasterPokemonLocations.includes($index()) -->
@@ -1806,7 +1817,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1754166273008.js"></script>
+        <script src="./bundle-1754250569182.js"></script>
     </body>
 </html>
 
