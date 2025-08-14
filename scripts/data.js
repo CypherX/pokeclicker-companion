@@ -125,6 +125,9 @@ const pokemonRegionOverride = {
     'Ditto (Magikarp)': GameConstants.Region.alola,
     'Flowering Celebi': GameConstants.Region.galar,
     'Magearna (Original Color)': GameConstants.Region.galar,
+    'Squad Leader Squirtle': GameConstants.Region.johto,
+    'Deoxys (Green Core)': GameConstants.Region.unova,
+    'Deoxys (Clone)': GameConstants.Region.unova,
 
     // Event / Discord / Client
     //...Object.fromEntries(EventDiscordClientPokemon.map(p => [p, -2]))
