@@ -3,6 +3,8 @@ const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
 
+const berryMasterList = GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None');
+
 const summaryDate = ko.observable(new Date());
 const summary = ko.observable({
     unown: [],
@@ -19,7 +21,7 @@ const generateForecasts = (date = new Date()) => {
     const boostedRouteData = [];
     const berryMasterData = [];
 
-    for (let day = 0; day < 180; day++) {
+    for (let day = 0; day < 365; day++) {
         const saveDate = new Date(date);
 
         // Unown
@@ -174,6 +176,56 @@ const getBerryMasterNextItemDate = (berryTrader) => {
     return Object.values(items).sort((a, b) => a.item.localeCompare(b.item));
 };
 
+const berryMasterSearchSetting = berryMasterList.map(_ => ko.observable(''));
+const berryMasterDisplaySetting = berryMasterList.map(_ => ko.observable('alpha'));
+
+const getItemListByBerryMaster = (berryTrader) => {
+    return ko.pureComputed(() => {
+        const itemMap = {};
+        const dealsByDay = getBerryMasterDeals(berryTrader);
+
+        for (const day of dealsByDay) {
+            for (const deal of day.deals) {
+                const itemName = deal.item.itemType._displayName || deal.item.itemType.name;
+                itemMap[itemName] = itemMap[itemName] || [];
+                itemMap[itemName].push({
+                    date: day.date,
+                    amount: deal.item.amount,
+                    berries: deal.berries,
+                });
+            }
+        }
+
+        const searchVal = berryMasterSearchSetting[berryTrader]().trim().toLowerCase();
+        const sort = berryMasterDisplaySetting[berryTrader]();
+        const itemList = Object.entries(itemMap).reduce((curr, [itemName, deals]) => {
+            if (searchVal.length && !itemName.toLowerCase().includes(searchVal)) {
+                return curr;
+            }
+            curr.push({ item: itemName, deals: deals });
+            return curr;
+        }, []);
+        
+        switch (sort) {
+            case 'next':
+                return itemList.sort((a, b) => (a.deals[0].date - b.deals[0].date || a.item.localeCompare(b.item)));
+            case 'alpha':
+            default:
+                return itemList.sort((a, b) => a.item.localeCompare(b.item));
+        }
+    });
+};
+
+const calcBerryMasterDealAfford = (berries) => {
+    if (!SaveData.isLoaded()) {
+        return 0;
+    }
+
+    const berryList = SaveData.file().save.farming.berryList;
+    const affordAmount = berries.map(b => Math.floor(berryList[b.berryType] / b.amount));
+    return Math.min(...affordAmount);
+};
+
 const isAvailableFromBerryMasterToday = (berryTrader, item) => {
     const deals = getBerryMasterDeals(berryTrader, 1)[0].deals;
     return deals?.some(d => (d.item.itemType._displayName || d.item.itemType.name) == item) ?? false;
@@ -274,4 +326,11 @@ module.exports = {
     getBerryMasterPokemonMinMaxCost,
     isAvailableFromBerryMasterToday,
     getIslandScanPokemonByDate,
+
+    getItemListByBerryMaster,
+    calcBerryMasterDealAfford,
+
+    berryMasterList,
+    berryMasterSearchSetting,
+    berryMasterDisplaySetting,
 };
