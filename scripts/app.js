@@ -763,6 +763,21 @@ $(document).on('mouseout', '.table-column-row-hover tbody td', (e) => {
     $(cell).closest('tbody').find(`td:nth-child(${cell.cellIndex + 1})`).css('background-color', '');
 });
 
+const getCacheItem = (cacheName) => {
+    try {
+        const cache = JSON.parse(localStorage.getItem(cacheName));
+        if (cache.version !== Companion.package.version) {
+            localStorage.removeItem(cacheName);
+            return null;   
+        }
+        return cache;
+    }
+    catch (error) {
+        localStorage.removeItem(cacheName);
+        return null;
+    }
+};
+
 module.exports = {
     getMissingPokemon,
     getTotalMissingPokemonCount,
@@ -811,4 +826,6 @@ module.exports = {
 
     tabVisited,
     activeTab,
+
+    getCacheItem,
 };
