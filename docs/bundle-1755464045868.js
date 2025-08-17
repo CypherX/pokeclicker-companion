@@ -12256,6 +12256,21 @@ $(document).on('mouseout', '.table-column-row-hover tbody td', (e) => {
     $(cell).closest('tbody').find(`td:nth-child(${cell.cellIndex + 1})`).css('background-color', '');
 });
 
+const getCacheItem = (cacheName, checkVersion = true) => {
+    try {
+        const cache = JSON.parse(localStorage.getItem(cacheName));
+        if (checkVersion && cache.version !== Companion.package.version) {
+            localStorage.removeItem(cacheName);
+            return null;   
+        }
+        return cache;
+    }
+    catch (error) {
+        localStorage.removeItem(cacheName);
+        return null;
+    }
+};
+
 module.exports = {
     getMissingPokemon,
     getTotalMissingPokemonCount,
@@ -12304,6 +12319,8 @@ module.exports = {
 
     tabVisited,
     activeTab,
+
+    getCacheItem,
 };
 
 },{}],37:[function(require,module,exports){
@@ -14472,10 +14489,20 @@ const tableSort = ko.observable('id');
 const tableSortDir = ko.observable(false);
 
 const pokemonVitaminList = (() => {
+    const cacheName = 'cache.optimalVitamins';
+    const optimalVitaminCache = Companion.getCacheItem(cacheName);
+
     const pokemon = [...Companion.data.obtainablePokemonList];
     pokemon.forEach((p) => {
         p.baseAttackBonus = getBreedingAttackBonus([0,0,0], p.attack);
         p.baseEggSteps = calcEggSteps([0,0,0], p.eggCycles);
+
+        const cached = optimalVitaminCache?.pokemon[p.id];
+        if (cached) {
+            p.regionVitamins = cached;
+            return;
+        }
+
         p.regionVitamins = [];
         for (let i = 0; i <= GameConstants.MAX_AVAILABLE_REGION; i++) {
             const res = getBestVitamins(p, i);
@@ -14488,6 +14515,19 @@ const pokemonVitaminList = (() => {
             };
         }
     });
+
+    if (!localStorage.getItem(cacheName)) {
+        const cache = {
+            date: Date.now(),
+            version: Companion.package.version,
+            pokemon: pokemon.reduce((obj, p) => {
+                obj[p.id] = p.regionVitamins;
+                return obj;
+            }, {}),
+        };
+
+        localStorage.setItem(cacheName, JSON.stringify(cache));
+    }
 
     return pokemon;
 })();
