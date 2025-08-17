@@ -412,17 +412,46 @@ const getRouteData = ko.pureComputed(() => {
 
     routeOverrides.forEach((r) => routeList.push({...r}));
 
+    const isRouteComplete = (route) => {
+        if (route.defeats < 10000) {
+            return false;
+        }
+
+        if (route.shinyCount < route.pokemonCount) {
+            return false;
+        }
+
+        if (isPokerusUnlocked() && route.resistCount < route.pokemonCount) {
+            return false;
+        }
+
+        return true;
+    };
+
     routeList.forEach(r => {
         const regionName = GameConstants.camelCaseToString(GameConstants.Region[r.region]);
         r.routes.forEach(route => {
+            const routePokemon = getRoutePokemon(route);
+
             route.routeName = route.routeName.replace(regionName, '').trim();
             route.defeats = getRouteDefeatCount(route.region, route.number);
+            route.pokemonCount = routePokemon.length;
+            route.shinyCount = getShinyCount(routePokemon);
+            route.resistCount = getResistCount(routePokemon);
+            route.isComplete = isRouteComplete(route);
         });
     });
 
     return routeList.sort((a, b) =>
         (a.displayRegion || a.region) - (b.displayRegion || b.region)
         || (a.displaySubRegion || a.subRegion) - (b.displaySubRegion || b.subRegion));
+});
+
+const isPokerusUnlocked = ko.pureComputed(() => {
+    if (!SaveData.isLoaded()) {
+        return false;
+    }
+    return SaveData.file().save.keyItems.Pokerus_virus === true;
 });
 
 const getRouteDefeatCount = (region, routeNumber) => {
@@ -432,6 +461,37 @@ const getRouteDefeatCount = (region, routeNumber) => {
 
     const regionName = GameConstants.Region[region];
     return SaveData.file().save.statistics.routeKills[regionName][routeNumber] || 0;
+};
+
+const getRoutePokemon = (route) => {
+    const pokemon = new Set([...route.pokemon.land, ...route.pokemon.water, ...route.pokemon.headbutt]);
+    for (const special of route.pokemon.special) {
+        // exclude event pokemon
+        if (special.req instanceof SpecialEventRequirement || special.req?.requirements?.some(r => r instanceof SpecialEventRequirement)) {
+            continue;
+        }
+
+        special.pokemon.forEach(p => pokemon.add(p));
+    }
+    return [...pokemon];
+};
+
+const getShinyCount = (pokemon) => {
+    return pokemon.reduce((total, p) => {
+        if (Companion.partyList()[pokemonMap[p].id]?.shiny) {
+            total += 1;
+        }
+        return total;
+    }, 0);
+}
+
+const getResistCount = (pokemon) => {
+    return pokemon.reduce((total, p) => {
+        if (Companion.partyList()[pokemonMap[p].id]?.pokerus === GameConstants.Pokerus.Resistant) {
+            total += 1;
+        }
+        return total;
+    }, 0);
 };
 
 const hideOtherStatSection = (data) => {
@@ -726,6 +786,7 @@ module.exports = {
     getPokerusImage,
     getShadowStatusImage,
     exportPartyPokemon,
+    isPokerusUnlocked,
 
     getDungeonData,
     totalDungeonClears,

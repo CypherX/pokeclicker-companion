@@ -7,7 +7,7 @@ EnigmaMutation.prototype.fromJSON = () => {};
 QuestLineHelper.loadQuestLinesReal = QuestLineHelper.loadQuestLines;
 QuestLineHelper.loadQuestLines = () => {
 	if (App.game.quests.questLines().length > 0) {
-		return;
+	  return;
 	}
 
 	QuestLineHelper.loadQuestLinesReal()

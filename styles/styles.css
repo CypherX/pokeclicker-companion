@@ -3,8 +3,31 @@ a { text-decoration: none; }
 .card-header .nav-pills .nav-item:not(:last-child) .nav-link { border-top-right-radius: 0; }
 .card-header .nav-pills .nav-item:not(:first-child) .nav-link { border-top-left-radius: 0; }
 .table-group-divider { border-top-color: #444; }
-.dungeon-clears-row td:nth-child(odd) { width: 42%; }
-.dungeon-clears-row td:nth-child(even) { width: 8%; }
+
+.dungeon-clears-row.six-cols td:nth-child(1),
+.dungeon-clears-row.six-cols td:nth-child(4) {
+    width: 36.2%;
+}
+.dungeon-clears-row.six-cols td:nth-child(2),
+.dungeon-clears-row.six-cols td:nth-child(3),
+.dungeon-clears-row.six-cols td:nth-child(5),
+.dungeon-clears-row.six-cols td:nth-child(6) {
+    width: 6.9%;
+}
+
+.dungeon-clears-row.eight-cols td:nth-child(1),
+.dungeon-clears-row.eight-cols td:nth-child(5) {
+    width: 31.8%;
+}
+.dungeon-clears-row.eight-cols td:nth-child(2),
+.dungeon-clears-row.eight-cols td:nth-child(3),
+.dungeon-clears-row.eight-cols td:nth-child(4),
+.dungeon-clears-row.eight-cols td:nth-child(6),
+.dungeon-clears-row.eight-cols td:nth-child(7),
+.dungeon-clears-row.eight-cols td:nth-child(8) {
+    width: 6.1%;
+}
+
 th.sortable { cursor: pointer; }
 .search-hidden, .filter-hidden { display: none; }
 .table-responsive table { margin-bottom: 0; }
