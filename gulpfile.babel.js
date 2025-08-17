@@ -6,6 +6,8 @@ const htmlImport = require('gulp-html-imports');
 const del = require('del');
 const source = require('vinyl-source-stream');
 const fs = require('fs');
+const buffer = require("vinyl-buffer");
+const terser = require("gulp-terser");
 
 const srcs = {
     buildArtefacts: 'build/**/*',
@@ -59,6 +61,8 @@ gulp.task('scripts', () =>
     browserify('scripts/main.js')
         .bundle()
         .pipe(source(`bundle-${timestamp}.js`))
+        .pipe(buffer())
+        .pipe(terser())
         .pipe(gulp.dest(dests.base))
         .pipe(browserSync.reload({stream: true})));
 

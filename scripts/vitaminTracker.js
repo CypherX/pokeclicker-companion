@@ -39,12 +39,7 @@ const getBestVitamins = (pokemon, region) => {
                 // If the previous result is better than this, no point to continue
                 if (eff < res.eff) break;
                 // Push our data if same or better
-                res = {
-                    protein,
-                    calcium,
-                    carbos,
-                    eff,
-                };
+                res = { protein, calcium, carbos, eff };
             }
         }
     }
@@ -64,50 +59,6 @@ hideShinyPokemon.subscribe((value) => localStorage.setItem('hideShinyPokemon', +
 
 const tableSort = ko.observable('id');
 const tableSortDir = ko.observable(false);
-
-const pokemonVitaminList = (() => {
-    const cacheName = 'cache.optimalVitamins';
-    const optimalVitaminCache = Companion.getCacheItem(cacheName);
-
-    const pokemon = [...Companion.data.obtainablePokemonList];
-    pokemon.forEach((p) => {
-        p.baseAttackBonus = getBreedingAttackBonus([0,0,0], p.attack);
-        p.baseEggSteps = calcEggSteps([0,0,0], p.eggCycles);
-
-        const cached = optimalVitaminCache?.pokemon[p.id];
-        if (cached) {
-            p.regionVitamins = cached;
-            return;
-        }
-
-        p.regionVitamins = [];
-        for (let i = 0; i <= GameConstants.MAX_AVAILABLE_REGION; i++) {
-            const res = getBestVitamins(p, i);
-            const vitamins = [res.protein, res.calcium, res.carbos];
-            p.regionVitamins[i] = {
-                bestVitamins: vitamins,
-                breedingEfficiency: res.eff,
-                vitaminEggSteps: calcEggSteps(vitamins, p.eggCycles),
-                attackBonus: getBreedingAttackBonus(vitamins, p.attack),
-            };
-        }
-    });
-
-    if (!localStorage.getItem(cacheName)) {
-        const cache = {
-            date: Date.now(),
-            version: Companion.package.version,
-            pokemon: pokemon.reduce((obj, p) => {
-                obj[p.id] = p.regionVitamins;
-                return obj;
-            }, {}),
-        };
-
-        localStorage.setItem(cacheName, JSON.stringify(cache));
-    }
-
-    return pokemon;
-})();
 
 const getVitaminPokemonList = ko.pureComputed(() => {
     if (!loadVitaminTrackerTable()) { // wait until document ready to load
@@ -335,8 +286,38 @@ $(document).ready(() => {
         }
     });
 
+    buildPokemonVitaminList();
     loadVitaminTrackerTable(true);
 });
+
+let pokemonVitaminList = [];
+const buildPokemonVitaminList = () => {
+    const pokemon = [...Companion.data.obtainablePokemonList];
+    pokemon.forEach((p) => {
+        p.baseAttackBonus = getBreedingAttackBonus([0,0,0], p.attack);
+        p.baseEggSteps = calcEggSteps([0,0,0], p.eggCycles);
+
+        const optimal = Companion.data.optimalVitamins[p.id];
+        if (optimal) {
+            p.regionVitamins = optimal;
+            return;
+        }
+
+        p.regionVitamins = [];
+        for (let i = 0; i <= GameConstants.MAX_AVAILABLE_REGION; i++) {
+            const res = getBestVitamins(p, i);
+            const vitamins = [res.protein, res.calcium, res.carbos];
+            p.regionVitamins[i] = {
+                bestVitamins: vitamins,
+                breedingEfficiency: res.eff,
+                vitaminEggSteps: calcEggSteps(vitamins, p.eggCycles),
+                attackBonus: getBreedingAttackBonus(vitamins, p.attack),
+            };
+        }
+    });
+
+    pokemonVitaminList = pokemon;
+};
 
 module.exports = {
     highestRegion,

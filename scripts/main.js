@@ -4,7 +4,11 @@ window.Companion = {
     package,
     ...require('./game'),
     ...require('./app'),
-    data: require('./data'),
+    //data: require('./data'),
+    data: {
+        ...require('./data'),
+        optimalVitamins: require('../assets/data/optimalVitamins.json'),
+    },
     settings: require('./settings'),
 }
 
