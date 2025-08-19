@@ -8,6 +8,7 @@ window.Companion = {
     data: {
         ...require('./data'),
         optimalVitamins: require('../assets/data/optimalVitamins.json'),
+        forecastData: require('../assets/data/forecastData.json'),
     },
     settings: require('./settings'),
 }

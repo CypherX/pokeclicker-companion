@@ -303,6 +303,7 @@ const buildPokemonVitaminList = () => {
             return;
         }
 
+        // fallback, probably not needed anymore
         p.regionVitamins = [];
         for (let i = 0; i <= GameConstants.MAX_AVAILABLE_REGION; i++) {
             const res = getBestVitamins(p, i);
