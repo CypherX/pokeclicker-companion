@@ -9,7 +9,7 @@
         </ul>
         <div class="tab-content flex-grow-1" style="overflow: auto;" data-bind="foreach: Forecast.berryMasterList">
             <div class="tab-pane" role="tabpanel" data-bind="css: { active: $index() == 0 }, attr: { id: `berrymaster-${$index()}` }">
-                <div class="container-xxl" data-bind="if: Forecast.berryMasters().length">
+                <div class="container-xxl">
 
                     <!-- ko ifnot: Companion.data.berryMasterPokemonLocations.includes($index()) -->
 
@@ -120,7 +120,7 @@
                                             <td data-bind="text: `${berry.amount} × ${BerryType[berry.berryType]}`, css: { 'border-bottom-0': $index() < deal.berries.length - 1 }"></td>
 
                                             <!-- ko if: $index() == 0 -->
-                                            <td class="align-middle" data-bind="text: `${$parent.item.amount} × ${$parent.item.itemType._displayName ?? $parent.item.itemType.name}`, attr: { rowspan: deal.berries.length }"></td>
+                                            <td class="align-middle" data-bind="text: `${$parent.item.amount} × ${$parent.item.itemName}`, attr: { rowspan: deal.berries.length }"></td>
                                             <!-- /ko -->
                                         </tr>
                                         <!-- /ko -->

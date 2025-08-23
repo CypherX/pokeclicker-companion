@@ -14,7 +14,7 @@ const summary = ko.observable({
     islandScan: {},
 });
 
-const generateForecasts = (date = new Date()) => {
+/*const generateForecasts = (date = new Date()) => {
     const currentHour = date.getHours();
     const unownData = [];
     const weatherData = [];
@@ -49,6 +49,69 @@ const generateForecasts = (date = new Date()) => {
     }
 
     // Remove past data
+    weatherData.splice(0, Math.floor(currentHour / Weather.period));
+    boostedRouteData.splice(0, Math.floor(currentHour / RoamingPokemonList.period));
+
+    unownForecast(unownData);
+    weatherForecast(weatherData);
+    boostedRoutes(boostedRouteData.slice(0, 6));
+    berryMasters(berryMasterData);
+};*/
+
+const generateForecasts = (data) => {
+    const unownData = [];
+    const weatherData = [];
+    const boostedRouteData = [];
+    const berryMasterData = [];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    //const nextYear = new Date(today);
+    //nextYear.setFullYear(today.getFullYear() + 1);
+
+    for (const [strDate, forecast] of Object.entries(data)) {
+        const [y, m, d] = strDate.split('-').map(Number);
+        const date = new Date(y, m - 1, d);
+
+        if (date < today) { // skip previous days
+            continue;
+        }
+
+        // Unown
+        unownData.push({
+            startDate: date,
+            unowns: forecast.unown
+        });
+
+
+        // Berry Masters
+        berryMasterData.push({
+            date: date,
+            traderDeals: forecast.berryDeal
+        });
+
+        for (const weather of forecast.weather) {
+            const hourDate = new Date(date);
+            hourDate.setHours(weather.hour);
+            weatherData.push({
+                startDate: hourDate,
+                regionalWeather: weather.weather
+            });
+        }
+
+        // Boosted Routes
+        for (const boosted of forecast.boostedRoute) {
+            const hourDate = new Date(date);
+            hourDate.setHours(boosted.hour);
+            boostedRouteData.push({
+                startDate: hourDate,
+                regionalRoutes: boosted.routes.flatMap(r => r),
+            });
+        }
+    }
+
+    // Remove past data
+    const currentHour = new Date().getHours();
     weatherData.splice(0, Math.floor(currentHour / Weather.period));
     boostedRouteData.splice(0, Math.floor(currentHour / RoamingPokemonList.period));
 
@@ -162,11 +225,11 @@ const getBerryMasterNextItemDate = (berryTrader) => {
     const timestamp = new Date().setHours(0, 0, 0, 0);
 
     getBerryMasterDeals(berryTrader).forEach((t) => t.deals.forEach((d) => {
-        const itemName = d.item.itemType.name;
+        const itemName = d.item.itemName;
         if (!items[itemName] && t.date.setHours(0, 0, 0, 0) > timestamp) {
             items[itemName] = {
                 date: t.date,
-                item: d.item.itemType._displayName || itemName,
+                item: d.item.itemName,
                 amount: d.item.amount,
                 berries: d.berries
             };
@@ -186,7 +249,7 @@ const getItemListByBerryMaster = (berryTrader) => {
 
         for (const day of dealsByDay) {
             for (const deal of day.deals) {
-                const itemName = deal.item.itemType._displayName || deal.item.itemType.name;
+                const itemName = ItemList[deal.item.itemName].displayName;
                 itemMap[itemName] = itemMap[itemName] || [];
                 itemMap[itemName].push({
                     date: day.date,
@@ -226,10 +289,11 @@ const calcBerryMasterDealAfford = (berries) => {
     return Math.min(...affordAmount);
 };
 
-const isAvailableFromBerryMasterToday = (berryTrader, item) => {
+/*const isAvailableFromBerryMasterToday = (berryTrader, item) => {
     const deals = getBerryMasterDeals(berryTrader, 1)[0].deals;
-    return deals?.some(d => (d.item.itemType._displayName || d.item.itemType.name) == item) ?? false;
-}
+    //return deals?.some(d => (d.item.itemType._displayName || d.item.itemType.name) == item) ?? false;
+    return deals?.some(d => d.item.itemName == item) ?? false;
+}*/
 
 const getBerryMasterPokemonMinMaxCost = (berryTrader) => {
     const pokemonList = [...Companion.data.berryMasterPokemonCosts[berryTrader]];
@@ -242,7 +306,7 @@ const getBerryMasterPokemonMinMaxCost = (berryTrader) => {
 };
 
 const getBerryMasterNextPokemonCost = (berryTrader, pokemonName, cost) => {
-    return getBerryMasterDeals(berryTrader).find(t => t.deals.find(d => d.item.itemType.name == pokemonName && d.berries[0].amount == cost))?.date;
+    return getBerryMasterDeals(berryTrader).find(t => t.deals.find(d => d.item.itemName == pokemonName && d.berries[0].amount == cost))?.date;
 };
 
 const getIslandScanPokemonByDate = (date = new Date()) => {
@@ -309,6 +373,19 @@ const getIslandScanPokemonByDate = (date = new Date()) => {
     return data;
 };
 
+const dataLoaded = ko.observable(false);
+
+$(document).ready(() => {
+
+    fetch(`/assets/data/v${Companion.package.version}/forecastData.json`)
+        .then(resp => resp.json())
+        .then(json => {
+            generateForecasts(json);
+            generateDailySummary();
+            dataLoaded(true);
+        });
+});
+
 module.exports = {
     unownForecast,
     weatherForecast,
@@ -324,7 +401,7 @@ module.exports = {
     getBerryMasterDeals,
     getBerryMasterNextItemDate,
     getBerryMasterPokemonMinMaxCost,
-    isAvailableFromBerryMasterToday,
+    //isAvailableFromBerryMasterToday,
     getIslandScanPokemonByDate,
 
     getItemListByBerryMaster,
@@ -333,4 +410,6 @@ module.exports = {
     berryMasterList,
     berryMasterSearchSetting,
     berryMasterDisplaySetting,
+
+    dataLoaded,
 };

@@ -675,8 +675,9 @@ $(document).ready(() => {
 
     Companion.settings.initialize();
     SaveData.initialize();
-    Forecast.generateForecasts();
-    Forecast.generateDailySummary();
+
+    //Forecast.generateForecasts();
+    //Forecast.generateDailySummary();
 
     Util.createNotifications();
 
