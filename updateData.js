@@ -17,6 +17,8 @@ const fs = require('fs');
 
     await page.waitForFunction(() => App.game &&  App.game.update && App.game.update.version);
 
+    const version = await page.evaluate(() => App.game.update.version);
+
     const optimalVitamins = await page.evaluate(() => {
         const getBreedingAttackBonus = (vitaminsUsed, baseAttack) => {
             const attackBonusPercent = (GameConstants.BREEDING_ATTACK_BONUS + vitaminsUsed[GameConstants.VitaminType.Calcium]) / 100;
@@ -157,7 +159,10 @@ const fs = require('fs');
         const now = new Date();
         const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         startDate.setDate(startDate.getDate() - 1);
-        const endDate = new Date(now.getFullYear() + 2, 0, 1);
+        const endDate = new Date(now.getFullYear() + 1, 0, 1);
+
+        /*const startDate = new Date(2025, 0, 1);
+        const endDate = new Date(2030, 0, 1);*/
 
         const currentDate = new Date(startDate);
         const forecasts = {};
@@ -176,8 +181,11 @@ const fs = require('fs');
         return forecasts;
     });
 
-    fs.writeFileSync('./assets/data/optimalVitamins.json', JSON.stringify(optimalVitamins));
-    fs.writeFileSync('./assets/data/forecastData.json', JSON.stringify(forecastData));
+    if (!fs.existsSync(`./assets/data/v${version}/`)) {
+        fs.mkdirSync(`./assets/data/v${version}/`);
+    }
+    fs.writeFileSync(`./assets/data/v${version}/optimalVitamins.json`, JSON.stringify(optimalVitamins));
+    fs.writeFileSync(`./assets/data/v${version}/forecastData.json`, JSON.stringify(forecastData));
 
     await browser.close();
 })();

@@ -286,8 +286,13 @@ $(document).ready(() => {
         }
     });
 
-    buildPokemonVitaminList();
-    loadVitaminTrackerTable(true);
+    fetch(`/assets/data/v${Companion.package.version}/optimalVitamins.json`)
+        .then(resp => resp.json())
+        .then(json => {
+            Companion.data.optimalVitamins = json;
+            buildPokemonVitaminList();
+            loadVitaminTrackerTable(true);
+        });
 });
 
 let pokemonVitaminList = [];
