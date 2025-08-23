@@ -742,7 +742,12 @@
 <!-- import end -->
 
                     <!-- import "forecastContent.html" -->
-<div class="tab-pane h-100" id="forecastContent">
+<div data-bind="hidden: Forecast.dataLoaded" class="text-center">
+    <p class="m-0">Loading forecast data..</p>
+    <p class="m-0">If this takes more than a second or two, something is wrong.</p>
+</div>
+
+<div class="tab-pane h-100" id="forecastContent" data-bind="visible: Forecast.dataLoaded">
     <div class="tab-content container-xxl h-100">
         <!-- import "forecastSummary.html" -->
 <div class="tab-pane show active" id="forecastSummary">
@@ -1134,7 +1139,7 @@
         </ul>
         <div class="tab-content flex-grow-1" style="overflow: auto;" data-bind="foreach: Forecast.berryMasterList">
             <div class="tab-pane" role="tabpanel" data-bind="css: { active: $index() == 0 }, attr: { id: `berrymaster-${$index()}` }">
-                <div class="container-xxl" data-bind="if: Forecast.berryMasters().length">
+                <div class="container-xxl">
 
                     <!-- ko ifnot: Companion.data.berryMasterPokemonLocations.includes($index()) -->
 
@@ -1245,7 +1250,7 @@
                                             <td data-bind="text: `${berry.amount} × ${BerryType[berry.berryType]}`, css: { 'border-bottom-0': $index() < deal.berries.length - 1 }"></td>
 
                                             <!-- ko if: $index() == 0 -->
-                                            <td class="align-middle" data-bind="text: `${$parent.item.amount} × ${$parent.item.itemType._displayName ?? $parent.item.itemType.name}`, attr: { rowspan: deal.berries.length }"></td>
+                                            <td class="align-middle" data-bind="text: `${$parent.item.amount} × ${$parent.item.itemName}`, attr: { rowspan: deal.berries.length }"></td>
                                             <!-- /ko -->
                                         </tr>
                                         <!-- /ko -->
@@ -1421,6 +1426,16 @@
                         </tr>
                         <!-- /ko -->
                     </thead>
+                    <!-- ko ifnot: VitaminTracker.loadVitaminTrackerTable -->
+                    <tbody>
+                        <tr>
+                            <td colspan="12" class="text-center">
+                                <p class="m-0">Loading optimal vitamin distribution data..</p>
+                                <p class="m-0 mt-1">If this takes more than a second or two, something is wrong.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <!-- /ko -->
                     <!-- ko with: VitaminTracker.getSortedVitaminList -->
                     <tbody data-bind="foreach: $data">
                         <tr>
@@ -1837,7 +1852,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1755981165305.js"></script>
+        <script src="./bundle-1755990676540.js"></script>
     </body>
 </html>
 
