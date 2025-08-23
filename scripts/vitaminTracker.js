@@ -130,6 +130,10 @@ const getSortedVitaminList = ko.pureComputed(() => {
 });
 
 const getTotalVitaminsNeeded = ko.pureComputed(() => {
+    if (!loadVitaminTrackerTable()) {
+        return { vitaminCount: [0, 0, 0], totalCost: 0 };
+    }
+
     const region = highestRegion();
     const amountNeeded = pokemonVitaminList.reduce((sum, p) => {
         if (p.obtainRegion <= region) {
@@ -302,14 +306,15 @@ const buildPokemonVitaminList = () => {
         p.baseAttackBonus = getBreedingAttackBonus([0,0,0], p.attack);
         p.baseEggSteps = calcEggSteps([0,0,0], p.eggCycles);
 
-        const optimal = Companion.data.optimalVitamins[p.id];
+        p.regionVitamins = Companion.data.optimalVitamins[p.id];
+        /*const optimal = Companion.data.optimalVitamins[p.id];
         if (optimal) {
             p.regionVitamins = optimal;
             return;
-        }
+        }*/
 
         // fallback, probably not needed anymore
-        p.regionVitamins = [];
+        /*p.regionVitamins = [];
         for (let i = 0; i <= GameConstants.MAX_AVAILABLE_REGION; i++) {
             const res = getBestVitamins(p, i);
             const vitamins = [res.protein, res.calcium, res.carbos];
@@ -319,7 +324,7 @@ const buildPokemonVitaminList = () => {
                 vitaminEggSteps: calcEggSteps(vitamins, p.eggCycles),
                 attackBonus: getBreedingAttackBonus(vitamins, p.attack),
             };
-        }
+        }*/
     });
 
     pokemonVitaminList = pokemon;
@@ -336,4 +341,5 @@ module.exports = {
     getTotalVitaminsNeeded,
 
     exportData,
+    loadVitaminTrackerTable,
 };

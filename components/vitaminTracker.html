@@ -110,6 +110,16 @@
                         </tr>
                         <!-- /ko -->
                     </thead>
+                    <!-- ko ifnot: VitaminTracker.loadVitaminTrackerTable -->
+                    <tbody>
+                        <tr>
+                            <td colspan="12" class="text-center">
+                                <p class="m-0">Loading optimal vitamin distribution data..</p>
+                                <p class="m-0 mt-1">If this takes more than a second or two, something is wrong.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <!-- /ko -->
                     <!-- ko with: VitaminTracker.getSortedVitaminList -->
                     <tbody data-bind="foreach: $data">
                         <tr>
