@@ -1564,6 +1564,10 @@
                     <div class="text-muted small text-center mt-1">Active flutes provide a +0.5% typed damage bonus for the Gem types they consume.</div>
                     <hr class="my-1" />
                     <div class="text-muted small text-center">Damage calculations include all Pokémon in your party at the current max level. Being in the hatchery or not max level will not affect these calculations.</div>
+                    <div data-bind="visible: BattleCalculator.settings.clicksPerSecond() >= 15">
+                        <hr class="my-1" />
+                        <div class="text-center text-danger small"><strong>Clicks/second Warning</strong> - Due to game calculations and lag, and depending on your progress and device hardware, you will likely not reach the full amount of clicks/second, even with an autoclicker.</div>
+                    </div>
                 </div>
 
                 <ul class="nav nav-tabs container-xxl mb-2" role="tablist">
@@ -1851,7 +1855,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1755999029228.js"></script>
+        <script src="./bundle-1756010811781.js"></script>
     </body>
 </html>
 
