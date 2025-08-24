@@ -159,7 +159,7 @@ const fs = require('fs');
         const now = new Date();
         const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         startDate.setDate(startDate.getDate() - 1);
-        const endDate = new Date(now.getFullYear() + 1, 0, 1);
+        const endDate = new Date(now.getFullYear() + 5, 0, 1);
 
         /*const startDate = new Date(2025, 0, 1);
         const endDate = new Date(2030, 0, 1);*/
