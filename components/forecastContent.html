@@ -1,10 +1,9 @@
-<div data-bind="hidden: Forecast.dataLoaded" class="text-center">
-    <p class="m-0">Loading forecast data..</p>
-    <p class="m-0">If this takes more than a second or two, something is wrong.</p>
-</div>
-
-<div class="tab-pane h-100" id="forecastContent" data-bind="visible: Forecast.dataLoaded">
-    <div class="tab-content container-xxl h-100">
+<div class="tab-pane h-100" id="forecastContent">
+    <div data-bind="hidden: Forecast.dataLoaded" class="text-center">
+        <p class="m-0">Loading forecast data..</p>
+        <p class="m-0">If this takes more than a second or two, something is wrong.</p>
+    </div>
+    <div class="tab-content container-xxl h-100" data-bind="visible: Forecast.dataLoaded">
         <!-- @import "forecastSummary.html" -->
 
         <!-- @import "forecastUnown.html" -->

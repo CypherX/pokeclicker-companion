@@ -3,7 +3,7 @@ const selectedFile = ko.observable();
 const saveFixError = ko.observable();
 
 const fixList = [
-    {
+    /*{
         name: 'v0.10.23 - An Unrivaled Power - Red',
         description: 'Red does not appear at Indigo Plateau Kanto during the An Unrivaled Power quest line.',
         requireCurrentVersion: true,
@@ -23,7 +23,7 @@ const fixList = [
             saveData.statistics.temporaryBattleDefeated[tempBattleIndex] = 0;
             return true;
         }
-    },
+    },*/
     /*{
         name: 'v0.10.20 Game Stuck Loading',
         description: 'After selecting a save file the game never loads',
