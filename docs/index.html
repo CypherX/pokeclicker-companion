@@ -742,13 +742,12 @@
 <!-- import end -->
 
                     <!-- import "forecastContent.html" -->
-<div data-bind="hidden: Forecast.dataLoaded" class="text-center">
-    <p class="m-0">Loading forecast data..</p>
-    <p class="m-0">If this takes more than a second or two, something is wrong.</p>
-</div>
-
-<div class="tab-pane h-100" id="forecastContent" data-bind="visible: Forecast.dataLoaded">
-    <div class="tab-content container-xxl h-100">
+<div class="tab-pane h-100" id="forecastContent">
+    <div data-bind="hidden: Forecast.dataLoaded" class="text-center">
+        <p class="m-0">Loading forecast data..</p>
+        <p class="m-0">If this takes more than a second or two, something is wrong.</p>
+    </div>
+    <div class="tab-content container-xxl h-100" data-bind="visible: Forecast.dataLoaded">
         <!-- import "forecastSummary.html" -->
 <div class="tab-pane show active" id="forecastSummary">
     <h4 class="mb-4">
@@ -1736,7 +1735,7 @@
             <div class="form col-12 col-lg-6 mx-auto">
                 <p>Fix common issues with your save file. After a fix is applied a fixed copy of the selected save file will be downloaded. Import the fixed file over your existing file in PokéClicker.</p>
                 <!-- ko if: SaveFixes.fixList.length == 0 -->
-                <p class="text-danger">No fixes available at this time.</p>
+                <p class="text-danger">There are currently no game bugs that require a save fix. If someone tells you to come here and do this, they are wrong.</p>
                 <!-- /ko -->
                 <hr />
                 <div class="mb-3">
@@ -1852,7 +1851,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1755990676540.js"></script>
+        <script src="./bundle-1755999029228.js"></script>
     </body>
 </html>
 
