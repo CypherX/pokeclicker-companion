@@ -15,6 +15,10 @@ const loadFile = (file) => {
 const loadSaveData = (saveString, fileName = null) => {
     const saveFile = JSON.parse(saveString);
 
+    if (!saveFile.player || !saveFile.save) {
+        return;
+    }
+
     if (file() !== undefined) {
         Companion.initGame();
     }

@@ -673,12 +673,51 @@ $(document).ready(() => {
         }
     });
 
+    document.addEventListener('paste', async (event) => {
+        const target = event.target;
+        if (
+            target instanceof HTMLInputElement ||
+            target instanceof HTMLTextAreaElement ||
+            target.isContentEditable
+        ) {
+            return;
+        }
+
+        const items = event.clipboardData.items;
+        if (!items?.length) {
+            return;
+        }
+
+        const text = await getClipboardText(items[0]);
+        if (text) {
+            SaveData.loadSaveData(atob(text));
+            await navigator.clipboard.writeText('');
+        }
+    });
+
     Companion.settings.initialize();
     SaveData.initialize();
     Util.createNotifications();
 
     updateNavigationHash();
 });
+
+const getClipboardText = async (item) => {
+    if (item.kind === 'string') {
+        return new Promise((resolve) => {
+            item.getAsString((str) => resolve(str));
+        });
+    }
+
+    if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file && file.type === 'text/plain') {
+            return await file.text();
+        }
+    }
+
+    return null;
+};
 
 const updateNavigationHash = () => {
     const pages = [];

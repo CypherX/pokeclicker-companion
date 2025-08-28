@@ -132,6 +132,14 @@ const notifications = [
         timeout: 30000,
         expires: new Date(2024, 9, 16),
     },
+    {
+        id: 'pastesupport',
+        title: 'Paste Support',
+        message: `You can now paste your save file (the content copied to clipboard or the file itself) anywhere on the Companion and it will detect and load that file.`,
+        type: 'info',
+        timeout: 30000,
+        expires: new Date(2025, 8, 1),
+    },
 ];
 
 const createNotifications = () => {
