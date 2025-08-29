@@ -527,7 +527,7 @@
 
             <div class="tab-pane container-xxl" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
                 <div class="text-center small">
-                    <p>Routes are listed by progression/difficulty. Event Pokémon are excluded from these counts.</p>
+                    <p>Routes are listed by progression/difficulty. Event Pokémon are excluded from these counts.<br />Click the route heading to view more information about the route.</p>
                 </div>
 
                 <!-- ko foreach: Companion.getRouteData() -->
@@ -539,8 +539,8 @@
                         <div class="row" data-bind="foreach: $data.routes">
                             <div class="col-6 col-md-3 col-xl-2 mb-2">
                                 <div class="card">
-                                    <div class="card-header position-relative">
-                                        <span data-bind="text: $data.routeName"></span>
+                                    <div class="card-header position-relative" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#routeInfoModal" data-bind="click: () => Companion.selectedRoute($data)">
+                                        <span data-bind="text: $data.displayName"></span>
                                         <div class="position-absolute top-50 translate-middle text-success fs-5" style="right: 0;"
                                             data-bind="visible: $data.isComplete">&check;</div>
                                         <div class="position-absolute top-50 translate-middle text-danger fs-5" style="right: 0;"
@@ -1815,6 +1815,60 @@
 </div>
 <!-- import end -->
 
+            <!-- import "mySaveRouteInfoModal.html" -->
+<div class="modal" id="routeInfoModal">
+    <div class="modal-dialog">
+        <div class="modal-content" data-bind="with: Companion.selectedRoute">
+            <div class="modal-header">
+                <h5 class="modal-title" data-bind="text: $data.routeName"></h5>
+                <small class="ms-2">
+                    <a href="#" target="_blank" data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Routes/${$data.routeName}` }">[ wiki ]</a>
+                </small>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-sm small mb-0">
+                    <thead>
+                        <tr class="table-dark">
+                            <th data-bind="text: `Pokémon (${$data.pokemonCount})`"></th>
+                            <th class="text-center" style="width: 15%;">Caught</th>
+                            <th class="text-center" style="width: 15%;">Shiny</th>
+                            <!-- ko if: Companion.isPokerusUnlocked() -->
+                            <th class="text-center" style="width: 15%;">Resisted</th>
+                            <!-- /ko -->
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: $data.pokemonList">
+                        <tr class="align-middle" data-bind="let: { pokemon: Companion.partyList()[pokemonMap[$data].id] }">
+                            <td>
+                                <div class="d-flex">
+                                    <span data-bind="text: $data"></span>
+                                    <a href="#" class="ms-auto me-1 small" target="_blank" data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pokemon/${$data}` }">[ wiki ]</a>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span data-bind="html: pokemon ? '&check;' : '&#x2717;', class: pokemon ? 'text-success' : 'text-danger'"></span>
+                            </td>
+                            <td class="text-center" data-bind="let: { isComplete: pokemon?.shiny === true }">
+                                <span data-bind="html: isComplete ? '&check;' : '&#x2717;', class: isComplete ? 'text-success' : 'text-danger'"></span>
+                            </td>
+                            <!-- ko if: Companion.isPokerusUnlocked() -->
+                            <td class="text-center" data-bind="let: { isComplete: pokemon?.pokerus === GameConstants.Pokerus.Resistant }">
+                                <span data-bind="html: isComplete ? '&check;' : '&#x2717;', class: isComplete ? 'text-success' : 'text-danger'"></span>
+                            </td>
+                            <!-- /ko -->
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- import end -->
         </div>
 
         <div class="modal" id="loadFromClipboardModal">
@@ -1849,7 +1903,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1756498083218.js"></script>
+        <script src="./bundle-1756502824198.js"></script>
     </body>
 </html>
 
