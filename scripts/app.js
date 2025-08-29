@@ -431,13 +431,12 @@ const getRouteData = ko.pureComputed(() => {
     routeList.forEach(r => {
         const regionName = GameConstants.camelCaseToString(GameConstants.Region[r.region]);
         r.routes.forEach(route => {
-            const routePokemon = getRoutePokemon(route);
-
-            route.routeName = route.routeName.replace(regionName, '').trim();
+            route.pokemonList = getRoutePokemon(route);
+            route.displayName = route.routeName.replace(regionName, '').trim();
             route.defeats = getRouteDefeatCount(route.region, route.number);
-            route.pokemonCount = routePokemon.length;
-            route.shinyCount = getShinyCount(routePokemon);
-            route.resistCount = getResistCount(routePokemon);
+            route.pokemonCount = route.pokemonList.length;
+            route.shinyCount = getShinyCount(route.pokemonList);
+            route.resistCount = getResistCount(route.pokemonList);
             route.isComplete = isRouteComplete(route);
         });
     });
@@ -799,6 +798,8 @@ $(document).on('mouseout', '.table-column-row-hover tbody td', (e) => {
     $(cell).closest('tbody').find(`td:nth-child(${cell.cellIndex + 1})`).css('background-color', '');
 });
 
+const selectedRoute = ko.observable(undefined);
+
 module.exports = {
     getMissingPokemon,
     getTotalMissingPokemonCount,
@@ -847,4 +848,6 @@ module.exports = {
 
     tabVisited,
     activeTab,
+
+    selectedRoute,
 };

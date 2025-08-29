@@ -2,20 +2,21 @@
     <div class="d-flex flex-column h-100">
         <ul class="nav nav-tabs container-xxl mb-4" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="dungeon-clears-tab" data-bs-toggle="pill" data-bs-target="#dungeon-clears" type="button" role="tab" aria-controls="dungeon-clears" aria-selected="true">
-                    Dungeon Clears
+                <button class="nav-link active" id="route-defeats-tab" data-bs-toggle="pill" data-bs-target="#route-defeats" type="button" role="tab" aria-controls="route-defeats" aria-selected="false">
+                    Routes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="dungeon-clears-tab" data-bs-toggle="pill" data-bs-target="#dungeon-clears" type="button" role="tab" aria-controls="dungeon-clears" aria-selected="true">
+                    Dungeons
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="gym-clears-tab" data-bs-toggle="pill" data-bs-target="#gym-clears" type="button" role="tab" aria-controls="gym-clears" aria-selected="false">
-                    Gym Clears
+                    Gyms
                 </button>
             </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="route-defeats-tab" data-bs-toggle="pill" data-bs-target="#route-defeats" type="button" role="tab" aria-controls="route-defeats" aria-selected="false">
-                    Routes
-                </button>
-            </li>
+            
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="enigma-berry-tab" data-bs-toggle="pill" data-bs-target="#enigma-berry" type="button" role="tab" aria-controls="enigma-berry" aria-selected="false">
                     Enigma Berry
@@ -33,7 +34,55 @@
             </li>
         </ul>
         <div class="tab-content flex-grow-1" style="overflow: auto;">
-            <div class="tab-pane active container-xxl" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
+            <div class="tab-pane active container-xxl" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
+                <div class="text-center small">
+                    <p>Routes are listed by progression/difficulty. Event Pokémon are excluded from these counts.<br />Click the route heading to view more information about the route.</p>
+                </div>
+
+                <!-- ko foreach: Companion.getRouteData() -->
+                <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
+                    <div class="card-header bg-primary px-2">
+                        <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
+                    </div>
+                    <div class="card-body small px-0 pt-2 pb-0" style="background-color: var(--bs-body-bg);">
+                        <div class="row" data-bind="foreach: $data.routes">
+                            <div class="col-6 col-md-3 col-xl-2 mb-2">
+                                <div class="card">
+                                    <div class="card-header position-relative" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#routeInfoModal" data-bind="click: () => Companion.selectedRoute($data)">
+                                        <span data-bind="text: $data.displayName"></span>
+                                        <div class="position-absolute top-50 translate-middle text-success fs-5" style="right: 0;"
+                                            data-bind="visible: $data.isComplete">&check;</div>
+                                        <div class="position-absolute top-50 translate-middle text-danger fs-5" style="right: 0;"
+                                            data-bind="hidden: $data.isComplete">&#x2717;</div>
+                                    </div>
+                                    <div class="card-body py-2">
+                                        <div class="card-text">
+                                            <div class="d-flex">
+                                                <div>Defeats:</div>
+                                                <div class="ms-auto" data-bind="text: $data.defeats.toLocaleString(), class: $data.defeats >= 10000 ? 'text-success' : 'text-danger'">0</div>
+                                            </div>
+                                            <div class="d-flex">
+                                                <div>Shiny:</div>
+                                                <div class="ms-auto" data-bind="text: `${$data.shinyCount} / ${$data.pokemonCount}`, class: $data.shinyCount >= $data.pokemonCount ? 'text-success' : 'text-danger'">0/0</div>
+                                            </div>
+                                            <!-- ko if: Companion.isPokerusUnlocked() -->
+                                            <div class="d-flex">
+                                                <div>Resisted:</div>
+                                                <div class="ms-auto" data-bind="text: `${$data.resistCount} / ${$data.pokemonCount}`, class: $data.resistCount >= $data.pokemonCount ? 'text-success' : 'text-danger'">0/0</div>
+                                            </div>
+                                            <!-- /ko -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+
+            <div class="tab-pane container-xxl" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
                 <div class="card border-0 mb-3">
                     <div class="card-header bg-dark rounded-0 px-2">Totals</div>
                     <div class="card-body p-0 collapse show" style="transition: none;">
@@ -129,88 +178,33 @@
             </div>
 
             <div class="tab-pane container-xxl" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
-                <div class="text-end small"><span class="text-danger">⚹</span> Incomplete gym (fewer than 1,000 clears)</div>
                 <!-- ko foreach: Companion.getGymData() -->
-                <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                    <div class="card-header bg-dark rounded-0 px-2">
-                        <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
-                        <div class="position-absolute" style="top: 4px; right: 0;">
-                            <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
-                                style="text-decoration: none; font-size: 0.9rem;"
-                                data-bind="attr: { 'data-bs-target': `#gyms-clears-collapse-${$index()}` }">[ Collapse ]</button>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table table-bordered table-striped table-hover table-sm mb-0">
-                            <tbody class="collapse show" style="transition: none; font-size: 0.9rem;" data-bind="attr: { id: `gyms-clears-collapse-${$index()}` }">
-                                <!-- ko foreach: Util.arrayToWhatever($data.gyms) -->
-                                <tr class="dungeon-clears-row" data-bind="foreach: $data">
-                                    <td class="align-middle">
-                                        <div class="position-relative">
-                                            <span data-bind="text: GymList[$data?.name]?.displayName || $data?.name"></span>
-                                            <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
-                                                data-bind="visible: $data?.clears < 1000">⚹</div>
-                                        </div>
-                                    </td>
-                                    <td class="text-center align-middle" data-bind="text: $data?.clears.toLocaleString()"></td>
-                                </tr>
-                                <!-- /ko -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <!-- /ko -->
-            </div>
-
-            <div class="tab-pane container-xxl" id="route-defeats" role="tabpanel" aria-labelledby="route-defeats-tab">
-                <div class="text-end small"><span class="text-danger">⚹</span> Event Pokémon are excluded from these counts</div>
-                <!-- ko foreach: Companion.getRouteData() -->
                 <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
                     <div class="card-header bg-primary px-2">
                         <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
-                        <div class="position-absolute" style="top: 4px; right: 0;">
-                            <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
-                                style="text-decoration: none; font-size: 0.9rem;"
-                                data-bind="attr: { 'data-bs-target': `#route-defeats-collapse-${$index()}` }">[ Collapse ]</button>
-                        </div>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="collapse show" data-bind="attr: { id: `route-defeats-collapse-${$index()}` }" style="transition: none;">
-                            <table class="table table-bordered table-striped table-hover table-sm mb-0">
-                                <thead>
-                                    <tr class="table-dark small">
-                                        <th>Route</th>
-                                        <th class="text-center">Defeats</th>
-                                        <th class="text-center">Shiny</th>
-                                        <!-- ko if: Companion.isPokerusUnlocked() -->
-                                        <th class="text-center">Resisted</th>
-                                        <!-- /ko -->
-                                        <th>Route</th>
-                                        <th class="text-center">Defeats</th>
-                                        <th class="text-center">Shiny</th>
-                                        <!-- ko if: Companion.isPokerusUnlocked() -->
-                                        <th class="text-center">Resisted</th>
-                                        <!-- /ko -->
-                                    </tr>
-                                </thead>
-                                <tbody style="font-size: 0.9rem;">
-                                    <!-- ko foreach: Util.arrayToWhatever($data.routes) -->
-                                    <tr class="dungeon-clears-row" data-bind="foreach: $data, class: Companion.isPokerusUnlocked() ? 'eight-cols' : 'six-cols'">
-                                        <td class="align-middle" data-bind="text: $data?.routeName, class: $data?.isComplete ? 'text-success' : 'text-danger'"></td>
-                                        <td class="text-center align-middle" data-bind="text: $data?.defeats.toLocaleString(), class: $data?.defeats > 9999 ? 'text-success' : 'text-danger'"></td>
-                                        <td class="text-center align-middle" data-bind="if: $data">
-                                            <span data-bind="text: `${$data.shinyCount}/${$data.pokemonCount}`, class: $data.shinyCount >= $data.pokemonCount ? 'text-success' : 'text-danger'"></span>
-                                        </td>
-                                        <!-- ko if: Companion.isPokerusUnlocked() -->
-                                        <td class="text-center align-middle" data-bind="if: $data">
-                                            <span data-bind="text: `${$data.resistCount}/${$data.pokemonCount}`, class: $data.resistCount >= $data.pokemonCount ? 'text-success' : 'text-danger'"></span>
-                                        </td>
-                                        <!-- /ko -->
-                                    </tr>
-                                    <!-- /ko -->
-                                </tbody>
-                            </table>
+                    <div class="card-body small px-0 pt-2 pb-0" style="background-color: var(--bs-body-bg);">
+                        <div class="row" data-bind="foreach: $data.gyms">
+                            <div class="col-6 col-md-3 col-xl-3 mb-2">
+                                <div class="card">
+                                    <div class="card-header position-relative">
+                                        <div class="d-flex">
+                                            <span data-bind="text: GymList[$data.name]?.displayName || $data.name"></span>
+                                            <a href="#" target="_blank" class="small ms-auto" data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Gyms/${$data.name}` }">[ wiki ]</a>
+                                        </div>
+                                    </div>
+                                    <div class="card-body py-2">
+                                        <div class="card-text">
+                                            <div class="d-flex">
+                                                <div>Clears:</div>
+                                                <div class="ms-auto" data-bind="text: $data.clears.toLocaleString(), class: $data.clears >= 1000 ? 'text-success' : 'text-danger'">0</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                        
                     </div>
                 </div>
                 <!-- /ko -->
@@ -237,7 +231,7 @@
                 </div>
                 <!-- /ko -->
                 <!-- ko if: Enigma.revealHints -->
-                <div class="text-center text-muted mt-5">Impatient (or unlucky) little shit, ain't ye?</div>
+                <div class="text-center text-muted mt-5">Impatient little shit, ain't ye?</div>
                 <!-- /ko -->
             </div>
 

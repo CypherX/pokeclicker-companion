@@ -92,6 +92,13 @@ const loadSaveData = (saveString, fileName = null) => {
             });
         }
     }
+    else if (saveFile.save.profile.name.toLowerCase() == 'potato') {
+        Util.notify({
+            message: 'Potato? More like Pooptato.<br />💩💩💩🥔💩💩💩',
+            type: 'danger',
+            timeout: 30000
+        });
+    }
 };
 
 const getMonoType = (party) => {

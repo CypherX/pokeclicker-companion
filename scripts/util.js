@@ -140,6 +140,14 @@ const notifications = [
         timeout: 30000,
         expires: new Date(2025, 8, 1),
     },
+    {
+        id: 'routesandgymsupdates',
+        title: 'UI/UX Updates',
+        message: `The [Routes] and [Gyms] sections of the <strong>My Save → Statistics & More</strong> page has been updated with a new look.`,
+        type: 'info',
+        timeout: 30000,
+        expires: new Date(2025, 8, 5),
+    },
 ];
 
 const createNotifications = () => {
