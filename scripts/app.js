@@ -303,17 +303,41 @@ const getDungeonData = ko.pureComputed(() => {
 
     Companion.data.DungeonListOverride.forEach((rd) => dungeonData.push({...rd}));
 
+    const isDungeonComplete = (data) => {
+        if (data.clears < 500) {
+            return false;
+        }
+
+        if (data.shinyCount < data.pokemonCount) {
+            return false;
+        }
+
+        if (isPokerusUnlocked() && data.resistCount < data.pokemonCount) {
+            return false;
+        }
+
+        return true;
+    };
+
     dungeonData.forEach(d => {
         d.dungeons = d.dungeons.map(dungeon => {
             const clears = getDungeonClearCount(dungeon);
             const cost = dungeonList[dungeon].tokenCost;
-            return {
+            const pokemonList = getDungeonPokemon(dungeon);
+            const pokemonNames = pokemonList.map(p => p.pokemon);
+            const data = {
                 name: dungeon,
                 clears: clears,
                 cost: cost,
                 remaining: Math.max((cost * 500) - (cost * clears), 0),
                 hide: TownList[dungeon].requirements.some(req => req instanceof DevelopmentRequirement),
+                pokemonList: pokemonList,
+                pokemonCount: pokemonList.length,
+                shinyCount: getShinyCount(pokemonNames),
+                resistCount: getResistCount(pokemonNames),
             };
+            data.isComplete = isDungeonComplete(data);
+            return data;
         }).filter(d => !d.hide);
     });
     
@@ -466,13 +490,70 @@ const getRoutePokemon = (route) => {
     const pokemon = new Set([...route.pokemon.land, ...route.pokemon.water, ...route.pokemon.headbutt]);
     for (const special of route.pokemon.special) {
         // exclude event pokemon
-        if (special.req instanceof SpecialEventRequirement || special.req?.requirements?.some(r => r instanceof SpecialEventRequirement)) {
+        if (hasEventRequirement(special.req)) {
             continue;
         }
 
         special.pokemon.forEach(p => pokemon.add(p));
     }
     return [...pokemon];
+};
+
+const getDungeonPokemon = (dungeonName) => {
+    const dungeon = dungeonList[dungeonName];
+    const pokemonList = [];
+
+    const getPokemonFromEncounter = (encounter, isBoss = false) => {
+        if (typeof encounter === 'string') {
+            return [{ pokemon: encounter }];
+        }
+
+        if (encounter.hasOwnProperty('pokemon')) {
+            return [{ pokemon: encounter.pokemon }];
+        }
+
+        if (encounter instanceof DungeonBossPokemon) {
+            return [{ pokemon: encounter.name, boss: true }];
+        }
+
+        if (encounter instanceof DungeonTrainer) { // include shadows
+            return encounter.team.reduce((arr, pokemon) => {
+                if (pokemon.shadow >= GameConstants.ShadowStatus.Shadow) {
+                    arr.push({ pokemon: pokemon.name, boss: isBoss, shadow: true });
+                }
+                return arr;
+            }, []);
+        }
+
+        return [];
+    };
+
+    for (const enemy of dungeon.enemyList) {
+        // exclude event encounters
+        if (hasEventRequirement(enemy.options?.requirement)) {
+            continue;
+        }
+
+        pokemonList.push(...getPokemonFromEncounter(enemy));
+    }
+
+    for (const boss of dungeon.bossList) {
+        // exclude event encounters
+        if (hasEventRequirement(boss.options?.requirement)) {
+            continue;
+        }
+
+        pokemonList.push(...getPokemonFromEncounter(boss, true));
+    }
+
+    return pokemonList;
+};
+
+const hasEventRequirement = (req) => {
+    if (!req) {
+        return false;
+    }
+    return req instanceof SpecialEventRequirement || req.requirements?.some(r => r instanceof SpecialEventRequirement);
 };
 
 const getShinyCount = (pokemon) => {
@@ -799,6 +880,7 @@ $(document).on('mouseout', '.table-column-row-hover tbody td', (e) => {
 });
 
 const selectedRoute = ko.observable(undefined);
+const selectedDungeon = ko.observable(undefined);
 
 module.exports = {
     getMissingPokemon,
@@ -850,4 +932,5 @@ module.exports = {
     activeTab,
 
     selectedRoute,
+    selectedDungeon,
 };

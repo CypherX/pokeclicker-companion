@@ -1,0 +1,91 @@
+<div class="modal" id="dungeonInfoModal">
+    <div class="modal-dialog">
+        <div class="modal-content" data-bind="with: Companion.selectedDungeon">
+            <div class="modal-header">
+                <h5 class="modal-title" data-bind="text: $data.name"></h5>
+                <small class="ms-2">
+                    <a href="#" target="_blank" data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Dungeons/${$data.name}` }">[ wiki ]</a>
+                </small>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-striped table-hover table-sm small">
+                    <thead>
+                        <tr class="table-dark">
+                            <th data-bind="text: `Pokémon (${$data.pokemonCount})`"></th>
+                            <th class="text-center" style="width: 15%;">Caught</th>
+                            <th class="text-center" style="width: 15%;">Shiny</th>
+                            <!-- ko if: Companion.isPokerusUnlocked() -->
+                            <th class="text-center" style="width: 15%;">Resisted</th>
+                            <!-- /ko -->
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: $data.pokemonList">
+                        <tr class="align-middle" data-bind="let: { partyPokemon: Companion.partyList()[pokemonMap[$data.pokemon].id] }">
+                            <td>
+                                <div class="d-flex">
+                                    <span data-bind="text: $data.pokemon"></span>
+                                    <span class="ms-auto">
+                                        <span data-bind="visible: $data.boss">
+                                            <img src="/assets/images/boss.png" width="18" title="Boss Encounter" />
+                                        </span>
+                                        <span data-bind="visible: $data.shadow">
+                                            <img src="/assets/images/status/shadow.svg" width="18" title="Shadow Pokémon" />
+                                        </span>
+                                        <a href="#" class="mx-1 small" target="_blank" data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pokemon/${$data.pokemon}` }">[ wiki ]</a>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span data-bind="html: partyPokemon ? '&check;' : '&#x2717;', class: partyPokemon ? 'text-success' : 'text-danger'"></span>
+                            </td>
+                            <td class="text-center" data-bind="let: { isComplete: partyPokemon?.shiny === true }">
+                                <span data-bind="html: isComplete ? '&check;' : '&#x2717;', class: isComplete ? 'text-success' : 'text-danger'"></span>
+                            </td>
+                            <!-- ko if: Companion.isPokerusUnlocked() -->
+                            <td class="text-center" data-bind="let: { isComplete: partyPokemon?.pokerus === GameConstants.Pokerus.Resistant }">
+                                <span data-bind="html: isComplete ? '&check;' : '&#x2717;', class: isComplete ? 'text-success' : 'text-danger'"></span>
+                            </td>
+                            <!-- /ko -->
+                        </tr>
+                    </tbody>
+                    <!-- ko if: $data.pokemonList.length === 0 -->
+                    <tbody>
+                        <tr>
+                            <td colspan="4" class="text-center">Trainers only!</td>
+                        </tr>
+                    </tbody>
+                    <!-- /ko -->
+                </table>
+
+                <table class="table table-sm table-striped table-hover small mb-0">
+                    <tbody class="text-center">
+                        <tr>
+                            <td class="w-50">Clears:</td>
+                            <td class="w-50" data-bind="text: $data.clears.toLocaleString()"></td>
+                        </tr>
+                        <tr>
+                            <td>Cost:</td>
+                            <td data-bind="text: $data.cost.toLocaleString()"></td>
+                        </tr>
+                        <tr>
+                            <td>500 Clears Cost:</td>
+                            <td data-bind="text: ($data.cost * 500).toLocaleString()"></td>
+                        </tr>
+                        <tr>
+                            <td>Remaining Cost:</td>
+                            <td data-bind="text: $data.remaining.toLocaleString()"></td>
+                        </tr>
+                        <tr>
+                            <td>Total Spent</td>
+                            <td data-bind="text: ($data.clears * $data.cost).toLocaleString()"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
