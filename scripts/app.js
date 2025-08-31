@@ -546,7 +546,16 @@ const getDungeonPokemon = (dungeonName) => {
         pokemonList.push(...getPokemonFromEncounter(boss, true));
     }
 
-    return pokemonList;
+    // remove dupes
+    const set = new Set();
+    return pokemonList.filter(item => {
+        const key = `${item.pokemon}-${item.boss}-${item.shadow}`;
+        if (set.has(key)) return false;
+        set.add(key);
+        return true;
+    });
+
+    //return pokemonList;
 };
 
 const hasEventRequirement = (req) => {

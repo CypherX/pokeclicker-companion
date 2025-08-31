@@ -143,7 +143,7 @@ const notifications = [
     {
         id: 'routesandgymsupdates',
         title: 'UI/UX Updates',
-        message: `The [Routes] and [Gyms] sections of the <strong>My Save → Statistics & More</strong> page has been updated with a new look.`,
+        message: `The [Routes], [Dungeons], and [Gyms] sections of the <strong>My Save → Statistics & More</strong> page has been updated with a new look.`,
         type: 'info',
         timeout: 30000,
         expires: new Date(2025, 8, 5),
