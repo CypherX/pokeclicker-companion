@@ -404,7 +404,7 @@
 
                 <!-- ko foreach: Companion.getRouteData() -->
                 <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                    <div class="card-header bg-primary px-2">
+                    <div class="card-header bg-primary rounded-0 px-2">
                         <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
                     </div>
                     <div class="card-body small px-0 pt-2 pb-0" style="background-color: var(--bs-body-bg);">
@@ -485,55 +485,50 @@
                     </div>
                 </div>
 
-                <div class="text-end small"><span class="text-danger">⚹</span> Incomplete dungeon (fewer than 500 clears)</div>
+                <div class="text-center small">
+                    <p>Dungeons are listed by progression/difficulty. Event Pokémon are excluded from these counts.<br />Click the dungeon heading to view more information about the dungeon.</p>
+                </div>
+
                 <!-- ko foreach: Companion.getDungeonData() -->
                 <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                    <div class="card-header bg-dark rounded-0 px-2">
-                        <span data-bind="text: $data.name ?? GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
-                        <div class="position-absolute" style="top: 4px; right: 0;">
-                            <button class="btn btn-link btn-sm collapse-button" type="button" data-bs-toggle="collapse"
-                                style="text-decoration: none; font-size: 0.9rem;"
-                                data-bind="attr: { 'data-bs-target': `#dungeon-clears-collapse-${$index()}` }">[ Collapse ]</button>
-                        </div>
+                    <div class="card-header bg-primary rounded-0 px-2">
+                        <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
                     </div>
-                    <div class="card-body p-0 collapse show" style="transition: none;" data-bind="attr: { id: `dungeon-clears-collapse-${$index()}` }">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th class="text-center w-auto">Total Clears</th>
-                                        <th class="text-center w-auto">Cost</th>
-                                        <th class="text-center w-auto">500 Clears Cost</th>
-                                        <th class="text-center w-auto">Remaining Cost</th>
-                                        <th class="text-center w-auto">Total Spent</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- ko foreach: $data.dungeons -->
-                                    <tr class="dungeon-clears-row">
-                                        <td class="align-middle">
-                                            <div class="position-relative">
-                                                <span data-bind="text: $data.name"></span>
-                                                <div class="text-danger position-absolute top-50 translate-middle" style="right: 0;"
-                                                    data-bind="visible: $data.clears < 500">⚹</div>
+                    <div class="card-body small px-0 pt-2 pb-0" style="background-color: var(--bs-body-bg);">
+                        <div class="d-flex text-muted gap-4 mb-2">
+                            <div>Total Cost (500 clears): <span data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.cost, 0) * 500).toLocaleString()"></span></div>
+                            <div>Remaining Cost: <span data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.remaining, 0).toLocaleString()"></span></div>
+                        </div>
+                        <div class="row" data-bind="foreach: $data.dungeons">
+                            <div class="col-6 col-md-3 col-xl-2 mb-2">
+                                <div class="card">
+                                    <div class="card-header position-relative" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#dungeonInfoModal" data-bind="click: () => Companion.selectedDungeon($data)">
+                                        <span data-bind="text: $data.name"></span>
+                                        <div class="position-absolute top-50 translate-middle text-success fs-5" style="right: 0;"
+                                            data-bind="visible: $data.isComplete">&check;</div>
+                                        <div class="position-absolute top-50 translate-middle text-danger fs-5" style="right: 0;"
+                                            data-bind="hidden: $data.isComplete">&#x2717;</div>
+                                    </div>
+                                    <div class="card-body py-2">
+                                        <div class="card-text">
+                                            <div class="d-flex">
+                                                <div>Clears:</div>
+                                                <div class="ms-auto" data-bind="text: $data.clears.toLocaleString(), class: $data.clears >= 500 ? 'text-success' : 'text-danger'">0</div>
                                             </div>
-                                        </td>
-                                        <td class="text-center align-middle w-auto" data-bind="text: $data.clears.toLocaleString()"></td>
-                                        <td class="text-center align-middle w-auto" data-bind="text: $data.cost.toLocaleString()"></td>
-                                        <td class="text-center align-middle w-auto" data-bind="text: ($data.cost * 500).toLocaleString()"></td>
-                                        <td class="text-center align-middle w-auto" data-bind="text: $data.remaining.toLocaleString()"></td>
-                                        <td class="text-center align-middle w-auto" data-bind="text: ($data.clears * $data.cost).toLocaleString()"></td>
-                                    </tr>
-                                    <!-- /ko -->
-                                    <tr class="table-dark">
-                                        <td colspan="3"></td>
-                                        <td class="text-center" data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.cost, 0) * 500).toLocaleString()"></td>
-                                        <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.remaining, 0).toLocaleString()"></td>
-                                        <td class="text-center" data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.clears * dungeon.cost, 0).toLocaleString()"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                            <div class="d-flex">
+                                                <div>Shiny:</div>
+                                                <div class="ms-auto" data-bind="text: `${$data.shinyCount} / ${$data.pokemonCount}`, class: $data.shinyCount >= $data.pokemonCount ? 'text-success' : 'text-danger'">0/0</div>
+                                            </div>
+                                            <!-- ko if: Companion.isPokerusUnlocked() -->
+                                            <div class="d-flex">
+                                                <div>Resisted:</div>
+                                                <div class="ms-auto" data-bind="text: `${$data.resistCount} / ${$data.pokemonCount}`, class: $data.resistCount >= $data.pokemonCount ? 'text-success' : 'text-danger'">0/0</div>
+                                            </div>
+                                            <!-- /ko -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -543,7 +538,7 @@
             <div class="tab-pane container-xxl" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
                 <!-- ko foreach: Companion.getGymData() -->
                 <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                    <div class="card-header bg-primary px-2">
+                    <div class="card-header bg-primary rounded-0 px-2">
                         <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
                     </div>
                     <div class="card-body small px-0 pt-2 pb-0" style="background-color: var(--bs-body-bg);">
@@ -1869,6 +1864,100 @@
 </div>
 
 <!-- import end -->
+            <!-- import "mySaveDungeonInfoModal.html" -->
+<div class="modal" id="dungeonInfoModal">
+    <div class="modal-dialog">
+        <div class="modal-content" data-bind="with: Companion.selectedDungeon">
+            <div class="modal-header">
+                <h5 class="modal-title" data-bind="text: $data.name"></h5>
+                <small class="ms-2">
+                    <a href="#" target="_blank" data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Dungeons/${$data.name}` }">[ wiki ]</a>
+                </small>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-striped table-hover table-sm small">
+                    <thead>
+                        <tr class="table-dark">
+                            <th data-bind="text: `Pokémon (${$data.pokemonCount})`"></th>
+                            <th class="text-center" style="width: 15%;">Caught</th>
+                            <th class="text-center" style="width: 15%;">Shiny</th>
+                            <!-- ko if: Companion.isPokerusUnlocked() -->
+                            <th class="text-center" style="width: 15%;">Resisted</th>
+                            <!-- /ko -->
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: $data.pokemonList">
+                        <tr class="align-middle" data-bind="let: { partyPokemon: Companion.partyList()[pokemonMap[$data.pokemon].id] }">
+                            <td>
+                                <div class="d-flex">
+                                    <span data-bind="text: $data.pokemon"></span>
+                                    <span class="ms-auto">
+                                        <span data-bind="visible: $data.boss">
+                                            <img src="/assets/images/boss.png" width="18" title="Boss Encounter" />
+                                        </span>
+                                        <span data-bind="visible: $data.shadow">
+                                            <img src="/assets/images/status/shadow.svg" width="18" title="Shadow Pokémon" />
+                                        </span>
+                                        <a href="#" class="mx-1 small" target="_blank" data-bind="attr: { href: `https://wiki.pokeclicker.com/#!Pokemon/${$data.pokemon}` }">[ wiki ]</a>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span data-bind="html: partyPokemon ? '&check;' : '&#x2717;', class: partyPokemon ? 'text-success' : 'text-danger'"></span>
+                            </td>
+                            <td class="text-center" data-bind="let: { isComplete: partyPokemon?.shiny === true }">
+                                <span data-bind="html: isComplete ? '&check;' : '&#x2717;', class: isComplete ? 'text-success' : 'text-danger'"></span>
+                            </td>
+                            <!-- ko if: Companion.isPokerusUnlocked() -->
+                            <td class="text-center" data-bind="let: { isComplete: partyPokemon?.pokerus === GameConstants.Pokerus.Resistant }">
+                                <span data-bind="html: isComplete ? '&check;' : '&#x2717;', class: isComplete ? 'text-success' : 'text-danger'"></span>
+                            </td>
+                            <!-- /ko -->
+                        </tr>
+                    </tbody>
+                    <!-- ko if: $data.pokemonList.length === 0 -->
+                    <tbody>
+                        <tr>
+                            <td colspan="4" class="text-center">Trainers only!</td>
+                        </tr>
+                    </tbody>
+                    <!-- /ko -->
+                </table>
+
+                <table class="table table-sm table-striped table-hover small mb-0">
+                    <tbody class="text-center">
+                        <tr>
+                            <td class="w-50">Clears:</td>
+                            <td class="w-50" data-bind="text: $data.clears.toLocaleString()"></td>
+                        </tr>
+                        <tr>
+                            <td>Cost:</td>
+                            <td data-bind="text: $data.cost.toLocaleString()"></td>
+                        </tr>
+                        <tr>
+                            <td>500 Clears Cost:</td>
+                            <td data-bind="text: ($data.cost * 500).toLocaleString()"></td>
+                        </tr>
+                        <tr>
+                            <td>Remaining Cost:</td>
+                            <td data-bind="text: $data.remaining.toLocaleString()"></td>
+                        </tr>
+                        <tr>
+                            <td>Total Spent</td>
+                            <td data-bind="text: ($data.clears * $data.cost).toLocaleString()"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- import end -->
         </div>
 
         <div class="modal" id="loadFromClipboardModal">
@@ -1903,7 +1992,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1756511210292.js"></script>
+        <script src="./bundle-1756612670302.js"></script>
     </body>
 </html>
 
