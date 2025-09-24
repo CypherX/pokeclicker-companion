@@ -450,8 +450,17 @@ const loadGymList = () => {
 const loadTempBattleList = () => {
     const list = [];
     const temporaryBattleDefeated = SaveData.file().save.statistics.temporaryBattleDefeated;
+
+    const excludedBattles = new Set(
+        ['Captain Mina', 'Captain Ilima', 'Captain Mallow', 'Captain Lana', 'Captain Kiawe', 'Captain Sophocles', 'Kahuna Nanu']
+    );
+
     Object.values(TemporaryBattleList).forEach((tb) => {
         if (tb.getTown().region > GameConstants.MAX_AVAILABLE_REGION) {
+            return;
+        }
+
+        if (excludedBattles.has(tb.name)) {
             return;
         }
 
