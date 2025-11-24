@@ -376,7 +376,7 @@ const showData = ko.observable(false);
 const gymList = ko.observable([]);
 const tempBattleList = ko.observable([]);
 
-const calculate = async () => {
+const calculate = () => {
     //const start = performance.now();
 
     if (!SaveData.isDamageLoaded()) {
