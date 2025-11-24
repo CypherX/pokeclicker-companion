@@ -1,6 +1,23 @@
 const isRunning = ko.observable(false);
 const simulationResult = ko.observable(null);
-const selectedAttempt = ko.observable(null);
+const selectedAttemptValue = ko.observable(1);
+
+selectedAttemptValue.subscribe((value) => {
+    const totalAttempts = simulationResult()?.attempts.length ?? 0;
+    if (isNaN(value) || value < 1 || value > totalAttempts) {
+        selectedAttemptValue(1);
+    }
+});
+
+const selectedAttempt = ko.pureComputed(() => {
+    const result = simulationResult();
+    if (!result) {
+        return null;
+    }
+
+    const selectedAttempt = selectedAttemptValue() ?? 1;
+    return result.attempts?.[selectedAttempt - 1];
+});
 
 const attemptOptions = ko.pureComputed(() => {
     return simulationResult()?.attempts.map((attempt, i) => ({
@@ -8,6 +25,9 @@ const attemptOptions = ko.pureComputed(() => {
         value: attempt,
     }));
 });
+
+const progressCurrentAttempt = ko.observable(0);
+const progressTotalAttempts = ko.observable(0);
 
 const settings = {
     xAttackEnabled: ko.observable(false),
@@ -44,6 +64,8 @@ const runSimulation = async () => {
 
     isRunning(true);
     simulationResult(null);
+    selectedAttemptValue(1);
+    progressTotalAttempts(+settings.simulationAttempts());
     await Util.sleep(0);
 
     // Toggle xAttack, flutes
@@ -59,6 +81,7 @@ const runSimulation = async () => {
 
     console.log(result);
     simulationResult(result);
+    selectedAttemptValue(result.bestAttempt);
 
     player.effectList['xAttack'](0);
     Object.values(GameConstants.FluteItemType).forEach((flute) => {
@@ -66,7 +89,8 @@ const runSimulation = async () => {
     });
 
     isRunning(false);
-    selectedAttempt(null);
+    progressCurrentAttempt(0);
+    progressTotalAttempts(0);
 };
 
 const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0) {
@@ -90,11 +114,12 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
         averageGems: Object.fromEntries([...gemTypes].map(type => [type, 0])),
         averageRunTime: 0,
         averageFullRunTime: 0,
+        bestAttempt: 0,
+        worstAttempt: 0,
     };
 
     for (let attempt = 1; attempt <= attempts; attempt++) {
         const attemptResult = {
-            stages: [],
             gemsEarned: Object.fromEntries([...gemTypes].map(type => [type, 0])),
             calcTime: performance.now(),
             stageReached: 0,
@@ -102,8 +127,12 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
             defeatSeconds: 0,
         };
 
-        //let stageWon = true;
         let runOver = false;
+
+        if (attempt % 100 === 0) {
+            progressCurrentAttempt(attempt);
+            await Util.sleep(0);
+        }
 
         for (let currentStage = 1; ; currentStage++) {
             let stageSeconds = 0;
@@ -137,7 +166,6 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
                 }
             }
 
-            attemptResult.stages.push(stageSeconds);
             attemptResult.totalSeconds += stageSeconds;
 
             if (!runOver && stageSeconds > timeLimit) {
@@ -171,6 +199,9 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
     if (targetStage > 0) {
         result.averageFullRunTime = Math.floor(result.attempts.reduce((sum, a) => sum + a.totalSeconds, 0) / result.attempts.length);
     }
+
+    result.bestAttempt = result.attempts.reduce((bestIdx, current, idx, arr) => current.stageReached > arr[bestIdx].stageReached ? idx : bestIdx, 0);
+    result.worstAttempt = result.attempts.reduce((worstIdx, current, idx, arr) => current.stageReached < arr[worstIdx].stageReached ? idx : worstIdx, 0);
 
     return result;
 };
@@ -248,9 +279,11 @@ const updateFluteActiveGemTypes = () => {
 module.exports = {
     isRunning,
     simulationResult,
+    selectedAttemptValue,
     selectedAttempt,
     attemptOptions,
-
+    progressCurrentAttempt,
+    progressTotalAttempts,
     settings,
 
     runSimulation,

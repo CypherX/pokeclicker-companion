@@ -344,6 +344,15 @@
                 </div>
                 <!-- /ko -->
 
+                <!-- ko if: BattleFrontierSim.isRunning() && BattleFrontierSim.progressTotalAttempts() >= 500 && BattleFrontierSim.progressCurrentAttempt() > 0 -->
+                <div class="card mt-3">
+                    <div class="card-header">Simulating..</div>
+                    <div class="card-body text-center">
+                        <span data-bind="text: `Attempt: ${BattleFrontierSim.progressCurrentAttempt().toLocaleString()} / ${BattleFrontierSim.progressTotalAttempts().toLocaleString()}`"></span>
+                    </div>
+                </div>
+                <!-- /ko -->
+
                 <!-- ko if: BattleFrontierSim.simulationResult() && !BattleFrontierSim.isRunning() -->
                 <div class="row mt-3" data-bind="with: BattleFrontierSim.simulationResult">
                     <div class="col-12 col-lg-6">
@@ -361,13 +370,19 @@
                                         <div class="row mb-1">
                                             <label class="col-sm-6 col-form-label">Highest Stage:</label>
                                             <div class="col-sm-6">
-                                                <span class="form-control-plaintext" data-bind="text: $data.highestStageReached.toLocaleString()"></span>
+                                                <div class="form-control-plaintext">
+                                                    <span data-bind="text: $data.highestStageReached.toLocaleString()"></span>
+                                                    <span class="small" data-bind="text: `( #${$data.bestAttempt.toLocaleString()} )`"></span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row mb-1">
                                             <label class="col-sm-6 col-form-label">Lowest Stage:</label>
                                             <div class="col-sm-6">
-                                                <span class="form-control-plaintext" data-bind="text: $data.lowestStageReached.toLocaleString()"></span>
+                                                <div class="form-control-plaintext">
+                                                    <span data-bind="text: $data.lowestStageReached.toLocaleString()"></span>
+                                                <span class="small" data-bind="text: `( #${$data.worstAttempt.toLocaleString()} )`"></span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row mb-1">
@@ -414,14 +429,13 @@
                     </div>
                     <div class="col-12 col-lg-6">
                         <div class="card">
-                            <div class="card-header">
-                                <select class="form-select form-select-sm" data-bind="
-                                    options: BattleFrontierSim.attemptOptions,
-                                    optionsText: 'label',
-                                    optionsValue: 'value',
-                                    value: BattleFrontierSim.selectedAttempt,
-                                    optionsCaption: '-- Select an Attempt --'"></select>
+                            <div class="card-header d-flex align-items-center">
+                                Attempt
+                                <input type="number" class="form-control form-control-sm mx-2" style="width: 100px;"
+                                    data-bind="value: BattleFrontierSim.selectedAttemptValue" />
+                                / <span class="ms-2" data-bind="text: $data.attempts.length.toLocaleString()"></span>
                             </div>
+                            <!--<div class="card-header d-flex align-items-center" style="height: 48px;">Results Summary</div>-->
                             <div class="card-body" data-bind="with: BattleFrontierSim.selectedAttempt">
                                 <div class="row">
                                     <div class="col">
