@@ -62,6 +62,8 @@ const initGame = () => {
 
   // optimizations
   App.game.badgeCase.maxLevel.extend({ deferred: true });
+
+  App.game.oakItems.use = () => {};
 };
 
 initGame();
