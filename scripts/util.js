@@ -165,6 +165,14 @@ const notifications = [
         timeout: 30000,
         expires: new Date(2025, 8, 5),
     },
+    {
+        id: 'newfeatbfsim',
+        title: 'New Feature',
+        message: `Check out the new Battle Frontier Simulator on the Tools tab! Make suggestions or report issues to <span class="text-warning fw-bold">Time</span> in the PokéClicker discord server.`,
+        type: 'primary',
+        timeout: 30000,
+        expires: new Date(2025, 11, 1),
+    },
 ];
 
 const createNotifications = () => {
