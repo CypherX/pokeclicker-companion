@@ -13,6 +13,23 @@ const formatTime24Hours = (date) => {
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 };
 
+const formatTime = (seconds) => {
+    seconds = Math.floor(seconds);
+
+    const d = Math.floor(seconds / 86400);
+    const h = Math.floor((seconds % 86400) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+
+    const parts = [];
+    if (d > 0) parts.push(`${d.toLocaleString()}d`);
+    if (h > 0) parts.push(`${h}h`);
+    if (m > 0) parts.push(`${m}m`);
+    if (s > 0 || parts.length === 0) parts.push(`${s}s`);
+
+    return parts.join(' ');
+};
+
 const dateAddHours = (startDate, hours) => {
     const date = new Date(startDate);
     date.setHours(date.getHours() + hours);
@@ -167,10 +184,13 @@ const createNotifications = () => {
     });
 };
 
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
 module.exports = {
     formatDate,
     formatDateTime,
     formatTime24Hours,
+    formatTime,
     dateAddHours,
 
     arrayToWhatever,
@@ -186,4 +206,5 @@ module.exports = {
     notify,
     getRegionNameText,
     createNotifications,
+    sleep,
 };

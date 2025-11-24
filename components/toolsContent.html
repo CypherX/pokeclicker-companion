@@ -1,12 +1,13 @@
 <div class="tab-pane h-100 container-xxl" id="toolsContent">
     <div class="tab-content h-100 container-xxl">
+        
         <div class="tab-pane h-100 container-xxl show active" id="tools-battle-calculator">
             <div data-bind="template: { name: 'load-save-template' }"></div>
 
             <div class="d-flex flex-column h-100" data-bind="if: SaveData.isLoaded">
-                <div class="mx-auto text-center mt-5" data-bind="hidden: SaveData.isDamageLoaded">
+                <div class="mx-auto text-center mt-5" data-bind="hidden: BattleCalculator.showData">
                     <button type="button" class="btn btn-primary" data-bind="click: () => BattleCalculator.calculate()">Calculate Battles</button>
-                    <div class="form-text">Additional data must be loaded from your save file. This may take a few seconds.</div>
+                    <div class="form-text">This may take a few seconds.</div>
                 </div>
 
                 <!-- ko if: BattleCalculator.showData() -->
@@ -268,6 +269,208 @@
                 <!-- /ko -->
             </div>
         </div>
+
+        <div class="tab-pane h-100 container-xxl" id="tools-bf-sim">
+            <div data-bind="template: { name: 'load-save-template' }"></div>
+
+            <div class="d-flex flex-column h-100" data-bind="if: SaveData.isLoaded">
+                <div class="mx-auto text-center mt-5" data-bind="hidden: SaveData.isDamageLoaded">
+                    <button type="button" class="btn btn-primary" data-bind="click: () => SaveData.loadAttackData()">Load Additional Data</button>
+                    <div class="form-text">Additional data must be loaded from your save file. This may take a few seconds.</div>
+                </div>
+
+                <!-- ko if: SaveData.isDamageLoaded() -->
+                <div class="card">
+                    <div class="card-header">Configuration</div>
+                    <div class="card-body">
+                        <div class="control-row mx-auto">
+                            <div class="row align-items-center justify-content-center" data-bind="with: BattleFrontierSim.settings">
+                                <div class="col-auto">
+                                    <div class="input-group">
+                                        <div class="input-group-text">Attempts</div>
+                                        <input class="form-control" type="number" min="1" style="width: 125px;" data-bind="value: $data.simulationAttempts" />
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="input-group" data-bind="tooltip: {
+                                        html: true,
+                                        title: 'Specify a target stage to simulate to or leave as zero to simulate until losing.',
+                                        trigger: 'hover',
+                                    }">
+                                        <div class="input-group-text">Target Stage</div>
+                                        <input class="form-control" type="number" min="0" style="width: 125px;" data-bind="value: $data.targetStage" />
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check form-check-inline form-switch me-3">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="BattleFrontierSimxAttack" data-bind="checked: $data.xAttackEnabled">
+                                        <label class="form-check-label" for="BattleFrontierSimxAttack">xAttack</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="my-2" />
+                            <div class="row justify-content-center mt-1">
+                                <!-- ko foreach: Object.values(GameConstants.FluteItemType) -->
+                                <div class="col-auto" data-bind="tooltip: {
+                                    html: true,
+                                    title: `${ItemList[$data].description}<br />${ItemList[$data].gemTypes.join(', ')}`,
+                                    placement: 'bottom',
+                                    trigger: 'hover',
+                                }">
+                                    <div class="form-check form-check-inline form-switch me-3">
+                                        <input class="form-check-input" type="checkbox" role="switch" data-bind="checkedValue: $data, checked: BattleFrontierSim.settings.activeFlutes,
+                                            attr: { id: `BattleFrontierSim${$data}` }">
+                                        <label class="form-check-label" data-bind="text: GameConstants.humanifyString($data), attr: { for: `BattleFrontierSim${$data}` }"></label>
+                                    </div>
+                                </div>
+                                <!-- /ko -->
+                                <div class="col-auto">
+                                    <div class="form-check form-check-inline form-switch me-3">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="BattleFrontierSim_AllFlutes" data-bind="checked: BattleFrontierSim.settings.allFlutesToggle">
+                                        <label class="form-check-label" for="BattleFrontierSim_AllFlutes">All</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-muted small text-center mt-1">Active flutes provide a +0.5% typed damage bonus for the Gem types they consume.</div>
+                            <hr class="my-1" />
+                            <div class="text-muted small text-center">Damage calculations include all Pokémon in your party at the current max level. Being in the hatchery or not max level will not affect these calculations.</div>
+                            <hr class="my-1" />
+                            <div class="text-center mt-3">
+                                <button type="button" class="btn btn-primary" data-bind="click: () => BattleFrontierSim.runSimulation(),
+                                    disable: BattleFrontierSim.isRunning">Simulate!</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /ko -->
+
+                <!-- ko if: BattleFrontierSim.simulationResult() && !BattleFrontierSim.isRunning() -->
+                <div class="row mt-3" data-bind="with: BattleFrontierSim.simulationResult">
+                    <div class="col-12 col-lg-6">
+                        <div class="card">
+                            <div class="card-header d-flex align-items-center" style="height: 48px;">Results Summary</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="row mb-1">
+                                            <label class="col-sm-6 col-form-label">Average Stage:</label>
+                                            <div class="col-sm-6">
+                                                <span class="form-control-plaintext" data-bind="text: $data.averageStageReached.toLocaleString()"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <label class="col-sm-6 col-form-label">Highest Stage:</label>
+                                            <div class="col-sm-6">
+                                                <span class="form-control-plaintext" data-bind="text: $data.highestStageReached.toLocaleString()"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <label class="col-sm-6 col-form-label">Lowest Stage:</label>
+                                            <div class="col-sm-6">
+                                                <span class="form-control-plaintext" data-bind="text: $data.lowestStageReached.toLocaleString()"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <label class="col-sm-6 col-form-label">Average Runtime:</label>
+                                            <div class="col-sm-6">
+                                                <span class="form-control-plaintext" data-bind="text: Util.formatTime($data.averageRunTime)"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- ko if: $data.settings.targetStage > 0 -->
+                                        <div class="row mt-4 mb-1">
+                                            <label class="col-sm-6 col-form-label">Target Stage:</label>
+                                            <div class="col-sm-6">
+                                                <span class="form-control-plaintext" data-bind="text:  $data.settings.targetStage.toLocaleString()"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <label class="col-sm-6 col-form-label">Avg. Full Runtime:</label>
+                                            <div class="col-sm-6">
+                                                <span class="form-control-plaintext" data-bind="text: Util.formatTime($data.averageFullRunTime)"></span>
+                                            </div>
+                                        </div>
+                                        <!-- /ko -->
+                                    </div>
+                                    <div class="col">
+                                        <table class="table table-sm table-bordered table-hover table-striped small">
+                                            <thead>
+                                                <tr class="table-dark">
+                                                    <th>Gem</th>
+                                                    <th class="text-center">Average Earned</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody data-bind="foreach: Object.entries(BattleFrontierSim.simulationResult().averageGems)">
+                                                <tr>
+                                                    <td data-bind="text: PokemonType[$data[0]]"></td>
+                                                    <td class="text-center" data-bind="text: $data[1].toLocaleString()"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <select class="form-select form-select-sm" data-bind="
+                                    options: BattleFrontierSim.attemptOptions,
+                                    optionsText: 'label',
+                                    optionsValue: 'value',
+                                    value: BattleFrontierSim.selectedAttempt,
+                                    optionsCaption: '-- Select an Attempt --'"></select>
+                            </div>
+                            <div class="card-body" data-bind="with: BattleFrontierSim.selectedAttempt">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="row mb-1">
+                                            <label class="col-sm-6 col-form-label">Stage Reached:</label>
+                                            <div class="col-sm-6">
+                                                <span class="form-control-plaintext" data-bind="text: $data.stageReached.toLocaleString()"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            <label class="col-sm-6 col-form-label">Runtime:</label>
+                                            <div class="col-sm-6">
+                                                <span class="form-control-plaintext" data-bind="text: Util.formatTime($data.defeatSeconds)"></span>
+                                            </div>
+                                        </div>
+                                        <!-- ko if: $parent.settings.targetStage > 0 -->
+                                        <div class="row mb-1">
+                                            <label class="col-sm-6 col-form-label">Full Runtime:</label>
+                                            <div class="col-sm-6">
+                                                <span class="form-control-plaintext" data-bind="text: Util.formatTime($data.totalSeconds)"></span>
+                                            </div>
+                                        </div>
+                                        <!-- /ko -->
+                                    </div>
+                                    <div class="col">
+                                        <table class="table table-sm table-bordered table-hover table-striped small">
+                                            <thead>
+                                                <tr class="table-dark">
+                                                    <th>Gem</th>
+                                                    <th class="text-center">Earned</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody data-bind="foreach: Object.entries($data.gemsEarned)">
+                                                <tr>
+                                                    <td data-bind="text: PokemonType[$data[0]]"></td>
+                                                    <td class="text-center" data-bind="text: $data[1].toLocaleString()"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+        </div>
+
         <div class="tab-pane show" id="tools-save-fixes">
             <div class="form col-12 col-lg-6 mx-auto">
                 <p>Fix common issues with your save file. After a fix is applied a fixed copy of the selected save file will be downloaded. Import the fixed file over your existing file in PokéClicker.</p>

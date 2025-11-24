@@ -21,5 +21,6 @@ Object.assign(window, {
     FriendSafari: require('./friendSafari'),
     SaveFixes: require('./saveFixes'),
     BattleCalculator: require('./battleCalculator'),
+    BattleFrontierSim: require('./bfSim'),
     Util: require('./util'),
 });
