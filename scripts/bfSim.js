@@ -81,7 +81,7 @@ const runSimulation = async () => {
 
     console.log(result);
     simulationResult(result);
-    selectedAttemptValue(result.bestAttempt);
+    selectedAttemptValue(result.bestAttempt + 1);
 
     player.effectList['xAttack'](0);
     Object.values(GameConstants.FluteItemType).forEach((flute) => {
