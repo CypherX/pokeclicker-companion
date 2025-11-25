@@ -1828,7 +1828,7 @@
                                             <div class="col-sm-6">
                                                 <div class="form-control-plaintext">
                                                     <span data-bind="text: $data.highestStageReached.toLocaleString()"></span>
-                                                    <span class="small" data-bind="text: `( #${$data.bestAttempt.toLocaleString()} )`"></span>
+                                                    <span class="small" data-bind="text: `( #${($data.bestAttempt + 1).toLocaleString()} )`"></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1837,7 +1837,7 @@
                                             <div class="col-sm-6">
                                                 <div class="form-control-plaintext">
                                                     <span data-bind="text: $data.lowestStageReached.toLocaleString()"></span>
-                                                <span class="small" data-bind="text: `( #${$data.worstAttempt.toLocaleString()} )`"></span>
+                                                <span class="small" data-bind="text: `( #${($data.worstAttempt + 1).toLocaleString()} )`"></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1888,7 +1888,7 @@
                             <div class="card-header d-flex align-items-center">
                                 Attempt
                                 <input type="number" class="form-control form-control-sm mx-2" style="width: 100px;"
-                                    data-bind="value: BattleFrontierSim.selectedAttemptValue" />
+                                    min="1" data-bind="value: BattleFrontierSim.selectedAttemptValue" />
                                 / <span class="ms-2" data-bind="text: $data.attempts.length.toLocaleString()"></span>
                             </div>
                             <!--<div class="card-header d-flex align-items-center" style="height: 48px;">Results Summary</div>-->
@@ -2209,7 +2209,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1764025871462.js"></script>
+        <script src="./bundle-1764081344191.js"></script>
     </body>
 </html>
 
