@@ -468,10 +468,10 @@
                                                     <th class="text-center">Earned</th>
                                                 </tr>
                                             </thead>
-                                            <tbody data-bind="foreach: Object.entries($data.gemsEarned)">
+                                            <tbody data-bind="foreach: $data.gemsEarned">
                                                 <tr>
-                                                    <td data-bind="text: PokemonType[$data[0]]"></td>
-                                                    <td class="text-center" data-bind="text: $data[1].toLocaleString()"></td>
+                                                    <td data-bind="text: PokemonType[$index()]"></td>
+                                                    <td class="text-center" data-bind="text: $data.toLocaleString()"></td>
                                                 </tr>
                                             </tbody>
                                         </table>

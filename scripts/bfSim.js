@@ -97,17 +97,30 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
     const timeLimit = GameConstants.GYM_TIME / 1000;
     const highestRegion = player.highestRegion();
     const gemTypes = GameHelper.enumNumbers(PokemonType).filter(type => type !== PokemonType.None);
-    const damageCache = new Map();
+
+    const damageCache = new Float64Array(1 << 19);
+    for (let a = 0; a <= 17; a++) {
+        for (let b = -1; b <= 17; b++) {
+            const key = (1 << (a + 1)) | (1 << (b + 1));
+            damageCache[key] = App.game.party.calculatePokemonAttack(a, b, true, GameConstants.Region.none, false, false, WeatherType.Clear);
+        }
+    }
+
+    const maxPrecalcStage = targetStage || highestStage + 10000;
+
+    const healthCache = new Float64Array(maxPrecalcStage);
+    const gemRewardCache = new Uint32Array(maxPrecalcStage);
+    for (let i = 1; i <= maxPrecalcStage; i++) {
+        healthCache[i] = calcHealth(i);
+        gemRewardCache[i] = calcGemReward(i);
+    }
+
     buildPokemonPool();
 
     const result = {
         attempts: [],
         totalCalcTime: performance.now(),
-        settings: {
-            attempts,
-            highestStage,
-            targetStage,
-        },
+        settings: { attempts, highestStage, targetStage },
         averageStageReached: 0,
         lowestStageReached: 0,
         highestStageReached: 0,
@@ -120,58 +133,54 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
 
     for (let attempt = 1; attempt <= attempts; attempt++) {
         const attemptResult = {
-            gemsEarned: Object.fromEntries([...gemTypes].map(type => [type, 0])),
+            gemsEarned: new Uint32Array(18),
             calcTime: performance.now(),
             stageReached: 0,
             totalSeconds: 0,
             defeatSeconds: 0,
         };
 
-        let runOver = false;
-
-        if (attempt % 100 === 0) {
+        if (attempt % 200 === 0) {
             progressCurrentAttempt(attempt);
             await Util.sleep(0);
         }
 
-        for (let currentStage = 1; ; currentStage++) {
+        let currentStage = 1;
+        let runOver = false;
+
+        for (;; currentStage++) {
             let stageSeconds = 0;
 
-            for (let pokemonIndex = 0; pokemonIndex < 3; pokemonIndex++) {
+            for (let i = 0; i < 3; i++) {
                 const enemy = getEnemy(highestRegion);
                 const t1 = enemy.type[0];
                 const t2 = enemy.type[1] ?? PokemonType.None;
-                const hp = getHealth(currentStage);
-                const gemReward = getGemReward(currentStage);
+                //const hp = healthCache[currentStage];
+                const gemReward = gemRewardCache[currentStage];
+                const damage = damageCache[(1 << (t1 + 1)) | (1 << (t2 + 1))];
 
-                const key = (1 << (t1 + 1)) | (1 << (t2 + 1));
-                let damage = damageCache.get(key);
-                if (damage === undefined) {
-                    damage = App.game.party.calculatePokemonAttack(t1, t2, true, GameConstants.Region.none, false, false, WeatherType.Clear);
-                    damageCache.set(key, damage);
-                }
+                let seconds = Math.ceil(healthCache[currentStage] / damage);
+                if (seconds < 1) seconds = 1;
+                if (currentStage <= highestStage) seconds *= 0.5;
 
-                let secondsToDefeat = Math.max(1, Math.ceil(hp / damage));
-                if (currentStage <= highestStage) {
-                    secondsToDefeat /= 2;
-                }
+                const newTotal = stageSeconds + seconds;
 
-                stageSeconds += secondsToDefeat;
-
-                if (stageSeconds <= timeLimit) {
+                if (newTotal <= timeLimit) {
                     attemptResult.gemsEarned[t1] += t2 === PokemonType.None ? gemReward * 2 : gemReward;
                     if (t2 !== PokemonType.None) {
                         attemptResult.gemsEarned[t2] += gemReward;
                     }
                 }
+
+                stageSeconds = newTotal;
             }
 
             attemptResult.totalSeconds += stageSeconds;
 
             if (!runOver && stageSeconds > timeLimit) {
+                runOver = true;
                 attemptResult.stageReached = currentStage;
                 attemptResult.defeatSeconds = attemptResult.totalSeconds;
-                runOver = true;
             }
 
             if ((stageSeconds > timeLimit && targetStage === 0) || (targetStage > 0 && currentStage >= targetStage)) {
@@ -185,23 +194,56 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
 
     result.totalCalcTime = performance.now() - result.totalCalcTime;
 
-    const stagesReached = result.attempts.map(a => a.stageReached);
-    result.averageStageReached = Math.floor(stagesReached.reduce((sum, stage) => sum + stage, 0) / result.attempts.length);
-    result.highestStageReached = Math.max(...stagesReached);
-    result.lowestStageReached = Math.min(...stagesReached);
+    // prepare results
 
-    for (const gemType of gemTypes) {
-        result.averageGems[gemType] = Math.floor(result.attempts.reduce((sum, a) => sum + a.gemsEarned[gemType] ?? 0, 0) / result.attempts.length);
+    const attemptCount = result.attempts.length;
+    let sumStages = 0, bestStage = -Infinity, worstStage = Infinity;
+    let sumRunTime = 0, sumFullRunTime = 0;
+    let bestAttemptIdx = 0, worstAttemptIdx = 0;
+
+    const gemTotals = Object.fromEntries(gemTypes.map(type => [type, 0]));
+
+    for (let i = 0; i < attemptCount; i++) {
+        const attempt = result.attempts[i];
+
+        const stageReached = attempt.stageReached;
+        sumStages += stageReached;
+ 
+        if (stageReached > bestStage) {
+            bestStage = stageReached;
+            bestAttemptIdx = i;
+        }
+
+        if (stageReached < worstStage) {
+            worstStage = stageReached;
+            worstAttemptIdx = i;
+        }
+
+        sumRunTime += attempt.defeatSeconds;
+        if (targetStage > 0) {
+            sumFullRunTime += a.totalSeconds;
+        }
+
+        for (const type of gemTypes) {
+            gemTotals[type] += attempt.gemsEarned[type];
+        }
     }
 
-    result.averageRunTime = Math.floor(result.attempts.reduce((sum, a) => sum + a.defeatSeconds, 0) / result.attempts.length);
+    result.averageStageReached = Math.floor(sumStages / attemptCount);
+    result.highestStageReached = bestStage;
+    result.lowestStageReached = worstStage;
 
+    for (const type of gemTypes) {
+        result.averageGems[type] = Math.floor(gemTotals[type] / attemptCount);
+    }
+
+    result.averageRunTime = Math.floor(sumRunTime / attemptCount);
     if (targetStage > 0) {
-        result.averageFullRunTime = Math.floor(result.attempts.reduce((sum, a) => sum + a.totalSeconds, 0) / result.attempts.length);
+        result.averageFullRunTime = Math.floor(sumFullRunTime / attemptCount);
     }
 
-    result.bestAttempt = result.attempts.reduce((bestIdx, current, idx, arr) => current.stageReached > arr[bestIdx].stageReached ? idx : bestIdx, 0);
-    result.worstAttempt = result.attempts.reduce((worstIdx, current, idx, arr) => current.stageReached < arr[worstIdx].stageReached ? idx : worstIdx, 0);
+    result.bestAttempt = bestAttemptIdx;
+    result.worstAttempt = worstAttemptIdx;
 
     return result;
 };
@@ -233,19 +275,13 @@ const getEnemy = (highestRegion) => {
     return Rand.fromArray(pool.byBaseId.get(id));
 };
 
-const healthCache = [];
-const getHealth = (stage) => {
-    return healthCache[stage] || (healthCache[stage] = calcHealth(stage));
-};
-
 const calcHealth = (stage) => {
     // ref: PokemonFactory.routeHealth
     const routeNum = MapHelper.normalizeRoute(stage + 10, GameConstants.Region.none);
     return Math.max(20, Math.floor(Math.pow((100 * Math.pow(routeNum, 2.2) / 12), 1.15) * (1 + GameConstants.Region.none / 20))) || 20;
 };
 
-const gemRewardCache = [];
-const getGemReward = (stage) => gemRewardCache[stage] ?? (gemRewardCache[stage] = Math.ceil(stage / 80));
+const calcGemReward = (stage) => Math.ceil(stage / 80);
 
 const toggleFlute = (flute, active) => {
     if (active && !isFluteActive(flute)) {

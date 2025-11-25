@@ -32,6 +32,7 @@ const loadSaveData = (saveString, fileName = null) => {
     VitaminTracker.highestRegion(player.highestRegion());
     Companion.typeDamageDistribution(undefined);
     BattleCalculator.showData(false);
+    BattleFrontierSim.simulationResult(null);
     isDamageLoaded(false);
 
     file(saveFile);
