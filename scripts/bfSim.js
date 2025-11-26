@@ -155,7 +155,6 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
                 const enemy = getEnemy(highestRegion);
                 const t1 = enemy.type[0];
                 const t2 = enemy.type[1] ?? PokemonType.None;
-                //const hp = healthCache[currentStage];
                 const gemReward = gemRewardCache[currentStage];
                 const damage = damageCache[(1 << (t1 + 1)) | (1 << (t2 + 1))];
 
