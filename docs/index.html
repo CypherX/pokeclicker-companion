@@ -1402,7 +1402,9 @@
                             <th class="text-center sortable" data-sort="vitamin-steps" style="width: 5%;"
                                 data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Steps w/ Vitamins</th>
                             <th class="text-center sortable" data-sort="breeding-efficiency" style="width: 5%;"
-                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Breeding Efficiency</th>
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }, tooltip: {
+                                    title: 'Breeding Efficiency w/ optimal vitamins. This does not include other bonuses such as EVs or held items and will likely differ from what you see in-game.',
+                                }">Breeding Efficiency</th>
                         </tr>
                         <!-- ko if: SaveData.isLoaded -->
                         <tr class="table-dark fw-normal border-top-0 align-middle">
@@ -2209,7 +2211,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1764106659125.js"></script>
+        <script src="./bundle-1764875516478.js"></script>
     </body>
 </html>
 
