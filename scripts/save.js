@@ -223,8 +223,11 @@ const loadAttackData = () => {
     //const bonus = AchievementHandler.achievementBonus();
     //AchievementHandler.achievementBonus = () => bonus;
 
-    // set all pokemon to max level to handle attack calculations better
-    App.game.party.caughtPokemon.forEach(p => p.level = App.game.badgeCase.maxLevel());
+    // set all pokemon to max level and reset breeding flag to handle attack calculations better
+    App.game.party.caughtPokemon.forEach(p => {
+        p.level = App.game.badgeCase.maxLevel();
+        p.breeding = false;
+    });
 
     BattleCalculator.settings.xAttackEnabled(false);
     BattleCalculator.settings.xClickEnabled(false);

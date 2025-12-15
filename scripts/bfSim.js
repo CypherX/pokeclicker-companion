@@ -69,9 +69,7 @@ const runSimulation = async () => {
     await Util.sleep(0);
 
     // Toggle xAttack, flutes
-    if (settings.xAttackEnabled) {
-        player.effectList['xAttack'](1);
-    }
+    player.effectList['xAttack'](settings.xAttackEnabled() ? 1 : 0);
     Object.values(GameConstants.FluteItemType).forEach((flute) => {
         toggleFlute(flute, settings.activeFlutes().includes(flute));
     });
@@ -220,7 +218,7 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
 
         sumRunTime += attempt.defeatSeconds;
         if (targetStage > 0) {
-            sumFullRunTime += a.totalSeconds;
+            sumFullRunTime += attempt.totalSeconds;
         }
 
         for (const type of gemTypes) {
