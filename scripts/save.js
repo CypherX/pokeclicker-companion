@@ -223,9 +223,11 @@ const loadAttackData = () => {
     //const bonus = AchievementHandler.achievementBonus();
     //AchievementHandler.achievementBonus = () => bonus;
 
-    // set all pokemon to max level and reset breeding flag to handle attack calculations better
+    // Set all pokemon to max level and reset breeding flag to include all pokemon
+    // at their max power in attack calculations
+    const maxLevel = App.game.badgeCase.maxLevel();
     App.game.party.caughtPokemon.forEach(p => {
-        p.level = App.game.badgeCase.maxLevel();
+        p.level = maxLevel;
         p.breeding = false;
     });
 

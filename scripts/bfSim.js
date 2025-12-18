@@ -19,13 +19,6 @@ const selectedAttempt = ko.pureComputed(() => {
     return result.attempts?.[selectedAttempt - 1];
 });
 
-const attemptOptions = ko.pureComputed(() => {
-    return simulationResult()?.attempts.map((attempt, i) => ({
-        label: `Attempt #${i + 1} Results`,
-        value: attempt,
-    }));
-});
-
 const progressCurrentAttempt = ko.observable(0);
 const progressTotalAttempts = ko.observable(0);
 
@@ -314,7 +307,6 @@ module.exports = {
     simulationResult,
     selectedAttemptValue,
     selectedAttempt,
-    attemptOptions,
     progressCurrentAttempt,
     progressTotalAttempts,
     settings,
