@@ -89,10 +89,18 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
     const highestRegion = player.highestRegion();
     const gemTypes = GameHelper.enumNumbers(PokemonType).filter(type => type !== PokemonType.None);
 
-    const damageCache = new Float64Array(1 << 19);
+    /*const damageCache = new Float64Array(1 << 19);
     for (let a = 0; a <= 17; a++) {
         for (let b = -1; b <= 17; b++) {
             const key = (1 << (a + 1)) | (1 << (b + 1));
+            damageCache[key] = App.game.party.calculatePokemonAttack(a, b, true, GameConstants.Region.none, false, false, WeatherType.Clear);
+        }
+    }*/
+
+    const damageCache = new Float64Array(1 << 10); 
+    for (let a = 0; a <= 17; a++) {
+        for (let b = -1; b <= 17; b++) {
+            const key = ((a + 1) << 5) | (b + 1);
             damageCache[key] = App.game.party.calculatePokemonAttack(a, b, true, GameConstants.Region.none, false, false, WeatherType.Clear);
         }
     }
@@ -147,7 +155,8 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
                 const t1 = enemy.type[0];
                 const t2 = enemy.type[1] ?? PokemonType.None;
                 const gemReward = gemRewardCache[currentStage];
-                const damage = damageCache[(1 << (t1 + 1)) | (1 << (t2 + 1))];
+                //const damage = damageCache[(1 << (t1 + 1)) | (1 << (t2 + 1))];
+                const damage = damageCache[((t1 + 1) << 5) | (t2 + 1)];
 
                 let seconds = Math.ceil(healthCache[currentStage] / damage);
                 if (seconds < 1) seconds = 1;
