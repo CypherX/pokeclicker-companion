@@ -89,14 +89,6 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
     const highestRegion = player.highestRegion();
     const gemTypes = GameHelper.enumNumbers(PokemonType).filter(type => type !== PokemonType.None);
 
-    /*const damageCache = new Float64Array(1 << 19);
-    for (let a = 0; a <= 17; a++) {
-        for (let b = -1; b <= 17; b++) {
-            const key = (1 << (a + 1)) | (1 << (b + 1));
-            damageCache[key] = App.game.party.calculatePokemonAttack(a, b, true, GameConstants.Region.none, false, false, WeatherType.Clear);
-        }
-    }*/
-
     const damageCache = new Float64Array(1 << 10); 
     for (let a = 0; a <= 17; a++) {
         for (let b = -1; b <= 17; b++) {
@@ -115,6 +107,16 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
     }
 
     buildPokemonPool();
+
+    const pool = pokemonRegionPool[highestRegion];
+    const flatTypePool = [];
+    pool.baseIds.forEach(id => pool.byBaseId.get(id).forEach(p => {
+        const t1 = p.type[0];
+        const t2 = p.type[1] ?? PokemonType.None;
+        flatTypePool.push(((t1 + 1) << 5) | (t2 + 1));
+    }));
+    const typePoolArray = new Uint16Array(flatTypePool);
+    const poolLength = typePoolArray.length;
 
     const result = {
         attempts: [],
@@ -151,12 +153,11 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
             let stageSeconds = 0;
 
             for (let i = 0; i < 3; i++) {
-                const enemy = getEnemy(highestRegion);
-                const t1 = enemy.type[0];
-                const t2 = enemy.type[1] ?? PokemonType.None;
+                const typeKey = typePoolArray[Math.floor(Math.random() * poolLength)];
+                const damage = damageCache[typeKey];
+                const t1 = (typeKey >> 5) - 1;
+                const t2 = (typeKey & 31) - 1;
                 const gemReward = gemRewardCache[currentStage];
-                //const damage = damageCache[(1 << (t1 + 1)) | (1 << (t2 + 1))];
-                const damage = damageCache[((t1 + 1) << 5) | (t2 + 1)];
 
                 let seconds = Math.ceil(healthCache[currentStage] / damage);
                 if (seconds < 1) seconds = 1;
