@@ -141,7 +141,7 @@ const runShit = async function (attempts = 1, highestStage = 1, targetStage = 0)
             defeatSeconds: 0,
         };
 
-        if (attempt % 200 === 0) {
+        if (attempt % 1000 === 0) {
             progressCurrentAttempt(attempt);
             await Util.sleep(0);
         }
