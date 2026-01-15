@@ -36,6 +36,12 @@
             </ul>
         </div>
         <div class="d-none d-md-block position-absolute end-0 me-2">
+            <button type="button" class="btn btn-secondary position-relative" data-bs-toggle="modal" data-bs-target="#changelogModal"
+                data-bind="tooltip: { title: 'Changelog', placement: 'bottom', trigger: 'hover' }">
+                <img src="assets/flag-solid-full.svg" width="16" height="16" class="d-flex my-1 align-self-center"
+                    style="filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(129deg) brightness(106%) contrast(101%);" />
+                <span id="newChangelogAlert" class="position-absolute translate-middle p-1 bg-danger rounded-circle d-none" style="top: 2px; left: 2px;"></span>
+            </button>
             <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#settingsModal"
                 data-bind="tooltip: { title: 'Companion Settings', placement: 'bottom', trigger: 'hover' }">
                 <img src="assets/gear-solid.svg" class="d-flex my-1 align-self-center"

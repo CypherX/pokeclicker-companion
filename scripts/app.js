@@ -736,16 +736,6 @@ $(document).ready(() => {
         event.preventDefault();
     });
 
-    document.addEventListener('dragenter', (event) => {
-        //$('#flex-container').addClass('drag-drop-border');
-        //$('#drag-drop-overlay, #drag-drop-message').removeClass('d-none');
-    });
-
-    document.addEventListener('dragleave', (event) => {
-        //$('#flex-container').removeClass('drag-drop-border');
-        //$('#drag-drop-overlay, #drag-drop-message').addClass('d-none');
-    });
-
     document.addEventListener('drop', (event) => {
         event.preventDefault();
 
@@ -783,6 +773,19 @@ $(document).ready(() => {
             await navigator.clipboard.writeText('');
         }
     });
+
+    const latestChangelogTimestamp = Companion.data.changeLogData?.[0]?.timestamp;
+    $('#changelogModal').on('shown.bs.modal', () => {
+        $('#newChangelogAlert').toggleClass('d-none', true);
+        if (latestChangelogTimestamp) {
+            localStorage.setItem('lastSeenChangelog', latestChangelogTimestamp);
+        }
+    });
+
+    const lastSeenChangelog = localStorage.getItem('lastSeenChangelog');
+    if (latestChangelogTimestamp && (!lastSeenChangelog || lastSeenChangelog < latestChangelogTimestamp)) {
+        $('#newChangelogAlert').toggleClass('d-none', false);
+    }
 
     Companion.settings.initialize();
     SaveData.initialize();

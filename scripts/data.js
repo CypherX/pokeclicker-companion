@@ -311,6 +311,40 @@ const berryMasterPokemonCosts = {
     ]
 };
 
+const changeLogData = [
+    {
+        timestamp: 1768449600000,
+        changes: [
+            'Battle Frontier Simulator - Optimized simulation speed (~4x faster) and greatly reduced memory usage.',
+        ],
+    },
+    {
+        timestamp: 1765814400000,
+        changes: [
+            'Battle Frontier Simulator - Fixed bug that caused the simulator to always include xAttack in calculations even when it was not toggled on.'
+        ],
+    },
+    {
+        timestamp: 1764081000000,
+        changes: [
+            'Battle Frontier Simulator - Various fixes and optimizations.'
+        ],
+    },
+    {
+        timestamp: 1763946000000,
+        changes: [
+            'Implemented Battle Frontier Simulator under the Tools tab.',
+        ],
+    },
+    {
+        timestamp: 0,
+        dateLabel: 'Earlier',
+        changes: [
+            'Everything else!'
+        ],
+    },
+];
+
 module.exports = {
     UnobtainablePokemon,
     EventDiscordClientPokemon,
@@ -331,4 +365,6 @@ module.exports = {
     unownList,
     berryMasterPokemonLocations,
     berryMasterPokemonCosts,
+
+    changeLogData,
 }
