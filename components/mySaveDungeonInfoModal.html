@@ -15,6 +15,9 @@
                             <th data-bind="text: `Pokémon (${$data.pokemonCount})`"></th>
                             <th class="text-center" style="width: 10%;">Caught</th>
                             <th class="text-center" style="width: 10%;">Shiny</th>
+                            <!-- ko if: $data.pokemonList.some(p => p.shadow) -->
+                            <th class="text-center" style="width: 10%;">Shadow</th>
+                            <!-- /ko -->
                             <!-- ko if: Companion.isPokerusUnlocked() -->
                             <th class="text-center" style="width: 10%;">Resisted</th>
                             <!-- /ko -->
@@ -42,6 +45,11 @@
                             <td class="text-center" data-bind="let: { isComplete: partyPokemon?.shiny === true }">
                                 <span data-bind="html: isComplete ? '&check;' : '&#x2717;', class: isComplete ? 'text-success' : 'text-danger'"></span>
                             </td>
+                            <!-- ko if: $data.shadow -->
+                            <td class="text-center" data-bind="let: { isComplete: partyPokemon?.shadow >= GameConstants.ShadowStatus.Shadow }">
+                                <span data-bind="html: isComplete ? '&check;' : '&#x2717;', class: isComplete ? 'text-success' : 'text-danger'"></span>
+                            </td>
+                            <!-- /ko -->
                             <!-- ko if: Companion.isPokerusUnlocked() -->
                             <td class="text-center" data-bind="let: { isComplete: partyPokemon?.pokerus === GameConstants.Pokerus.Resistant }">
                                 <span data-bind="html: isComplete ? '&check;' : '&#x2717;', class: isComplete ? 'text-success' : 'text-danger'"></span>

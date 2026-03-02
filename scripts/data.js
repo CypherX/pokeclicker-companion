@@ -313,6 +313,12 @@ const berryMasterPokemonCosts = {
 
 const changeLogData = [
     {
+        timestamp: 1772412579939,
+        changes: [
+            'Orre dungeons on the [My Save] → [Statistics & More] → [Dungeons] page now include Shadow status in the info & completion display.',
+        ],
+    },
+    {
         timestamp: 1768449600000,
         changes: [
             'Battle Frontier Simulator - Optimized simulation speed (~4x faster) and greatly reduced memory usage.',

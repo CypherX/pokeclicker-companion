@@ -156,6 +156,12 @@
                                                 <div>Shiny:</div>
                                                 <div class="ms-auto" data-bind="text: `${$data.shinyCount} / ${$data.pokemonCount}`, class: $data.shinyCount >= $data.pokemonCount ? 'text-success' : 'text-danger'">0/0</div>
                                             </div>
+                                            <!-- ko if: $data.pokemonList.some(p => p.shadow) -->
+                                            <div class="d-flex">
+                                                <div>Shadow:</div>
+                                                <div class="ms-auto" data-bind="text: `${$data.shadowCount} / ${$data.shadowPokemonCount}`, class: $data.shadowCount >= $data.shadowPokemonCount ? 'text-success' : 'text-danger'">0/0</div>
+                                            </div>
+                                            <!-- /ko -->
                                             <!-- ko if: Companion.isPokerusUnlocked() -->
                                             <div class="d-flex">
                                                 <div>Resisted:</div>

@@ -312,6 +312,10 @@ const getDungeonData = ko.pureComputed(() => {
             return false;
         }
 
+        if (data.shadowCount < data.shadowPokemonCount) {
+            return false;
+        }
+
         if (isPokerusUnlocked() && data.resistCount < data.pokemonCount) {
             return false;
         }
@@ -333,7 +337,9 @@ const getDungeonData = ko.pureComputed(() => {
                 hide: TownList[dungeon].requirements.some(req => req instanceof DevelopmentRequirement),
                 pokemonList: pokemonList,
                 pokemonCount: pokemonList.length,
+                shadowPokemonCount: pokemonList.filter(p => p.shadow).length,
                 shinyCount: getShinyCount(pokemonNames),
+                shadowCount: getShadowCount(pokemonNames),
                 resistCount: getResistCount(pokemonNames),
             };
             data.isComplete = isDungeonComplete(data);
@@ -573,6 +579,15 @@ const getShinyCount = (pokemon) => {
         return total;
     }, 0);
 }
+
+const getShadowCount = (pokemon) => {
+    return pokemon.reduce((total, p) => {
+        if (Companion.partyList()[pokemonMap[p].id]?.shadow >= GameConstants.ShadowStatus.Shadow) {
+            total += 1;
+        }
+        return total;
+    }, 0);
+};
 
 const getResistCount = (pokemon) => {
     return pokemon.reduce((total, p) => {
