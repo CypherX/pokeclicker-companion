@@ -8,7 +8,7 @@
         <meta http-equiv="Pragma" content="no-cache">
         <meta http-equiv="Expires" content="0">-->
         <title>PokéClicker Companion</title>
-        <link href="./styles/bootstrap.min.css" rel="stylesheet">
+        <link id="theme-stylesheet" href="./styles/bootstrap.min.css" rel="stylesheet">
         <link href="./styles/styles.css" rel="stylesheet">
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
@@ -16,6 +16,12 @@
         <script src="./pokeclicker/scripts/modules.min.js?v=0.10.25"></script>
         <script src="./pokeclicker/scripts/script.min.js?v=0.10.25"></script>
         <script type="text/javascript" src="./libs/bootstrap.bundle.min.js"></script>
+        <script type="text/javascript">
+            const date = new Date();
+            if (date.getMonth() === 3 && date.getDate() === 1) {
+                document.getElementById('theme-stylesheet').href = './styles/bootstrap.sketchy.min.css';
+            }
+        </script>
     </head>
     <body>
         <div id="toaster"></div>
