@@ -656,7 +656,6 @@ const typeDamageWeather = ko.observable(WeatherType.Clear);
 const typeDamageRegion = ko.observable(GameConstants.Region.none);
 
 const calculateTypeDamageDistribution = () => {
-    // load shit
     SaveData.loadAttackData();
 
     player.effectList['xAttack'](includeXAttack() ? 1 : 0);
@@ -675,9 +674,24 @@ const calculateTypeDamageDistribution = () => {
         result[PokemonType[type1]] = {};
         for (let type2 = 0; type2 <= 17; ++type2) {
             let dmg = App.game.party.calculatePokemonAttack(type1, type2, ignoreRegionMultiplier, typeDamageRegion(), true, false, typeDamageWeather(), true, true);
-            result[PokemonType[type1]][PokemonType[type2]] = dmg.toLocaleString();
+            result[PokemonType[type1]][PokemonType[type2]] = { damage: dmg };
             max = Math.max(max, dmg);
             min = Math.min(min, dmg);
+        }
+    }
+
+    // calculate heatmap
+    for (let type1 = 0; type1 <= 17; ++type1) {
+        for (let type2 = 0; type2 <= 17; ++type2) {
+            const dmg = result[PokemonType[type1]][PokemonType[type2]].damage;
+
+            // Calculate where the value falls between 0.0 (min) and 1.0 (max)
+            const percent = (dmg - min) / (max - min);
+
+            // Map the percentage to a Hue degree:
+            // High values (1.0) * 120 = 120 (Green)
+            // Low values (0.0) * 120 = 0 (Red)
+            result[PokemonType[type1]][PokemonType[type2]].hue = percent * 120;
         }
     }
 
@@ -690,8 +704,6 @@ const calculateTypeDamageDistribution = () => {
 
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#mySaveContent');
-
-
 
 $(document).ready(() => {
     const container = document.getElementById('container');
@@ -895,15 +907,22 @@ function getSortValue(sortOption, partyPokemon) {
 
 $(document).on('mouseover', '.table-column-row-hover tbody td', (e) => {
     const cell = e.target;
-    $(cell).closest('tr').find('td').css('background-color', 'rgba(100, 100, 60, 0.1)');
-    $(cell).closest('tbody').find(`td:nth-child(${cell.cellIndex + 1})`).css('background-color', 'rgba(100, 100, 60, 0.1)');
-    cell.style.backgroundColor = 'rgba(100, 100, 60, 0.25)';
+    const $cell = $(cell);
+    const colIndex = cell.cellIndex + 1;
+
+    $cell.closest('tr').find('td').addClass('hover-crosshair');
+    $cell.closest('tbody').find(`td:nth-child(${colIndex})`).addClass('hover-crosshair');
+    $cell.addClass('hover-cell-active');
 });
 
 $(document).on('mouseout', '.table-column-row-hover tbody td', (e) => {
     const cell = e.target;
-    $(cell).closest('tr').find('td').css('background-color', '');
-    $(cell).closest('tbody').find(`td:nth-child(${cell.cellIndex + 1})`).css('background-color', '');
+    const $cell = $(cell);
+    const colIndex = cell.cellIndex + 1;
+
+    $cell.closest('tr').find('td').removeClass('hover-crosshair');
+    $cell.closest('tbody').find(`td:nth-child(${colIndex})`).removeClass('hover-crosshair');
+    $cell.removeClass('hover-cell-active');
 });
 
 const selectedRoute = ko.observable(undefined);

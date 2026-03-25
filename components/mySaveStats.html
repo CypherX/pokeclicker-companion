@@ -305,7 +305,7 @@
                     </div>
                     <div class="table-responsive mt-1" data-bind="if: Companion.typeDamageDistribution">
                         <!-- ko let: { types: Object.keys(Companion.typeDamageDistribution().distribution) } -->
-                        <table class="table table-column-row-hover table-black-bg table-sticky-header table-sm mb-0" style="font-size: 0.9rem;">
+                        <table id="typeDamageTable" class="table table-column-row-hover table-black-bg table-sticky-header table-sm mb-0" style="font-size: 0.9rem;">
                             <thead>
                                 <tr class="table-dark text-center">
                                     <th style="position: sticky; left: 0; z-index: 99;">
@@ -323,7 +323,8 @@
                                 <tr class="align-middle text-center">
                                     <th class="table-dark small px-2" style="position: sticky; left: 0; z-index: 99;" data-bind="text: types[$index()]"></th>
                                     <!-- ko foreach: Object.values($data) -->
-                                    <td class="font-monospace small px-2" data-bind="text: $data"></td>
+                                    <td class="font-monospace small px-2" data-bind="text: $data.damage.toLocaleString(), attr: { 'data-raw-damage': $data.damage },
+                                        style: { 'background-color': `hsla(${$data.hue}, 70%, 40%, 0.4)` }"></td>
                                     <!-- /ko -->
                                 </tr>
                             </tbody>

@@ -121,3 +121,16 @@ table.custom-borders > tbody > tr:not(:first-child):not(.collapse) > td {
 #drag-drop-message {
     z-index: 1001;
 }
+
+.hover-crosshair {
+    /* Makes the row/column 30% brighter */
+    filter: brightness(1.3); 
+}
+
+.hover-cell-active {
+    /* Makes the specific cell 60% brighter */
+    filter: brightness(1.6);
+    /* Adds a crisp, pure white inner border for absolute clarity */
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9) !important; 
+    font-weight: bold; /* Optional: makes the number pop */
+}

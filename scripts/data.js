@@ -313,6 +313,13 @@ const berryMasterPokemonCosts = {
 
 const changeLogData = [
     {
+        timestamp: 1774476425624,
+        changes: [
+            'Added a heatmap to the [My Save] → [Statistics & More] → [Type Damage] grid.',
+            'Additional minor changes to the Battle Calculator.',
+        ],
+    },
+    {
         timestamp: 1774399889214,
         changes: [
             'Visual & performance updates to the Battle Calculator. Should be a bit more useable on mobile now as well.',
