@@ -13,31 +13,40 @@ const loadFile = (file) => {
 };
 
 const loadSaveData = (saveString, fileName = null) => {
+    if (file() !== undefined) {
+        sessionStorage.setItem('fileDataToLoad', saveString);
+        location.reload();
+        return;
+    }
+
     const saveFile = JSON.parse(saveString);
 
     if (!saveFile.player || !saveFile.save) {
         return;
     }
 
-    if (file() !== undefined) {
-        Companion.initGame();
-    }
+    player = new Player(saveFile.player);
 
-    player.highestRegion(saveFile.player.highestRegion);
-    player.trainerId = saveFile.player.trainerId;
+    /*if (file() !== undefined) {
+        Companion.initGame();
+    }*/
+
+    //player.highestRegion(saveFile.player.highestRegion);
+    //player.trainerId = saveFile.player.trainerId;
+
     App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
     Settings.setSettingByName('breedingEfficiencyAllModifiers', false);
 
     Enigma.revealHintsCounter(0);
     VitaminTracker.highestRegion(player.highestRegion());
     Companion.typeDamageDistribution(undefined);
-    BattleCalculator.showData(false);
+    //BattleCalculator.showData(false);
     BattleFrontierSim.simulationResult(null);
     isDamageLoaded(false);
 
     file(saveFile);
 
-    if (fileName) {
+    /*if (fileName) {
         const prevDataIndex = prevLoadedSaves().findIndex((save) => save.name == fileName);
         if (prevDataIndex > 0) {
             prevLoadedSaves.unshift(prevLoadedSaves.splice(prevDataIndex, 1)[0]);
@@ -48,7 +57,7 @@ const loadSaveData = (saveString, fileName = null) => {
             arr.length = Math.min(arr.length, 5);
             prevLoadedSaves(arr);
         }
-    }
+    }*/
 
     if (!saveFile.save.party.caughtPokemon?.length) {
         Util.notify({
@@ -130,22 +139,30 @@ const isOlderVersion = ko.pureComputed(() => {
 });
 
 const initialize = () => {
-    const prevSaves = localStorage.getItem('prevLoadedSaves');
+    /*const prevSaves = localStorage.getItem('prevLoadedSaves');
     if (prevSaves) {
         prevLoadedSaves(JSON.parse(prevSaves));
     }
 
     prevLoadedSaves.subscribe((value) => {
         localStorage.setItem('prevLoadedSaves', JSON.stringify(value));
-    });
+    });*/
+
+    localStorage.removeItem('prevLoadedSaves');
+
+    const fileDataToLoad = sessionStorage.getItem('fileDataToLoad');
+    if (fileDataToLoad) {
+        sessionStorage.removeItem('fileDataToLoad');
+        loadSaveData(fileDataToLoad);
+    }
 };
 
-const origAchievementBonus = AchievementHandler.achievementBonus;
 const loadAttackData = () => {
     if (!isLoaded() || isDamageLoaded()) {
         return;
     }
 
+    // Clear Achievement multiplier bonuses
     Object.values(App.game.multiplier.multipliers).forEach((multiplier) => {
         const index = multiplier.findIndex(b => b.source == 'Achievements');
         if (index > -1) {
@@ -153,65 +170,37 @@ const loadAttackData = () => {
         }
     });
 
+    // Init Achievements
     AchievementHandler.achievementList = [];
-    AchievementHandler.achievementBonus = origAchievementBonus;
     AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
 
-    // load starters
-    player.regionStarters = [];
-    const savedPlayer = SaveData.file().player;
-    for (let i = 0; i <= GameConstants.MAX_AVAILABLE_REGION; i++) {
-        if (savedPlayer.regionStarters && savedPlayer.regionStarters[i] != undefined) {
-            player.regionStarters.push(ko.observable(savedPlayer.regionStarters[i]));
-        } else if (i < (savedPlayer.highestRegion ?? 0)) {
-            player.regionStarters.push(ko.observable(GameConstants.Starter.Grass));
-        } else if (i == (savedPlayer.highestRegion ?? 0)) {
-            player.regionStarters.push(ko.observable(GameConstants.Starter.None));
-        } else {
-            this.regionStarters.push(ko.observable(GameConstants.Starter.None));
-        }
-    }
-
-    player.effectList = Save.initializeEffects(SaveData.file().player.effectList);
-    const itemList = SaveData.file().player._itemList;
-    player.itemList = Save.initializeItemlist();
-    if (itemList) {
-        for (const key in itemList) {
-            if (player.itemList[key]) {
-                player.itemList[key](itemList[key]);
-            }
-        }
-    }
-
+    // Disable Battle Items & Flutes for Battle Calculator & BF Simulator
     player.effectList['xAttack'](0);
     player.effectList['xClick'](0);
 
     GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
         player.effectList[flute](0);
         player.itemList[flute](1);
-    })
+    });
 
+    // Init Battle Item & Flute effect runners
     EffectEngineRunner.initialize(App.game.multiplier, GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]));
     FluteEffectRunner.initialize(App.game.multiplier);
 
-    // everything we need to load to calculate true damage
-    const thingsToLoad = ['breeding', 'keyItems', 'badgeCase', 'oakItems', 'party', 'gems', 'farming', 'statistics', 'quests', 'challenges', 'multiplier', 'underground'];
-
-    Object.keys(App.game).filter(key => thingsToLoad.includes(key)).filter(key => App.game[key]?.saveKey).forEach(key => {
-    //Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
+    // Load remaining data from save file to calculate true damage
+    //const thingsToLoad = ['breeding', 'keyItems', 'badgeCase', 'oakItems', 'party', 'gems', 'farming', 'statistics', 'quests', 'challenges', 'multiplier', 'underground'];
+    //Object.keys(App.game).filter(key => thingsToLoad.includes(key)).filter(key => App.game[key]?.saveKey).forEach(key => {
+    Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
         const saveKey = App.game[key].saveKey;
         App.game[key].fromJSON(SaveData.file().save[saveKey]);
     });
 
-    SaveData.file().save.achievements?.forEach((achievementName) => {
-        const achievement = AchievementHandler.findByName(achievementName);
-        if (achievement) {
-            achievement.unlocked(true);
-        }
-    });
+    AchievementHandler.fromJSON(SaveData.file().save.achievements);
 
+    // Calc Achievement Bonus & minor optimization to not re-check achievement requirements
     AchievementHandler.preCheckAchievements();
     AchievementHandler.calculateMaxBonus();
+
     AchievementHandler.achievementList.forEach(a => {
         if (a.unlocked()) {
             a.isCompleted = () => true;
@@ -231,6 +220,7 @@ const loadAttackData = () => {
         p.breeding = false;
     });
 
+    // Reset some settings, need to handle this better
     BattleCalculator.settings.xAttackEnabled(false);
     BattleCalculator.settings.xClickEnabled(false);
     BattleCalculator.settings.rockyHelmetEnabled(false);
