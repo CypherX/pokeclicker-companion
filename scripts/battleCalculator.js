@@ -1,3 +1,11 @@
+const isRunning = ko.observable(false);
+const showResult = ko.observable(false);
+
+let regionMultiplierOverride = -1;
+const gymList = ko.observable([]);
+const tempBattleList = ko.observable([]);
+const damageCache = new Map();
+
 const settings = {
     xAttackEnabled: ko.observable(false),
     weather: ko.observable(WeatherType.Clear),
@@ -9,14 +17,6 @@ const settings = {
     xClickEnabled: ko.observable(false),
     rockyHelmetEnabled: ko.observable(false),
 };
-
-settings.xAttackEnabled.subscribe((value) => {
-    player.effectList['xAttack'](value ? 1 : 0);
-});
-
-settings.xClickEnabled.subscribe((value) => {
-    player.effectList['xClick'](value ? 1 : 0);
-});
 
 settings.activeFlutes.subscribe(() => {
     toggleActiveFlutes();
@@ -39,205 +39,100 @@ settings.clicksPerSecond.subscribe((value) => {
     }
 });
 
-settings.rockyHelmetEnabled.subscribe((value) => {
-    App.game.oakItems.itemList[OakItemType.Rocky_Helmet].isActiveKO(!!value);
-});
-
-const ignoreSettings = ['hideCompleted', 'hideLocked', 'allFlutesToggle'];
-Object.entries(settings).forEach(([name, setting]) => {
-    if (ignoreSettings.includes(name)) {
+const runCalc = async () => {
+    if (isRunning()) {
         return;
     }
 
-    setting.subscribe(() => BattleCalculator.calcBattleData());
-});
+    showResult(false);
+    isRunning(true);
+    await Util.sleep(0);
 
-let regionMultiplierOverride = -1;
+    loadGymList();
+    loadTempBattleList();
 
-/*let baseGymList = undefined;
-const gymList = ko.pureComputed(() => {
-    if (!SaveData.isDamageLoaded()) {
-        return [];
-    }
-
-    if (!baseGymList) {
-        baseGymList = [];
-        GameConstants.RegionGyms.forEach((gyms, region) => {
-            if (region > GameConstants.MAX_AVAILABLE_REGION) {
-                return;
-            }
-    
-            if (region == GameConstants.Region.alola) {
-                gyms = gyms.filter(g => !g.endsWith(' Trial'));
-            }
-    
-            baseGymList.push({
-                region: region,
-                gyms: gyms
-            });
-        });
-
-        Companion.data.GymListOverride.forEach((g) => baseGymList.push({...g}));
-        baseGymList = baseGymList.sort((a, b) => a.region - b.region)
-            .flatMap(rg => rg.gyms.map(g => {
-                const gym = GymList[g];
-                gym.region = rg.region;
-                return gym;
-            }));
-    }
-
-    const gymsDefeated = SaveData.file().save.statistics.gymsDefeated;
-    const gymList = baseGymList.filter(g => {
-        if (!Companion.settings.showAllRegions() && Math.floor(g.region) > player.highestRegion()) {
-            return false;
-        }
-
-        if (g.region > GameConstants.MAX_AVAILABLE_REGION) {
-            return false;
-        }
-
-        if (settings.hideLocked() && !g.isUnlocked()) {
-            return false;
-        }
-
-        if (settings.hideCompleted() && gymsDefeated[GameConstants.getGymIndex(g.town)] > 0) {
-            return false;
-        }
-
-        return true;
-    });
-
-    return gymList;
-});*/
-
-/*const tempBattleList = ko.pureComputed(() => {
-    if (!SaveData.isDamageLoaded()) {
-        return [];
-    }
-
-    const temporaryBattleDefeated = SaveData.file().save.statistics.temporaryBattleDefeated;
-    return Object.values(TemporaryBattleList).filter(tb => {
-        if (!Companion.settings.showAllRegions() && tb.getTown().region > player.highestRegion()) {
-            return false;
-        }
-
-        if (tb.getTown().region > GameConstants.MAX_AVAILABLE_REGION) {
-            return false;
-        }
-
-        if (settings.hideLocked() && !tb.isUnlocked()) {
-            return false;
-        }
-
-        if (settings.hideCompleted() && temporaryBattleDefeated[GameConstants.getTemporaryBattlesIndex(tb.name)] > 0) {
-            return false;
-        }
-
-        return true;
-    });
-});*/
-
-/*const getBattleData = ko.pureComputed(() => {
-    const battleData = {
-        gyms: [],
-        tempBattles: [],
-    };
-
-    if (!SaveData.isDamageLoaded()) {
-        return battleData;
-    }
-
-    // xAttack
+    // Toggle xAttack, xClick, Rocky Helm, flutes
     player.effectList['xAttack'](settings.xAttackEnabled() ? 1 : 0);
-
-    // xClick
     player.effectList['xClick'](settings.xClickEnabled() ? 1 : 0);
-
-    // Flutes
+    App.game.oakItems.itemList[OakItemType.Rocky_Helmet].isActiveKO(settings.rockyHelmetEnabled());
     Object.values(GameConstants.FluteItemType).forEach((flute) => {
         toggleFlute(flute, settings.activeFlutes().includes(flute));
     });
 
-    const clickDamage = calcClickAttack();
-    const mkjclickDamage = calcClickAttack(GameConstants.Region.alola, GameConstants.AlolaSubRegions.MagikarpJump);
+    await calcBattleData();
 
-    damageCache.clear();
-    const gymsDefeated = SaveData.file().save.statistics.gymsDefeated;
-    const temporaryBattleDefeated = SaveData.file().save.statistics.temporaryBattleDefeated;
-
-    // gyms
-    const gymBattles = [...gymList()];
-    gymBattles.forEach(g => {
-        //if (!g.pokemonList) {
-            g.pokemonList = g.getPokemonList();
-        //}
-
-        const town = TownList[g.parent?.name ?? g.town];
-        g.townObj = town;
-
-        regionMultiplierOverride = town.region;
-
-        g.isCompleted = gymsDefeated[GameConstants.getGymIndex(g.town)] > 0;
-        g.secondsToWin = 0;
-
-        g.clickDamage = clickDamage;
-        if (town.region === GameConstants.Region.alola && town.subRegion === GameConstants.AlolaSubRegions.MagikarpJump) {
-            g.clickDamage = mkjclickDamage;
-        }
-
-        g.pokemonList.forEach(p => {
-            const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0) + g.clickDamage;
-            p.partyDamage = damage;
-            p.secondsToDefeat = Math.max(1, Math.ceil(p.maxHealth / damage));
-            if (damage > 0) {
-                g.secondsToWin += p.secondsToDefeat;
-            }
-        });
-
-        if (g.secondsToWin == 0) {
-            g.secondsToWin = Infinity;
-        }
+    player.effectList['xAttack'](0);
+    player.effectList['xClick'](0);
+    App.game.oakItems.itemList[OakItemType.Rocky_Helmet].isActiveKO(false);
+    Object.values(GameConstants.FluteItemType).forEach((flute) => {
+        toggleFlute(flute, false);
     });
 
-    battleData.gyms = gymBattles;
+    isRunning(false);
+    showResult(true);
+    await Util.sleep(0);
+    new bootstrap.Collapse(document.getElementById('battleCalcConfigCollapse')).hide();
+};
 
-    // temp battles
-    const tempBattles = [...tempBattleList()];
-    tempBattles.forEach(tb => {
-        //if (!tb.pokemonList) {
-            tb.pokemonList = tb.getPokemonList();
-        //}
+const calcBattleData = async () => {
+    const start = performance.now();
+    damageCache.clear();
 
+    const clickDamage = calcClickAttack();
+    const mkjClickDamage = calcClickAttack(GameConstants.Region.alola, GameConstants.AlolaSubRegions.MagikarpJump);
+
+    for (const gym of gymList()) {
+        regionMultiplierOverride = gym.townObj.region;
+        gym.secondsToWin(0);
+
+        gym.clickDamage(
+            gym.townObj.region === GameConstants.Region.alola && gym.townObj.subRegion === GameConstants.AlolaSubRegions.MagikarpJump
+                ? mkjClickDamage : clickDamage);
+
+        for (const pokemon of gym.pokemonList) {
+            const damage = calcPokemonDamage(pokemon.name, gym.townObj.region, gym.townObj.subRegion ?? 0) + gym.clickDamage();
+            pokemon.partyDamage(damage);
+            const secondsToDefeat = Math.max(1, Math.ceil(pokemon.maxHealth / damage));
+            pokemon.secondsToDefeat(secondsToDefeat);
+            if (damage > 0) {
+                gym.secondsToWin(gym.secondsToWin() + secondsToDefeat);
+            }
+        }
+
+        if (gym.secondsToWin() === 0) {
+            gym.secondsToWin(Infinity);
+        }
+    }
+
+    for (const tb of tempBattleList()) {
         const town = tb.getTown();
         regionMultiplierOverride = town.region;
+        tb.secondsToWin(0);
 
-        tb.isCompleted = temporaryBattleDefeated[GameConstants.getTemporaryBattlesIndex(tb.name)] > 0;
-        tb.secondsToWin = 0;
+        tb.clickDamage(
+            town.region === GameConstants.Region.alola && town.subRegion === GameConstants.AlolaSubRegions.MagikarpJump
+                ? mkjClickDamage : clickDamage);
 
-        tb.clickDamage = clickDamage;
-        if (town.region === GameConstants.Region.alola && town.subRegion === GameConstants.AlolaSubRegions.MagikarpJump) {
-            tb.clickDamage = mkjclickDamage;
-        }
-
-        tb.pokemonList.forEach(p => {
-            const damage = calcPokemonDamage(p.name, town.region, town.subRegion ?? 0) + tb.clickDamage;
-            p.partyDamage = damage;
-            p.secondsToDefeat = Math.max(1, Math.ceil(p.maxHealth / damage));
+        for (const pokemon of tb.pokemonList) {
+            const damage = calcPokemonDamage(pokemon.name, town.region, town.subRegion ?? 0) + tb.clickDamage();
+            pokemon.partyDamage(damage);
+            const secondsToDefeat = Math.max(1, Math.ceil(pokemon.maxHealth / damage));
+            pokemon.secondsToDefeat(secondsToDefeat);
             if (damage > 0) {
-                tb.secondsToWin += p.secondsToDefeat;
+                tb.secondsToWin(tb.secondsToWin() + secondsToDefeat);
             }
-        });
-
-        if (tb.secondsToWin == 0) {
-            tb.secondsToWin = Infinity;
         }
-    });
 
-    battleData.tempBattles = tempBattles;
+        if (tb.secondsToWin() === 0) {
+            tb.secondsToWin(Infinity);
+        }
+    }
+
     regionMultiplierOverride = -1;
 
-    return battleData;
-}).extend({ rateLimit: 50 });*/
+    const end = performance.now();
+    console.log(`[calcBattleData] ${end - start}ms`);
+};
 
 const calcClickAttack = (region = 0, subRegion = 0) => {
     const clicksPerSecond = settings.clicksPerSecond();
@@ -275,12 +170,7 @@ const getTempBattleTime = ko.pureComputed(() => {
     return Math.ceil(battleTime / 100) / 10;
 });
 
-//let calcTimes = 0;
-//let calcTime = 0;
-
-const damageCache = new Map();
 const calcPokemonDamage = (pokemonName, battleRegion, battleSubRegion) => {
-    //const start = performance.now();
     const pokemon = pokemonMap[pokemonName];
     const type1 = pokemon.type[0];
     const type2 = pokemon.type[1] ?? PokemonType.None;
@@ -298,9 +188,6 @@ const calcPokemonDamage = (pokemonName, battleRegion, battleSubRegion) => {
         //calcTimes += 1;
         damageCache.set(damageCacheKey, damage);
     }
-
-    //const end = performance.now();
-    //calcTime += (end - start);
 
     return damage;
 }
@@ -371,28 +258,8 @@ const formattedSecondsToWin = (secondsToWin) => {
     return secondsToWin.toLocaleString();
 };
 
-
-const showData = ko.observable(false);
-const gymList = ko.observable([]);
-const tempBattleList = ko.observable([]);
-
-const calculate = () => {
-    //const start = performance.now();
-
-    if (!SaveData.isDamageLoaded()) {
-        SaveData.loadAttackData();
-    }
-
-    loadGymList();
-    loadTempBattleList();
-    calcBattleData();
-    showData(true);
-
-    //const end = performance.now();
-    //console.log(`[calculate] ${end - start}ms`);
-};
-
 const loadGymList = () => {
+    const start = performance.now();
     let list = [];
     GameConstants.RegionGyms.forEach((gyms, region) => {
         if (region > GameConstants.MAX_AVAILABLE_REGION) {
@@ -445,9 +312,12 @@ const loadGymList = () => {
     }));
 
     gymList(list);
+    const end = performance.now();
+    console.log(`[loadGymList] ${end - start}ms`);
 };
 
 const loadTempBattleList = () => {
+    const start = performance.now();
     const list = [];
     const temporaryBattleDefeated = SaveData.file().save.statistics.temporaryBattleDefeated;
 
@@ -494,87 +364,20 @@ const loadTempBattleList = () => {
     });
 
     tempBattleList(list);
-}
-
-const calcBattleData = () => {
-    const start = performance.now();
-    damageCache.clear();
-
-    //calcTimes = 0;
-    //calcTime = 0;
-
-    const clickDamage = calcClickAttack();
-    const mkjClickDamage = calcClickAttack(GameConstants.Region.alola, GameConstants.AlolaSubRegions.MagikarpJump);
-
-    for (const gym of gymList()) {
-        regionMultiplierOverride = gym.townObj.region;
-        gym.secondsToWin(0);
-
-        gym.clickDamage(
-            gym.townObj.region === GameConstants.Region.alola && gym.townObj.subRegion === GameConstants.AlolaSubRegions.MagikarpJump
-                ? mkjClickDamage : clickDamage);
-
-        for (const pokemon of gym.pokemonList) {
-            const damage = calcPokemonDamage(pokemon.name, gym.townObj.region, gym.townObj.subRegion ?? 0) + gym.clickDamage();
-            pokemon.partyDamage(damage);
-            const secondsToDefeat = Math.max(1, Math.ceil(pokemon.maxHealth / damage));
-            pokemon.secondsToDefeat(secondsToDefeat);
-            if (damage > 0) {
-                gym.secondsToWin(gym.secondsToWin() + secondsToDefeat);
-            }
-        }
-
-        if (gym.secondsToWin() === 0) {
-            gym.secondsToWin(Infinity);
-        }
-    }
-
-    for (const tb of tempBattleList()) {
-        const town = tb.getTown();
-        regionMultiplierOverride = town.region;
-        tb.secondsToWin(0);
-
-        tb.clickDamage(
-            town.region === GameConstants.Region.alola && town.subRegion === GameConstants.AlolaSubRegions.MagikarpJump
-                ? mkjClickDamage : clickDamage);
-
-        for (const pokemon of tb.pokemonList) {
-            const damage = calcPokemonDamage(pokemon.name, town.region, town.subRegion ?? 0) + tb.clickDamage();
-            pokemon.partyDamage(damage);
-            const secondsToDefeat = Math.max(1, Math.ceil(pokemon.maxHealth / damage));
-            pokemon.secondsToDefeat(secondsToDefeat);
-            if (damage > 0) {
-                tb.secondsToWin(tb.secondsToWin() + secondsToDefeat);
-            }
-        }
-
-        if (tb.secondsToWin() === 0) {
-            tb.secondsToWin(Infinity);
-        }
-    }
-
-    //console.log(`[calcTimes] ${calcTimes}`);
-    //console.log(`[calcTime] ${calcTime}ms`);
-
-    regionMultiplierOverride = -1;
-
     const end = performance.now();
-    console.log(`[calcBattleData] ${end - start}ms`);
+    console.log(`[loadGymList] ${end - start}ms`);
 }
-
 
 module.exports = {
     settings,
-    //getBattleData,
     getGymBattleTime,
     getTempBattleTime,
     formattedSecondsToWin,
     calcClickAttack,
 
-    showData,
+    showResult,
     gymList,
     tempBattleList,
-
-    calculate,
-    calcBattleData,
+    isRunning,
+    runCalc,
 };

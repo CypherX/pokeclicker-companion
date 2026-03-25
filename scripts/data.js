@@ -313,6 +313,12 @@ const berryMasterPokemonCosts = {
 
 const changeLogData = [
     {
+        timestamp: 1774399889214,
+        changes: [
+            'Visual & performance updates to the Battle Calculator. Should be a bit more useable on mobile now as well.',
+        ],
+    },
+    {
         timestamp: 1772412579939,
         changes: [
             'Orre dungeons on the [My Save] → [Statistics & More] → [Dungeons] page now include Shadow status in the info & completion display.',
