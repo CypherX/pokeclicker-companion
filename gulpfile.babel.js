@@ -8,6 +8,8 @@ const source = require('vinyl-source-stream');
 const fs = require('fs');
 const buffer = require("vinyl-buffer");
 const terser = require("gulp-terser");
+const gulpIf = require('gulp-if');
+const rename = require('gulp-rename');
 
 const srcs = {
     buildArtefacts: 'build/**/*',
@@ -105,9 +107,14 @@ gulp.task('pokeclicker-assets', () => {
     .pipe(gulp.dest('build/assets/sounds'));
 });
 
-gulp.task('styles', () => gulp.src(srcs.styles)
+gulp.task('styles', () => {
+    return gulp.src(srcs.styles)
+        .pipe(gulpIf(file => file.relative === 'styles.css', rename((path) => {
+            path.basename = `styles-${timestamp}`;
+        })))
         .pipe(gulp.dest(dests.styles))
-        .pipe(browserSync.reload({stream: true})));
+        .pipe(browserSync.reload({stream: true}))
+});
 
 gulp.task('browserSync', () => {
     browserSync({
