@@ -16,7 +16,11 @@ const settings = {
     clicksPerSecond: ko.observable(0),
     xClickEnabled: ko.observable(false),
     rockyHelmetEnabled: ko.observable(false),
+    autoCollapseConfig: ko.observable(true),
 };
+
+settings.autoCollapseConfig(!!+(localStorage.getItem('autoCollapseBattleCalcConfig') ?? '1'));
+settings.autoCollapseConfig.subscribe((value) => localStorage.setItem('autoCollapseBattleCalcConfig', +value));
 
 settings.activeFlutes.subscribe(() => {
     toggleActiveFlutes();
@@ -39,6 +43,19 @@ settings.clicksPerSecond.subscribe((value) => {
     }
 });
 
+const ignoreSettings = ['hideCompleted', 'hideLocked', 'allFlutesToggle', 'autoCollapseConfig'];
+Object.entries(settings).forEach(([name, setting]) => {
+    if (ignoreSettings.includes(name)) {
+        return;
+    }
+
+    setting.subscribe(() => {
+        if (showResult()) {
+            BattleCalculator.calcBattleData();
+        }
+    });
+});
+
 const runCalc = async () => {
     if (isRunning()) {
         return;
@@ -51,6 +68,20 @@ const runCalc = async () => {
     loadGymList();
     loadTempBattleList();
 
+    await calcBattleData();
+
+    isRunning(false);
+    showResult(true);
+    await Util.sleep(0);
+
+    if (settings.autoCollapseConfig()) {
+        new bootstrap.Collapse(document.getElementById('battleCalcConfigCollapse')).hide();
+    }
+};
+
+const calcBattleData = async () => {
+    damageCache.clear();
+    
     // Toggle xAttack, xClick, Rocky Helm, flutes
     player.effectList['xAttack'](settings.xAttackEnabled() ? 1 : 0);
     player.effectList['xClick'](settings.xClickEnabled() ? 1 : 0);
@@ -58,25 +89,6 @@ const runCalc = async () => {
     Object.values(GameConstants.FluteItemType).forEach((flute) => {
         toggleFlute(flute, settings.activeFlutes().includes(flute));
     });
-
-    await calcBattleData();
-
-    player.effectList['xAttack'](0);
-    player.effectList['xClick'](0);
-    App.game.oakItems.itemList[OakItemType.Rocky_Helmet].isActiveKO(false);
-    Object.values(GameConstants.FluteItemType).forEach((flute) => {
-        toggleFlute(flute, false);
-    });
-
-    isRunning(false);
-    showResult(true);
-    await Util.sleep(0);
-    new bootstrap.Collapse(document.getElementById('battleCalcConfigCollapse')).hide();
-};
-
-const calcBattleData = async () => {
-    const start = performance.now();
-    damageCache.clear();
 
     const clickDamage = calcClickAttack();
     const mkjClickDamage = calcClickAttack(GameConstants.Region.alola, GameConstants.AlolaSubRegions.MagikarpJump);
@@ -128,10 +140,14 @@ const calcBattleData = async () => {
         }
     }
 
-    regionMultiplierOverride = -1;
+    player.effectList['xAttack'](0);
+    player.effectList['xClick'](0);
+    App.game.oakItems.itemList[OakItemType.Rocky_Helmet].isActiveKO(false);
+    Object.values(GameConstants.FluteItemType).forEach((flute) => {
+        toggleFlute(flute, false);
+    });
 
-    const end = performance.now();
-    console.log(`[calcBattleData] ${end - start}ms`);
+    regionMultiplierOverride = -1;
 };
 
 const calcClickAttack = (region = 0, subRegion = 0) => {
@@ -185,7 +201,6 @@ const calcPokemonDamage = (pokemonName, battleRegion, battleSubRegion) => {
     let damage = damageCache.get(damageCacheKey) || damageCache.get(damageCacheKey2);
     if (damage === undefined) {
         damage = calcPartyAttack(type1, type2, battleRegion, settings.weather(), battleRegion, battleSubRegion);
-        //calcTimes += 1;
         damageCache.set(damageCacheKey, damage);
     }
 
@@ -259,7 +274,6 @@ const formattedSecondsToWin = (secondsToWin) => {
 };
 
 const loadGymList = () => {
-    const start = performance.now();
     let list = [];
     GameConstants.RegionGyms.forEach((gyms, region) => {
         if (region > GameConstants.MAX_AVAILABLE_REGION) {
@@ -312,12 +326,9 @@ const loadGymList = () => {
     }));
 
     gymList(list);
-    const end = performance.now();
-    console.log(`[loadGymList] ${end - start}ms`);
 };
 
 const loadTempBattleList = () => {
-    const start = performance.now();
     const list = [];
     const temporaryBattleDefeated = SaveData.file().save.statistics.temporaryBattleDefeated;
 
@@ -364,8 +375,6 @@ const loadTempBattleList = () => {
     });
 
     tempBattleList(list);
-    const end = performance.now();
-    console.log(`[loadGymList] ${end - start}ms`);
 }
 
 module.exports = {
@@ -374,7 +383,7 @@ module.exports = {
     getTempBattleTime,
     formattedSecondsToWin,
     calcClickAttack,
-
+    calcBattleData,
     showResult,
     gymList,
     tempBattleList,

@@ -10,9 +10,13 @@
         <!-- ko if: SaveData.isDamageLoaded() -->
         <div class="card">
             <div class="card-header">
-                Configuration
-                <div class="float-end">
-                    <button class="btn btn-link btn-sm text-decoration-none p-0 m-0" type="button" data-bs-toggle="collapse" data-bs-target="#battleCalcConfigCollapse">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">Configuration</div>
+                    <div class="form-check form-switch small p-0 m-0" style="min-height: 0;">
+                        <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorAutoCollapseConfig" data-bind="checked: BattleCalculator.settings.autoCollapseConfig">
+                        <label class="form-check-label" for="BattleCalculatorAutoCollapseConfig">Auto-collapse configuration</label>
+                    </div>
+                    <button class="btn btn-link btn-sm text-decoration-none p-0 m-0 ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#battleCalcConfigCollapse">
                         Show/Hide
                     </button>
                 </div>
@@ -108,15 +112,23 @@
                         <div class="text-muted small text-center mt-1">Active flutes provide a +0.5% typed damage bonus for the Gem types they consume.</div>
                         <hr class="my-1" />
                         <div class="text-muted small text-center">Damage calculations include all Pokémon in your party at the current max level. Being in the hatchery or not max level will not affect these calculations.</div>
+                        <div data-bind="visible: BattleCalculator.settings.clicksPerSecond() >= 15">
+                            <hr class="my-1" />
+                            <div class="text-center text-danger small"><strong>Clicks/second Warning</strong> - Due to game calculations and lag, and depending on your progress and device hardware, you will likely not reach the full amount of clicks/second, even with an autoclicker.</div>
+                        </div>
                         <hr class="my-1" />
-                        <div class="text-center mt-3">
+                        <!-- ko ifnot: BattleCalculator.showResult() -->
+                        <div class="text-center mt-2">
                             <button type="button" class="btn btn-primary" data-bind="
                                 click: () => BattleCalculator.runCalc(),
                                 enable: BattleCalculator.isRunning() === false">
                                 Calculate Battles!
                             </button>
-                            <div class="small mt-1">Battles must be re-calculated after adjusting (most) of the above settings.</div>
                         </div>
+                        <!-- /ko -->
+                        <!-- ko if: BattleCalculator.showResult() -->
+                        <div class="small text-center text-muted">Battles are automatically recalculated when adjusting above settings.</div>
+                        <!-- /ko -->
                     </div>
                 </div>
             </div>
