@@ -75,6 +75,9 @@
                                                         <div class="d-flex flex-column" style="line-height: 1.25;">
                                                             <span data-bind="text: amount"></span>
                                                             <span data-bind="text: BerryType[berryType]"></span>
+                                                            <!-- ko if: SaveData.isLoaded -->
+                                                            <span class="small text-muted" style="margin-top: 2px;" data-bind="text: `(${SaveData.file().save.farming.berryList[berryType].toLocaleString()})`"></span>
+                                                            <!-- /ko -->
                                                         </div>
                                                     </div>
                                                 </td>
