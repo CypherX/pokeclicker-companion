@@ -34,8 +34,11 @@
                             <div class="col-auto">
                                 <div class="input-group">
                                     <div class="input-group-text">Weather</div>
-                                    <select class="form-select form-select-sm"
-                                        data-bind="options: GameHelper.enumSelectOption(WeatherType), optionsText: 'name', optionsValue: 'value', value: $data.weather">
+                                    <select class="form-select form-select-sm" data-bind="
+                                        options: [...GameHelper.enumSelectOption(WeatherType), { name: 'Current Regional', value: -1 }],
+                                        optionsText: 'name',
+                                        optionsValue: 'value',
+                                        value: $data.weather">
                                     </select>
                                 </div>
                             </div>
@@ -51,6 +54,9 @@
                                     <label class="form-check-label" for="BattleCalculatorHideLocked">Hide Locked Battles</label>
                                 </div>
                             </div>
+                        </div>
+                        <div class="text-muted small text-center mt-1" data-bind="visible: BattleCalculator.settings.weather() === -1">
+                            <strong>Current Regional</strong> - applies the current weather in each region to these calculations.
                         </div>
                         <hr class="my-2" />
                         <div class="row align-items-center justify-content-center mt-1" data-bind="with: BattleCalculator.settings">
@@ -155,12 +161,15 @@
                     <span class="text-muted small">Enable the <span class="text-decoration-underline">Show All Regions / Pokémon</span> setting to see battles from regions you have yet to reach.</span>
                 </div>
                 <!-- /ko -->
-                <table class="table table-bordered table-sticky-header custom-borders">
+                <table class="table table-bordered small table-sticky-header custom-borders">
                     <thead>
-                        <tr class="table-dark">
+                        <tr class="table-dark align-middle">
                             <th>Gym</th>
                             <th class="text-center">Town</th>
                             <th class="text-center">Region</th>
+                            <!-- ko if: BattleCalculator.settings.weather() === -1 -->
+                            <th class="text-center">Weather</th>
+                            <!-- /ko -->
                             <th class="text-center">Pokémon</th>
                             <th class="text-center">Total HP</th>
                             <th class="text-center">Battle Seconds</th>
@@ -175,6 +184,9 @@
                             <td data-bind="text: $data.leaderName"></td>
                             <td class="text-center" data-bind="text: $data.townObj.name"></td>
                             <td class="text-center" data-bind="text: Util.getRegionNameText($data.townObj.region, $data.townObj.subRegion)"></td>
+                            <!-- ko if: BattleCalculator.settings.weather() === -1 -->
+                            <td class="text-center" data-bind="text: GameConstants.humanifyString(WeatherType[Weather.getWeather($data.townObj.region, new Date())])"></td>
+                            <!-- /ko -->
                             <td class="text-center" data-bind="text: pokemonList.length"></td>
                             <td class="text-center" data-bind="text: pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
                             <td class="text-center" data-bind="text: Number(BattleCalculator.getGymBattleTime().toFixed(1))"></td>
@@ -189,7 +201,7 @@
                         </tr>
                         <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }, visible: $data.isVisible" style="transition: none !important;">
                             <td colspan="9">
-                                <table class="table table-sm small mb-0">
+                                <table class="table table-sm mb-0">
                                     <thead>
                                         <tr class="table-dark">
                                             <th>Pokemon</th>
@@ -229,11 +241,14 @@
                     <span class="text-muted small">Enable the <span class="text-decoration-underline">Show All Regions / Pokémon</span> setting to see battles from regions you have yet to reach.</span>
                 </div>
                 <!-- /ko -->
-                <table class="table table-bordered table-sticky-header custom-borders">
+                <table class="table table-bordered small table-sticky-header custom-borders">
                     <thead>
-                        <tr class="table-dark">
+                        <tr class="table-dark align-middle">
                             <th>Battle</th>
                             <th class="text-center">Region</th>
+                            <!-- ko if: BattleCalculator.settings.weather() === -1 -->
+                            <th class="text-center">Weather</th>
+                            <!-- /ko -->
                             <th class="text-center">Pokémon</th>
                             <th class="text-center">Total HP</th>
                             <th class="text-center">Battle Seconds</th>
@@ -247,6 +262,9 @@
                         <tr class="align-middle" data-bind="visible: $data.isVisible">
                             <td data-bind="text: $data.name"></td>
                             <td class="text-center" data-bind="text: Util.getRegionNameText($data.getTown().region, $data.getTown().subRegion)"></td>
+                            <!-- ko if: BattleCalculator.settings.weather() === -1 -->
+                            <td class="text-center" data-bind="text: GameConstants.humanifyString(WeatherType[Weather.getWeather($data.getTown().region, new Date())])"></td>
+                            <!-- /ko -->
                             <td class="text-center" data-bind="text: pokemonList.length"></td>
                             <td class="text-center" data-bind="text: pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
                             <td class="text-center" data-bind="text: Number(BattleCalculator.getTempBattleTime().toFixed(1))"></td>
@@ -261,7 +279,7 @@
                         </tr>
                         <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }, visible: $data.isVisible" style="transition: none !important;">
                             <td colspan="8">
-                                <table class="table table-sm small mb-0">
+                                <table class="table table-sm mb-0">
                                     <thead>
                                         <tr class="table-dark">
                                             <th>Pokemon</th>

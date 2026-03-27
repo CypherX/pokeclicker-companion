@@ -81,6 +81,16 @@ const runCalc = async () => {
 
 const calcBattleData = async () => {
     damageCache.clear();
+
+    const weatherLookup = new Array(GameConstants.MAX_AVAILABLE_REGION);
+    if (settings.weather() === -1) {
+        const date = new Date();
+        for (let i = 0; i < GameConstants.MAX_AVAILABLE_REGION; i++) {
+            weatherLookup[i] = Weather.getWeather(i, date);
+        }
+    } else {
+        weatherLookup.fill(settings.weather());
+    }
     
     // Toggle xAttack, xClick, Rocky Helm, flutes
     player.effectList['xAttack'](settings.xAttackEnabled() ? 1 : 0);
@@ -102,7 +112,7 @@ const calcBattleData = async () => {
                 ? mkjClickDamage : clickDamage);
 
         for (const pokemon of gym.pokemonList) {
-            const damage = calcPokemonDamage(pokemon.name, gym.townObj.region, gym.townObj.subRegion ?? 0) + gym.clickDamage();
+            const damage = calcPokemonDamage(pokemon.name, gym.townObj.region, gym.townObj.subRegion ?? 0, weatherLookup[gym.townObj.region]) + gym.clickDamage();
             pokemon.partyDamage(damage);
             const secondsToDefeat = Math.max(1, Math.ceil(pokemon.maxHealth / damage));
             pokemon.secondsToDefeat(secondsToDefeat);
@@ -126,7 +136,7 @@ const calcBattleData = async () => {
                 ? mkjClickDamage : clickDamage);
 
         for (const pokemon of tb.pokemonList) {
-            const damage = calcPokemonDamage(pokemon.name, town.region, town.subRegion ?? 0) + tb.clickDamage();
+            const damage = calcPokemonDamage(pokemon.name, town.region, town.subRegion ?? 0, weatherLookup[town.region]) + tb.clickDamage();
             pokemon.partyDamage(damage);
             const secondsToDefeat = Math.max(1, Math.ceil(pokemon.maxHealth / damage));
             pokemon.secondsToDefeat(secondsToDefeat);
@@ -186,7 +196,7 @@ const getTempBattleTime = ko.pureComputed(() => {
     return Math.ceil(battleTime / 100) / 10;
 });
 
-const calcPokemonDamage = (pokemonName, battleRegion, battleSubRegion) => {
+const calcPokemonDamage = (pokemonName, battleRegion, battleSubRegion, weather) => {
     const pokemon = pokemonMap[pokemonName];
     const type1 = pokemon.type[0];
     const type2 = pokemon.type[1] ?? PokemonType.None;
@@ -200,7 +210,7 @@ const calcPokemonDamage = (pokemonName, battleRegion, battleSubRegion) => {
 
     let damage = damageCache.get(damageCacheKey) || damageCache.get(damageCacheKey2);
     if (damage === undefined) {
-        damage = calcPartyAttack(type1, type2, battleRegion, settings.weather(), battleRegion, battleSubRegion);
+        damage = calcPartyAttack(type1, type2, battleRegion, weather, battleRegion, battleSubRegion);
         damageCache.set(damageCacheKey, damage);
     }
 

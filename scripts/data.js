@@ -313,6 +313,13 @@ const berryMasterPokemonCosts = {
 
 const changeLogData = [
     {
+        timestamp: 1774625069477,
+        changes: [
+            'Battle Calculator now has a "Current Regional" weather option. This will apply the current weather in each region to the battle calculations.',
+            'Berry Master forecasts now show how many of each berry you own after loading a save file.',
+        ],
+    },
+    {
         timestamp: 1774476425624,
         changes: [
             'Added a heatmap to the [My Save] → [Statistics & More] → [Type Damage] grid.',
