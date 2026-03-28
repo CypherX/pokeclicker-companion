@@ -85,7 +85,7 @@ const calcBattleData = async () => {
     const weatherLookup = new Array(GameConstants.MAX_AVAILABLE_REGION);
     if (settings.weather() === -1) {
         const date = new Date();
-        for (let i = 0; i < GameConstants.MAX_AVAILABLE_REGION; i++) {
+        for (let i = 0; i <= GameConstants.MAX_AVAILABLE_REGION; i++) {
             weatherLookup[i] = Weather.getWeather(i, date);
         }
     } else {
