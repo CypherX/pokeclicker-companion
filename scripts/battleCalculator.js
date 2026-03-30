@@ -114,10 +114,10 @@ const calcBattleData = async () => {
         for (const pokemon of gym.pokemonList) {
             const damage = calcPokemonDamage(pokemon.name, gym.townObj.region, gym.townObj.subRegion ?? 0, weatherLookup[gym.townObj.region]) + gym.clickDamage();
             pokemon.partyDamage(damage);
-            const secondsToDefeat = Math.max(1, Math.ceil(pokemon.maxHealth / damage));
+            const secondsToDefeat = Math.max(1, pokemon.maxHealth / damage);
             pokemon.secondsToDefeat(secondsToDefeat);
             if (damage > 0) {
-                gym.secondsToWin(gym.secondsToWin() + secondsToDefeat);
+                gym.secondsToWin(gym.secondsToWin() + Math.ceil(secondsToDefeat));
             }
         }
 
@@ -138,10 +138,10 @@ const calcBattleData = async () => {
         for (const pokemon of tb.pokemonList) {
             const damage = calcPokemonDamage(pokemon.name, town.region, town.subRegion ?? 0, weatherLookup[town.region]) + tb.clickDamage();
             pokemon.partyDamage(damage);
-            const secondsToDefeat = Math.max(1, Math.ceil(pokemon.maxHealth / damage));
+            const secondsToDefeat = Math.max(1, pokemon.maxHealth / damage);
             pokemon.secondsToDefeat(secondsToDefeat);
             if (damage > 0) {
-                tb.secondsToWin(tb.secondsToWin() + secondsToDefeat);
+                tb.secondsToWin(tb.secondsToWin() + Math.ceil(secondsToDefeat));
             }
         }
 

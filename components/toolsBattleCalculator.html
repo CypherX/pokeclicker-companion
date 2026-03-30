@@ -221,7 +221,11 @@
                                                 <knockout class="small text-warning" data-bind="text: `(${$parent.clickDamage().toLocaleString()})`,
                                                     visible: $parent.clickDamage() > 0"></knockout>
                                             </td>
-                                            <td class="text-center" data-bind="text: secondsToDefeat().toLocaleString()"></td>
+                                            <td class="text-center">
+                                                <knockout data-bind="text: Math.ceil(secondsToDefeat()).toLocaleString()"></knockout>
+                                                <knockout class="ms-1 text-warning small" data-bind="
+                                                    text: `(${secondsToDefeat().toLocaleString()})`, visible: secondsToDefeat() !== Infinity && secondsToDefeat() % 1 != 0"></knockout>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -301,7 +305,11 @@
                                                 <knockout class="small text-warning" data-bind="text: `(${$parent.clickDamage().toLocaleString()})`,
                                                     visible: $parent.clickDamage() > 0"></knockout>
                                             </td>
-                                            <td class="text-center" data-bind="text: secondsToDefeat().toLocaleString()"></td>
+                                            <td class="text-center">
+                                                <knockout data-bind="text: Math.ceil(secondsToDefeat()).toLocaleString()"></knockout>
+                                                <knockout class="ms-1 text-warning small" data-bind="
+                                                    text: `(${secondsToDefeat().toLocaleString()})`, visible: secondsToDefeat() !== Infinity && secondsToDefeat() % 1 != 0"></knockout>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
