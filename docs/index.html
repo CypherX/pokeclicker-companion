@@ -9,7 +9,7 @@
         <meta http-equiv="Expires" content="0">-->
         <title>PokéClicker Companion</title>
         <link id="theme-stylesheet" href="./styles/bootstrap.min.css" rel="stylesheet">
-        <link href="./styles/styles-1774734976498.css" rel="stylesheet">
+        <link href="./styles/styles-1774879796103.css" rel="stylesheet">
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
@@ -1705,7 +1705,11 @@
                                                 <knockout class="small text-warning" data-bind="text: `(${$parent.clickDamage().toLocaleString()})`,
                                                     visible: $parent.clickDamage() > 0"></knockout>
                                             </td>
-                                            <td class="text-center" data-bind="text: secondsToDefeat().toLocaleString()"></td>
+                                            <td class="text-center">
+                                                <knockout data-bind="text: Math.ceil(secondsToDefeat()).toLocaleString()"></knockout>
+                                                <knockout class="ms-1 text-warning small" data-bind="
+                                                    text: `(${secondsToDefeat().toLocaleString()})`, visible: secondsToDefeat() !== Infinity && secondsToDefeat() % 1 != 0"></knockout>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1785,7 +1789,11 @@
                                                 <knockout class="small text-warning" data-bind="text: `(${$parent.clickDamage().toLocaleString()})`,
                                                     visible: $parent.clickDamage() > 0"></knockout>
                                             </td>
-                                            <td class="text-center" data-bind="text: secondsToDefeat().toLocaleString()"></td>
+                                            <td class="text-center">
+                                                <knockout data-bind="text: Math.ceil(secondsToDefeat()).toLocaleString()"></knockout>
+                                                <knockout class="ms-1 text-warning small" data-bind="
+                                                    text: `(${secondsToDefeat().toLocaleString()})`, visible: secondsToDefeat() !== Infinity && secondsToDefeat() % 1 != 0"></knockout>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -2324,7 +2332,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1774734976498.js"></script>
+        <script src="./bundle-1774879796103.js"></script>
     </body>
 </html>
 
