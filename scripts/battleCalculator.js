@@ -17,10 +17,14 @@ const settings = {
     xClickEnabled: ko.observable(false),
     rockyHelmetEnabled: ko.observable(false),
     autoCollapseConfig: ko.observable(true),
+    runCalcImmediately: ko.observable(false),
 };
 
 settings.autoCollapseConfig(!!+(localStorage.getItem('autoCollapseBattleCalcConfig') ?? '1'));
 settings.autoCollapseConfig.subscribe((value) => localStorage.setItem('autoCollapseBattleCalcConfig', +value));
+
+settings.runCalcImmediately(!!+(localStorage.getItem('runBattleCalcImmediately') ?? '0'));
+settings.runCalcImmediately.subscribe((value) => localStorage.setItem('runBattleCalcImmediately', +value));
 
 settings.activeFlutes.subscribe(() => {
     toggleActiveFlutes();
