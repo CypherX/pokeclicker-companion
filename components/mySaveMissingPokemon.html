@@ -35,7 +35,7 @@
         </div>
         <div class="flex-grow-1" style="overflow: auto;" data-bind="foreach: $data">
             <div class="card mb-3">
-                <div class="card-header bg-dark rounded-0 sticky-top"
+                <div class="card-header bg-dark text-white rounded-0 sticky-top"
                     data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`"></div>
                 <div class="card-body p-0">
                     <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 0.9rem;">

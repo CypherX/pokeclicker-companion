@@ -41,7 +41,7 @@
 
                 <!-- ko foreach: Companion.getRouteData() -->
                 <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                    <div class="card-header bg-primary rounded-0 px-2">
+                    <div class="card-header bg-primary text-white rounded-0 px-2">
                         <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
                     </div>
                     <div class="card-body small px-0 pt-2 pb-0" style="background-color: var(--bs-body-bg);">
@@ -84,7 +84,7 @@
 
             <div class="tab-pane container-xxl" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
                 <div class="card border-0 mb-3">
-                    <div class="card-header bg-dark rounded-0 px-2">Totals</div>
+                    <div class="card-header bg-dark text-white rounded-0 px-2">Totals</div>
                     <div class="card-body p-0 collapse show" style="transition: none;">
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
@@ -181,7 +181,7 @@
             <div class="tab-pane container-xxl" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
                 <!-- ko foreach: Companion.getGymData() -->
                 <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                    <div class="card-header bg-primary rounded-0 px-2">
+                    <div class="card-header bg-primary text-white rounded-0 px-2">
                         <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
                     </div>
                     <div class="card-body small px-0 pt-2 pb-0" style="background-color: var(--bs-body-bg);">
