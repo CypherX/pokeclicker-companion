@@ -65,22 +65,6 @@ settings.clicksPerSecond.subscribe((value) => {
     }
 });
 
-//let calcDebounceTimeout;
-const ignoreSettings = ['hideCompleted', 'hideLocked', 'allFlutesToggle', 'autoCollapseConfig'];
-
-Object.entries(settings).forEach(([name, setting]) => {
-    if (ignoreSettings.includes(name)) return;
-    setting.subscribe(() => {
-        if (showResult()) {
-            /*clearTimeout(calcDebounceTimeout);
-            calcDebounceTimeout = setTimeout(() => {
-                BattleCalculator.calcBattleData();
-            }, 100);*/
-            BattleCalculator.calcBattleData();
-        }
-    });
-});
-
 const runFirstCalc = async () => {
     if (isRunning()) return;
 
@@ -231,7 +215,11 @@ const calcBattleData = async () => {
         if (gym.secondsToWin.peek() !== totalSeconds) {
             gym.secondsToWin(totalSeconds);
             gym.formattedSecondsToWin(totalSeconds.toLocaleString());
-            gym.timeClass(totalSeconds <= gymTime ? 'text-success' : 'text-danger');
+        }
+
+        const newTimeClass = totalSeconds <= gymTime ? 'text-success' : 'text-danger';
+        if (gym.timeClass.peek() !== newTimeClass) {
+            gym.timeClass(newTimeClass);
         }
     }
 
@@ -290,7 +278,11 @@ const calcBattleData = async () => {
         if (tb.secondsToWin.peek() !== totalSeconds) {
             tb.secondsToWin(totalSeconds);
             tb.formattedSecondsToWin(totalSeconds.toLocaleString());
-            tb.timeClass(totalSeconds <= tbTime ? 'text-success' : 'text-danger');
+        }
+
+        const newTbTimeClass = totalSeconds <= tbTime ? 'text-success' : 'text-danger';
+        if (tb.timeClass.peek() !== newTbTimeClass) {
+            tb.timeClass(newTbTimeClass);
         }
     }
 
@@ -542,6 +534,22 @@ const hasVisibleTempBattles = ko.pureComputed(() => {
         if (hideLocked && !tb.isUnlocked()) return false;
         if (hideCompleted && tb.isCompleted()) return false;
         return true; 
+    });
+});
+
+//let calcDebounceTimeout;
+const ignoreSettings = ['hideCompleted', 'hideLocked', 'allFlutesToggle', 'autoCollapseConfig'];
+
+Object.entries(settings).forEach(([name, setting]) => {
+    if (ignoreSettings.includes(name)) return;
+    setting.subscribe(() => {
+        if (showResult()) {
+            /*clearTimeout(calcDebounceTimeout);
+            calcDebounceTimeout = setTimeout(() => {
+                BattleCalculator.calcBattleData();
+            }, 100);*/
+            BattleCalculator.calcBattleData();
+        }
     });
 });
 
