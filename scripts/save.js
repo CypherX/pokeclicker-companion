@@ -157,14 +157,33 @@ const initialize = () => {
     }
 };
 
+const excludedStatistics = new Set([
+    'pokemonCaptured',
+    'pokemonDefeated',
+    'pokemonEncountered',
+    'pokemonHatched',
+    'pokemonSeen',
+    'shadowPokemonCaptured',
+    'shadowPokemonDefeated',
+    'shinyPokemonCaptured',
+    'shinyPokemonDefeated',
+    'shinyPokemonEncountered',
+    'shinyPokemonHatched',
+]);
+
 const loadAttackData = () => {
     if (!isLoaded() || isDamageLoaded()) {
         return;
     }
 
+    const start = performance.now();
+
+    const currentSave = file()?.save;
+    if (!currentSave) return;
+
     // Clear Achievement multiplier bonuses
     Object.values(App.game.multiplier.multipliers).forEach((multiplier) => {
-        const index = multiplier.findIndex(b => b.source == 'Achievements');
+        const index = multiplier.findIndex(b => b.source === 'Achievements');
         if (index > -1) {
             multiplier.splice(index, 1);
         }
@@ -174,59 +193,61 @@ const loadAttackData = () => {
     AchievementHandler.achievementList = [];
     AchievementHandler.initialize(App.game.multiplier, App.game.challenges);
 
-    // Disable Battle Items & Flutes for Battle Calculator & BF Simulator
+    // Disable Battle Items & Flutes
     player.effectList['xAttack'](0);
     player.effectList['xClick'](0);
 
-    GameHelper.enumStrings(GameConstants.FluteItemType).forEach((flute) => {
+    const flutes = GameHelper.enumStrings(GameConstants.FluteItemType);
+    flutes.forEach((flute) => {
         player.effectList[flute](0);
         player.itemList[flute](1);
     });
 
     // Init Battle Item & Flute effect runners
-    EffectEngineRunner.initialize(App.game.multiplier, GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]));
+    const battleItems = GameHelper.enumStrings(GameConstants.BattleItemType).map((name) => ItemList[name]);
+    EffectEngineRunner.initialize(App.game.multiplier, battleItems);
     FluteEffectRunner.initialize(App.game.multiplier);
 
     // Load remaining data from save file to calculate true damage
-    //const thingsToLoad = ['breeding', 'keyItems', 'badgeCase', 'oakItems', 'party', 'gems', 'farming', 'statistics', 'quests', 'challenges', 'multiplier', 'underground'];
-    //Object.keys(App.game).filter(key => thingsToLoad.includes(key)).filter(key => App.game[key]?.saveKey).forEach(key => {
-    Object.keys(App.game).filter(key => App.game[key]?.saveKey).forEach(key => {
-        const saveKey = App.game[key].saveKey;
-        App.game[key].fromJSON(SaveData.file().save[saveKey]);
-    });
+    for (const key in App.game) {
+        const saveKey = App.game[key]?.saveKey;
+        if (saveKey && currentSave[saveKey]) {
+            let data = currentSave[saveKey];
 
-    AchievementHandler.fromJSON(SaveData.file().save.achievements);
+            if (saveKey === 'statistics') {
+                const stats = currentSave[saveKey];
+                const filteredStats = Object.fromEntries(
+                    Object.entries(stats).filter(([key]) => !excludedStatistics.has(key))
+                );
+                data = filteredStats;
+            }
 
-    // Calc Achievement Bonus & minor optimization to not re-check achievement requirements
+            //const loadStart = performance.now();
+            App.game[key].fromJSON(data);
+            //const loadEnd = performance.now();
+            //console.log(`[${saveKey}] ${loadEnd - loadStart}ms`);
+        }
+    }
+
+    AchievementHandler.fromJSON(currentSave.achievements);
+
+    // Calc Achievement Bonus
     AchievementHandler.preCheckAchievements();
     AchievementHandler.calculateMaxBonus();
-
     AchievementHandler.achievementList.forEach(a => {
-        if (a.unlocked()) {
-            a.isCompleted = () => true;
-        } else {
-            a.isCompleted = () => false;
-        }
+        const isUnlocked = a.unlocked();
+        a.isCompleted = () => isUnlocked;
     });
 
-    //const bonus = AchievementHandler.achievementBonus();
-    //AchievementHandler.achievementBonus = () => bonus;
-
-    // Set all pokemon to max level and reset breeding flag to include all pokemon
-    // at their max power in attack calculations
+    // Set all pokemon to max level and reset breeding flag
     const maxLevel = App.game.badgeCase.maxLevel();
     App.game.party.caughtPokemon.forEach(p => {
         p.level = maxLevel;
         p.breeding = false;
     });
 
-    // Reset some settings, need to handle this better
-    /*BattleCalculator.settings.xAttackEnabled(false);
-    BattleCalculator.settings.xClickEnabled(false);
-    BattleCalculator.settings.rockyHelmetEnabled(false);
-    BattleCalculator.settings.clicksPerSecond(0);
-    BattleCalculator.settings.activeFlutes([]);
-    BattleCalculator.settings.allFlutesToggle(false);*/
+    const end = performance.now();
+    console.log(`[loadAttackData] ${end - start}ms`);
 
     isDamageLoaded(true);
 };
