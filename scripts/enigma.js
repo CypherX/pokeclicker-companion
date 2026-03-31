@@ -20,7 +20,8 @@ const getBerries = ko.pureComputed(() => {
     }
 
     const enigmaMutationIdx = App.game.farming.mutations.findIndex(m => m.mutatedBerry == BerryType.Enigma);
-    const hintsSeen = SaveData.file().save.farming.mutations[enigmaMutationIdx].seen;
+    const enigmaMutation = SaveData.file().save.farming.mutations[enigmaMutationIdx];
+    let hintsSeen = (Array.isArray(enigmaMutation) ? enigmaMutation : enigmaMutation.seen) ?? [];
 
     for (let i = 0; i < berries.length; i++) {
         if (hintsSeen[i] || revealHints()) {
