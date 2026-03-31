@@ -227,6 +227,7 @@
                                             <th class="text-center">HP</th>
                                             <th class="text-center">Damage Per Attack</th>
                                             <th class="text-center">Seconds To Defeat</th>
+                                            <th class="text-center">Exact Seconds</th>
                                         </tr>
                                     </thead>
                                     <tbody data-bind="foreach: pokemonList">
@@ -239,11 +240,8 @@
                                                 <knockout class="small text-warning" data-bind="text: $parent.formattedClickDamage,
                                                     visible: $parent.clickDamage() > 0"></knockout>
                                             </td>
-                                            <td class="text-center">
-                                                <knockout data-bind="text: formattedSeconds"></knockout>
-                                                <knockout class="ms-1 text-warning small" data-bind="
-                                                    text: secondsRemainder, visible: hasSecondsRemainder"></knockout>
-                                            </td>
+                                            <td class="text-center" data-bind="text: formattedSeconds"></td>
+                                            <td class="text-center" data-bind="text: secondsRemainder"></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -322,6 +320,7 @@
                                             <th class="text-center">HP</th>
                                             <th class="text-center">Damage Per Attack</th>
                                             <th class="text-center">Seconds To Defeat</th>
+                                            <th class="text-center">Exact Time</th>
                                         </tr>
                                     </thead>
                                     <tbody data-bind="foreach: pokemonList">
@@ -334,11 +333,8 @@
                                                 <knockout class="small text-warning" data-bind="text: $parent.formattedClickDamage,
                                                     visible: $parent.clickDamage() > 0"></knockout>
                                             </td>
-                                            <td class="text-center">
-                                                <knockout data-bind="text: formattedSeconds"></knockout>
-                                                <knockout class="ms-1 text-warning small" data-bind="
-                                                    text: secondsRemainder, visible: hasSecondsRemainder"></knockout>
-                                            </td>
+                                            <td class="text-center" data-bind="text: formattedSeconds"></td>
+                                            <td class="text-center" data-bind="text: secondsRemainder"></td>
                                         </tr>
                                     </tbody>
                                 </table>

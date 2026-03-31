@@ -200,10 +200,7 @@ const calcBattleData = async () => {
                 pokemon.formattedSeconds(Math.ceil(secondsToDefeat).toLocaleString());
                 
                 const hasRemainder = secondsToDefeat !== Infinity && secondsToDefeat % 1 !== 0;
-                pokemon.hasSecondsRemainder(hasRemainder);
-                if (hasRemainder) {
-                    pokemon.secondsRemainder(`(${secondsToDefeat.toLocaleString()})`);
-                }
+                pokemon.secondsRemainder(hasRemainder ? secondsToDefeat.toLocaleString() : '-');
             }
             
             if (totalDmg > 0) {
@@ -263,10 +260,7 @@ const calcBattleData = async () => {
                 pokemon.formattedSeconds(Math.ceil(secondsToDefeat).toLocaleString());
                 
                 const hasRemainder = secondsToDefeat !== Infinity && secondsToDefeat % 1 !== 0;
-                pokemon.hasSecondsRemainder(hasRemainder);
-                if (hasRemainder) {
-                    pokemon.secondsRemainder(`(${secondsToDefeat.toLocaleString()})`);
-                }
+                pokemon.secondsRemainder(hasRemainder ? secondsToDefeat.toLocaleString() : '-');
             }
             
             if (totalDmg > 0) {
@@ -420,7 +414,6 @@ const loadGymList = () => {
                 formattedPartyDamage: ko.observable('0').extend({ deferred: true }),
                 secondsToDefeat: ko.observable(0).extend({ deferred: true }),
                 formattedSeconds: ko.observable('0').extend({ deferred: true }),
-                hasSecondsRemainder: ko.observable(false).extend({ deferred: true }),
                 secondsRemainder: ko.observable('').extend({ deferred: true })
             };
         });
@@ -487,7 +480,6 @@ const loadTempBattleList = () => {
                 formattedPartyDamage: ko.observable('0').extend({ deferred: true }),
                 secondsToDefeat: ko.observable(0).extend({ deferred: true }),
                 formattedSeconds: ko.observable('0').extend({ deferred: true }),
-                hasSecondsRemainder: ko.observable(false).extend({ deferred: true }),
                 secondsRemainder: ko.observable('').extend({ deferred: true })
             };
         });
