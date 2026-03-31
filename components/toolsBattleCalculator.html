@@ -7,14 +7,14 @@
                 <button type="button" class="btn btn-primary" data-bind="click: () => {
                     SaveData.loadAttackData();
                     if (BattleCalculator.settings.runCalcImmediately()) {
-                        BattleCalculator.runCalc();
+                        BattleCalculator.runFirstCalc();
                     }
                 }">Load Additional Data</button>
                 <div class="form-text">Additional data must be loaded from your save file. This may take a few seconds.</div>
             </div>
             <div class="form-check form-switch small mt-2">
                 <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculatorRunCalcImmediately" data-bind="checked: BattleCalculator.settings.runCalcImmediately">
-                <label class="form-check-label text-muted" for="BattleCalculatorRunCalcImmediately">Calculate Battles after loading additional data. Leave disabled to adjust configuration first.</label>
+                <label class="form-check-label text-muted" for="BattleCalculatorRunCalcImmediately">Calculate Battles automatically after loading additional data. Disable this to adjust configuration first.</label>
             </div>
         </div>
 
@@ -32,7 +32,7 @@
                     </button>
                 </div>
             </div>
-            <div class="collapse show" id="battleCalcConfigCollapse">
+            <div class="collapse show" id="battleCalcConfigCollapse" style="transition: none !important;">
                 <div class="card-body pb-2">
                     <div class="control-row mx-auto">
                         <div class="row align-items-center justify-content-center" data-bind="with: BattleCalculator.settings">
@@ -133,18 +133,14 @@
                             <hr class="my-1" />
                             <div class="text-center text-danger small"><strong>Clicks/second Warning</strong> - Due to game calculations and lag, and depending on your progress and device hardware, you will likely not reach the full amount of clicks/second, even with an autoclicker.</div>
                         </div>
-                        <hr class="my-1" />
                         <!-- ko ifnot: BattleCalculator.showResult() -->
+                        <hr class="my-1" />
                         <div class="text-center mt-2">
                             <button type="button" class="btn btn-primary" data-bind="
-                                click: () => BattleCalculator.runCalc(),
-                                enable: BattleCalculator.isRunning() === false">
+                                click: () => BattleCalculator.runFirstCalc()">
                                 Calculate Battles!
                             </button>
                         </div>
-                        <!-- /ko -->
-                        <!-- ko if: BattleCalculator.showResult() -->
-                        <div class="small text-center text-muted">Battles are automatically recalculated when adjusting above settings.</div>
                         <!-- /ko -->
                     </div>
                 </div>
@@ -190,8 +186,16 @@
                         </tr>
                     </thead>
 
-                    <tbody data-bind="foreach: BattleCalculator.gymList">
-                        <tr class="align-middle" data-bind="visible: $data.isVisible">
+                    <tbody data-bind="foreach: BattleCalculator.gymList, css: { 
+                        'filter-hide-locked': BattleCalculator.settings.hideLocked(), 
+                        'filter-hide-completed': BattleCalculator.settings.hideCompleted(),
+                        'filter-hide-future': !Companion.settings.showAllRegions() 
+                    }">
+                        <tr class="align-middle" data-bind="css: {
+                            'state-locked': !isUnlocked(),
+                            'state-completed': isCompleted(),
+                            'state-future': parent.region > player.highestRegion()
+                        }">
                             <td data-bind="text: $data.leaderName"></td>
                             <td class="text-center" data-bind="text: $data.townObj.name"></td>
                             <td class="text-center" data-bind="text: Util.getRegionNameText($data.townObj.region, $data.townObj.subRegion)"></td>
@@ -199,19 +203,22 @@
                             <td class="text-center" data-bind="text: GameConstants.humanifyString(WeatherType[Weather.getWeather($data.townObj.region, new Date())])"></td>
                             <!-- /ko -->
                             <td class="text-center" data-bind="text: pokemonList.length"></td>
-                            <td class="text-center" data-bind="text: pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: formattedTotalHealth"></td>
                             <td class="text-center" data-bind="text: Number(BattleCalculator.getGymBattleTime().toFixed(1))"></td>
-                            <td class="text-center" data-bind="text: BattleCalculator.formattedSecondsToWin($data.secondsToWin()),
-                                class: $data.secondsToWin() <= BattleCalculator.getGymBattleTime() ? 'text-success' : 'text-danger'"></td>
-                            <td class="text-center" data-bind="text: $data.isCompleted ? 'Yes' : 'No',
-                                class: $data.isCompleted ? 'text-success' : 'text-danger'"></td>
+                            <td class="text-center" data-bind="text: formattedSecondsToWin, class: timeClass"></td>
+                            <td class="text-center" data-bind="text: $data.isCompleted() ? 'Yes' : 'No',
+                                class: $data.isCompleted() ? 'text-success' : 'text-danger'"></td>
                             <td class="text-center">
                                 <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
                                     data-bind="attr: { 'data-bs-target': `#gym-collapse${$index()}` }"></button>
                             </td>
                         </tr>
-                        <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }, visible: $data.isVisible" style="transition: none !important;">
-                            <td colspan="10">
+                        <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }, css: {
+                            'state-locked': !isUnlocked(),
+                            'state-completed': isCompleted(),
+                            'state-future': parent.region > player.highestRegion()
+                        }" style="transition: none !important;">
+                            <td data-bind="attr: { colspan: BattleCalculator.settings.weather() === -1 ? 10 : 9 }">
                                 <table class="table table-sm mb-0">
                                     <thead>
                                         <tr class="table-dark">
@@ -225,17 +232,17 @@
                                     <tbody data-bind="foreach: pokemonList">
                                         <tr>
                                             <td data-bind="text: name"></td>
-                                            <td class="text-center" data-bind="text: pokemonMap[$data.name].type.map(t => PokemonType[t]).join(' / ')"></td>
-                                            <td class="text-center" data-bind="text: maxHealth.toLocaleString()"></td>
+                                            <td class="text-center" data-bind="text: typeString"></td>
+                                            <td class="text-center" data-bind="text: formattedMaxHealth"></td>
                                             <td class="text-center">
-                                                <knockout data-bind="text: partyDamage().toLocaleString()"></knockout>
-                                                <knockout class="small text-warning" data-bind="text: `(${$parent.clickDamage().toLocaleString()})`,
+                                                <knockout data-bind="text: formattedPartyDamage"></knockout>
+                                                <knockout class="small text-warning" data-bind="text: $parent.formattedClickDamage,
                                                     visible: $parent.clickDamage() > 0"></knockout>
                                             </td>
                                             <td class="text-center">
-                                                <knockout data-bind="text: Math.ceil(secondsToDefeat()).toLocaleString()"></knockout>
+                                                <knockout data-bind="text: formattedSeconds"></knockout>
                                                 <knockout class="ms-1 text-warning small" data-bind="
-                                                    text: `(${secondsToDefeat().toLocaleString()})`, visible: secondsToDefeat() !== Infinity && secondsToDefeat() % 1 != 0"></knockout>
+                                                    text: secondsRemainder, visible: hasSecondsRemainder"></knockout>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -243,9 +250,11 @@
                             </td>
                         </tr>
                     </tbody>
-                    <tbody data-bind="visible: !BattleCalculator.gymList().some(g => g.isVisible())">
+                    <tbody data-bind="visible: !BattleCalculator.hasVisibleGyms()">
                         <tr>
-                            <td class="text-center" colspan="9">No data to display. Check above settings.</td>
+                            <td class="text-center" data-bind="attr: { colspan: BattleCalculator.settings.weather() === -1 ? 10 : 9 }">
+                                No data to display. Check above settings.
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -273,27 +282,38 @@
                         </tr>
                     </thead>
                     
-                    <tbody data-bind="foreach: BattleCalculator.tempBattleList">
-                        <tr class="align-middle" data-bind="visible: $data.isVisible">
+                    <tbody data-bind="foreach: BattleCalculator.tempBattleList, css: {
+                        'filter-hide-locked': BattleCalculator.settings.hideLocked(), 
+                        'filter-hide-completed': BattleCalculator.settings.hideCompleted(),
+                        'filter-hide-future': !Companion.settings.showAllRegions()
+                    }">
+                        <tr class="align-middle" data-bind="css: {
+                            'state-locked': !isUnlocked(),
+                            'state-completed': isCompleted(),
+                            'state-future': getTown().region > player.highestRegion()
+                        }">
                             <td data-bind="text: $data.name"></td>
                             <td class="text-center" data-bind="text: Util.getRegionNameText($data.getTown().region, $data.getTown().subRegion)"></td>
                             <!-- ko if: BattleCalculator.settings.weather() === -1 -->
                             <td class="text-center" data-bind="text: GameConstants.humanifyString(WeatherType[Weather.getWeather($data.getTown().region, new Date())])"></td>
                             <!-- /ko -->
                             <td class="text-center" data-bind="text: pokemonList.length"></td>
-                            <td class="text-center" data-bind="text: pokemonList.reduce((hp, p) => hp + p.maxHealth, 0).toLocaleString()"></td>
+                            <td class="text-center" data-bind="text: formattedTotalHealth"></td>
                             <td class="text-center" data-bind="text: Number(BattleCalculator.getTempBattleTime().toFixed(1))"></td>
-                            <td class="text-center" data-bind="text: BattleCalculator.formattedSecondsToWin($data.secondsToWin()),
-                                class: $data.secondsToWin() <= BattleCalculator.getTempBattleTime() ? 'text-success' : 'text-danger'"></td>
-                            <td class="text-center" data-bind="text: $data.optionalArgs.resetDaily ? 'Resets Daily' : $data.isCompleted ? 'Yes' : 'No',
-                                class: $data.optionalArgs.resetDaily ? 'text-body small' : $data.isCompleted ? 'text-success' : 'text-danger'"></td>
+                            <td class="text-center" data-bind="text: formattedSecondsToWin, class: timeClass"></td>
+                            <td class="text-center" data-bind="text: $data.optionalArgs.resetDaily ? 'Resets Daily' : $data.isCompleted() ? 'Yes' : 'No',
+                                class: $data.optionalArgs.resetDaily ? 'text-body small' : $data.isCompleted() ? 'text-success' : 'text-danger'"></td>
                             <td class="text-center">
                                 <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
                                     data-bind="attr: { 'data-bs-target': `#tb-collapse${$index()}` }"></button>
                             </td>
                         </tr>
-                        <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }, visible: $data.isVisible" style="transition: none !important;">
-                            <td colspan="9">
+                        <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }, css: {
+                            'state-locked': !isUnlocked(),
+                            'state-completed': isCompleted(),
+                            'state-future': getTown().region > player.highestRegion()
+                        }" style="transition: none !important;">
+                            <td data-bind="attr: { colspan: BattleCalculator.settings.weather() === -1 ? 9 : 8 }">
                                 <table class="table table-sm mb-0">
                                     <thead>
                                         <tr class="table-dark">
@@ -307,19 +327,17 @@
                                     <tbody data-bind="foreach: pokemonList">
                                         <tr>
                                             <td data-bind="text: name"></td>
-                                            <td class="text-center" data-bind="text: pokemonMap[$data.name].type.map(t => PokemonType[t]).join(' / ')"></td>
-                                            <td class="text-center" data-bind="text: maxHealth.toLocaleString()"></td>
-                                            <!--<td class="text-center" data-bind="text: partyDamage().toLocaleString()"></td>
-                                            <td class="text-center" data-bind="text: secondsToDefeat().toLocaleString()"></td>-->
+                                            <td class="text-center" data-bind="text: typeString"></td>
+                                            <td class="text-center" data-bind="text: formattedMaxHealth"></td>
                                             <td class="text-center">
-                                                <knockout data-bind="text: partyDamage().toLocaleString()"></knockout>
-                                                <knockout class="small text-warning" data-bind="text: `(${$parent.clickDamage().toLocaleString()})`,
+                                                <knockout data-bind="text: formattedPartyDamage"></knockout>
+                                                <knockout class="small text-warning" data-bind="text: $parent.formattedClickDamage,
                                                     visible: $parent.clickDamage() > 0"></knockout>
                                             </td>
                                             <td class="text-center">
-                                                <knockout data-bind="text: Math.ceil(secondsToDefeat()).toLocaleString()"></knockout>
+                                                <knockout data-bind="text: formattedSeconds"></knockout>
                                                 <knockout class="ms-1 text-warning small" data-bind="
-                                                    text: `(${secondsToDefeat().toLocaleString()})`, visible: secondsToDefeat() !== Infinity && secondsToDefeat() % 1 != 0"></knockout>
+                                                    text: secondsRemainder, visible: hasSecondsRemainder"></knockout>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -327,9 +345,11 @@
                             </td>
                         </tr>
                     </tbody>
-                    <tbody data-bind="visible: !BattleCalculator.tempBattleList().some(g => g.isVisible())">
+                    <tbody data-bind="visible: !BattleCalculator.hasVisibleTempBattles()">
                         <tr>
-                            <td class="text-center" colspan="8">No data to display. Check above settings.</td>
+                            <td class="text-center" data-bind="attr: { colspan: BattleCalculator.settings.weather() === -1 ? 9 : 8 }">
+                                No data to display. Check above settings.
+                            </td>
                         </tr>
                     </tbody>
                 </table>

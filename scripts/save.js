@@ -221,12 +221,12 @@ const loadAttackData = () => {
     });
 
     // Reset some settings, need to handle this better
-    BattleCalculator.settings.xAttackEnabled(false);
+    /*BattleCalculator.settings.xAttackEnabled(false);
     BattleCalculator.settings.xClickEnabled(false);
     BattleCalculator.settings.rockyHelmetEnabled(false);
     BattleCalculator.settings.clicksPerSecond(0);
     BattleCalculator.settings.activeFlutes([]);
-    BattleCalculator.settings.allFlutesToggle(false);
+    BattleCalculator.settings.allFlutesToggle(false);*/
 
     isDamageLoaded(true);
 };
