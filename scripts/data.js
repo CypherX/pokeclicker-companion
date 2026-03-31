@@ -313,6 +313,12 @@ const berryMasterPokemonCosts = {
 
 const changeLogData = [
     {
+        timestamp: 1774917973018,
+        changes: [
+            'Battle Calculator - major performance improvements & optimizations',
+        ],
+    },
+    {
         timestamp: 1774625069477,
         changes: [
             'Battle Calculator now has a "Current Regional" weather option. This will apply the current weather in each region to the battle calculations.',
