@@ -9,7 +9,7 @@
         <meta http-equiv="Expires" content="0">-->
         <title>PokéClicker Companion</title>
         <link id="theme-stylesheet" href="./styles/bootstrap.min.css" rel="stylesheet">
-        <link href="./styles/styles-1774967304521.css" rel="stylesheet">
+        <link href="./styles/styles-1774969760143.css" rel="stylesheet">
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
@@ -250,7 +250,7 @@
         </div>
         <div class="flex-grow-1" style="overflow: auto;" data-bind="foreach: $data">
             <div class="card mb-3">
-                <div class="card-header bg-dark rounded-0 sticky-top"
+                <div class="card-header bg-dark text-white rounded-0 sticky-top"
                     data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`"></div>
                 <div class="card-body p-0">
                     <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 0.9rem;">
@@ -421,7 +421,7 @@
 
                 <!-- ko foreach: Companion.getRouteData() -->
                 <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                    <div class="card-header bg-primary rounded-0 px-2">
+                    <div class="card-header bg-primary text-white rounded-0 px-2">
                         <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
                     </div>
                     <div class="card-body small px-0 pt-2 pb-0" style="background-color: var(--bs-body-bg);">
@@ -464,7 +464,7 @@
 
             <div class="tab-pane container-xxl" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
                 <div class="card border-0 mb-3">
-                    <div class="card-header bg-dark rounded-0 px-2">Totals</div>
+                    <div class="card-header bg-dark text-white rounded-0 px-2">Totals</div>
                     <div class="card-body p-0 collapse show" style="transition: none;">
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
@@ -561,7 +561,7 @@
             <div class="tab-pane container-xxl" id="gym-clears" role="tabpanel" aria-labelledby="gym-clears-tab">
                 <!-- ko foreach: Companion.getGymData() -->
                 <div class="card border-0 mb-3" data-bind="hidden: Companion.hideOtherStatSection($data)">
-                    <div class="card-header bg-primary rounded-0 px-2">
+                    <div class="card-header bg-primary text-white rounded-0 px-2">
                         <span data-bind="text: $data.name || GameConstants.camelCaseToString(GameConstants.Region[$data.region])"></span>
                     </div>
                     <div class="card-body small px-0 pt-2 pb-0" style="background-color: var(--bs-body-bg);">
@@ -781,7 +781,7 @@
             <div class="row">
                 <div class="col-12 col-sm-6">
                     <div class="card mb-2">
-                        <div class="card-header bg-primary">Unown</div>
+                        <div class="card-header bg-primary text-white">Unown</div>
                         <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
                             <table class="table table-sm table-striped small mb-0">
                                 <thead>
@@ -817,7 +817,7 @@
                 </div>
                 <div class="col-12 col-sm-6">
                     <div class="card mb-2">
-                        <div class="card-header bg-primary">Alola Island Scan</div>
+                        <div class="card-header bg-primary text-white">Alola Island Scan</div>
                         <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
                             <table class="table table-sm small mb-0" data-bind="with: Forecast.summary().islandScan">
                                 <thead>
@@ -861,7 +861,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card mb-2">
-                        <div class="card-header bg-primary">Weather</div>
+                        <div class="card-header bg-primary text-white">Weather</div>
                         <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped table-sm small mb-0">
@@ -890,7 +890,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header bg-primary">Boosted Routes</div>
+                        <div class="card-header bg-primary text-white">Boosted Routes</div>
                         <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
                             <table class="table table-bordered table-sm small mb-0">
                                 <thead>
@@ -917,7 +917,7 @@
         </div>
         <div class="col col-md-4">
             <div class="card mb-2">
-                <div class="card-header bg-primary">Berry Trades</div>
+                <div class="card-header bg-primary text-white">Berry Trades</div>
                 <div class="card-body p-1" style="background-color: var(--bs-body-bg);">
                     <div class="" data-bind="foreach: GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None')">
                         <table class="table table-sm small mb-1">
@@ -1711,6 +1711,7 @@
                                             <th class="text-center">HP</th>
                                             <th class="text-center">Damage Per Attack</th>
                                             <th class="text-center">Seconds To Defeat</th>
+                                            <th class="text-center">Exact Seconds</th>
                                         </tr>
                                     </thead>
                                     <tbody data-bind="foreach: pokemonList">
@@ -1723,11 +1724,8 @@
                                                 <knockout class="small text-warning" data-bind="text: $parent.formattedClickDamage,
                                                     visible: $parent.clickDamage() > 0"></knockout>
                                             </td>
-                                            <td class="text-center">
-                                                <knockout data-bind="text: formattedSeconds"></knockout>
-                                                <knockout class="ms-1 text-warning small" data-bind="
-                                                    text: secondsRemainder, visible: hasSecondsRemainder"></knockout>
-                                            </td>
+                                            <td class="text-center" data-bind="text: formattedSeconds"></td>
+                                            <td class="text-center" data-bind="text: secondsRemainder"></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1806,6 +1804,7 @@
                                             <th class="text-center">HP</th>
                                             <th class="text-center">Damage Per Attack</th>
                                             <th class="text-center">Seconds To Defeat</th>
+                                            <th class="text-center">Exact Time</th>
                                         </tr>
                                     </thead>
                                     <tbody data-bind="foreach: pokemonList">
@@ -1818,11 +1817,8 @@
                                                 <knockout class="small text-warning" data-bind="text: $parent.formattedClickDamage,
                                                     visible: $parent.clickDamage() > 0"></knockout>
                                             </td>
-                                            <td class="text-center">
-                                                <knockout data-bind="text: formattedSeconds"></knockout>
-                                                <knockout class="ms-1 text-warning small" data-bind="
-                                                    text: secondsRemainder, visible: hasSecondsRemainder"></knockout>
-                                            </td>
+                                            <td class="text-center" data-bind="text: formattedSeconds"></td>
+                                            <td class="text-center" data-bind="text: secondsRemainder"></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -2363,7 +2359,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1774967304521.js"></script>
+        <script src="./bundle-1774969760143.js"></script>
     </body>
 </html>
 
