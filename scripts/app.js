@@ -67,6 +67,12 @@ const getMissingPokemon = ko.pureComputed(() => {
     const showRequiredOnly = Companion.settings.showRequiredOnly();
     const showAllRegions = Companion.settings.showAllRegions();
 
+    const caughtBaseIds = new Set(
+        saveData?.save?.party?.caughtPokemon 
+            ? saveData.save.party.caughtPokemon.map(c => Math.floor(c.id)) 
+            : []
+    );
+
     Companion.data.obtainablePokemonList.forEach(p => {
         if (caughtPokemon[p.id]) {
             return;
@@ -82,8 +88,7 @@ const getMissingPokemon = ko.pureComputed(() => {
                 return;
             }
 
-            const formCaught = saveData.save.party.caughtPokemon.some(c => Math.floor(c.id) == Math.floor(p.id));
-            if (formCaught) {
+            if (caughtBaseIds.has(Math.floor(p.id))) {
                 return;
             }
         }
@@ -112,110 +117,57 @@ const getTotalMissingPokemonCount = ko.pureComputed(() => {
 });
 
 const caughtPokemonCount = ko.pureComputed(() => {
-    if (!SaveData.isLoaded()) {
-        return 0;
-    }
-
-    return SaveData.file().save.party.caughtPokemon
-        .filter(p => Companion.data.obtainablePokemonMap[p.id]).length;
+    if (!SaveData.isLoaded()) return 0;
+    return Object.keys(partyList()).length;
 });
 
 const caughtShinyCount = ko.pureComputed(() => {
-    if (!SaveData.isLoaded()) {
-        return 0;
-    }
-
-    return SaveData.file().save.party.caughtPokemon
-        .filter(p => Companion.data.obtainablePokemonMap[p.id]
-            && p[PartyPokemonSaveKeys.shiny] === true).length;
+    if (!SaveData.isLoaded()) return 0;
+    return Object.values(partyList()).filter(p => p.shiny).length;
 });
 
 const caughtResistantCount = ko.pureComputed(() => {
-    if (!SaveData.isLoaded()) {
-        return 0;
-    }
-
-    return SaveData.file().save.party.caughtPokemon
-        .filter(p => Companion.data.obtainablePokemonMap[p.id]
-            && p[PartyPokemonSaveKeys.pokerus] === GameConstants.Pokerus.Resistant).length;
+    if (!SaveData.isLoaded()) return 0;
+    return Object.values(partyList()).filter(p => p.pokerus === GameConstants.Pokerus.Resistant).length;
 });
 
+const isPokemonHiddenStatsTable = (partyPokemon, searchVal, filterVal) => {
+    if (searchVal) {
+        if (!partyPokemon.id.toString().includes(searchVal)
+            && !partyPokemon.name.toLowerCase().includes(searchVal.toLowerCase())) {
+            return true;
+        }
+    }
+
+    if (filterVal) {
+        const isResistant = partyPokemon.pokerus === GameConstants.Pokerus.Resistant;
+        const isFriendSafari = FriendSafari.isInRotation(partyPokemon.name);
+
+        switch (filterVal) {
+            case 'not-shiny': return partyPokemon.shiny;
+            case 'not-resistant': return isResistant;
+            case 'not-resistant-not-friend-safari': return isResistant || isFriendSafari;
+            case 'not-resistant-friend-safari': return isResistant || !isFriendSafari;
+            case 'resistant': return !isResistant;
+            case 'infected': return partyPokemon.pokerus != GameConstants.Pokerus.Infected;
+            case 'missing-shadow': return partyPokemon.shadow || !Companion.data.shadowPokemon.has(partyPokemon.name);
+            case 'missing-purified': return partyPokemon.shadow == GameConstants.ShadowStatus.Purified || !Companion.data.shadowPokemon.has(partyPokemon.name);
+            case 'shadow': return partyPokemon.shadow != GameConstants.ShadowStatus.Shadow;
+            case 'purified': return partyPokemon.shadow != GameConstants.ShadowStatus.Purified;
+        }
+    }
+    return false;
+};
+
 const hideFromPokemonStatsTable = (partyPokemon) => {
-    return ko.pureComputed(() => {
-        const searchVal = pokemonStatTableSearch();
-        if (searchVal) {
-            if (!partyPokemon.id.toString().includes(searchVal)
-                && !partyPokemon.name.toLowerCase().includes(searchVal.toLowerCase())) {
-                return true;
-            }
-        }
-
-        const filterVal = pokemonStatTableFilter();
-
-        if (filterVal) {
-            const isResistant = partyPokemon.pokerus === GameConstants.Pokerus.Resistant;
-            const isFriendSafari = FriendSafari.isInRotation(partyPokemon.name);
-
-            switch (filterVal) {
-                case 'not-shiny':
-                    if (partyPokemon.shiny) {
-                        return true;
-                    }
-                    break;
-                case 'not-resistant':
-                    if (isResistant) {
-                        return true;
-                    }
-                    break;
-                case 'not-resistant-not-friend-safari':
-                    if (isResistant || isFriendSafari) {
-                        return true;
-                    }
-                    break;
-                case 'not-resistant-friend-safari':
-                    if (isResistant || !isFriendSafari) {
-                        return true;
-                    }
-                    break;
-                case 'resistant':
-                    if (!isResistant) {
-                        return true;
-                    }
-                    break;
-                case 'infected':
-                    if (partyPokemon.pokerus != GameConstants.Pokerus.Infected) {
-                        return true;
-                    }
-                    break;
-                case 'missing-shadow':
-                    if (partyPokemon.shadow || !Companion.data.shadowPokemon.has(partyPokemon.name)) {
-                        return true;
-                    }
-                break;
-                case 'missing-purified':
-                    if (partyPokemon.shadow == GameConstants.ShadowStatus.Purified || !Companion.data.shadowPokemon.has(partyPokemon.name)) {
-                        return true;
-                    }
-                break;
-                case 'shadow':
-                    if (partyPokemon.shadow != GameConstants.ShadowStatus.Shadow) {
-                        return true;
-                    }
-                break;
-                case 'purified':
-                    if (partyPokemon.shadow != GameConstants.ShadowStatus.Purified) {
-                        return true;
-                    }
-                break;
-            }
-        }
-
-        return false;
-    });
+    return ko.pureComputed(() => isPokemonHiddenStatsTable(partyPokemon, pokemonStatTableSearch(), pokemonStatTableFilter()));
 };
 
 const getPokemonStatsTableCount = ko.pureComputed(() => {
-    return Object.values(partyList()).reduce((sum, p) => !hideFromPokemonStatsTable(p)() ? sum + 1 : sum, 0);
+    const searchVal = pokemonStatTableSearch();
+    const filterVal = pokemonStatTableFilter();
+    
+    return Object.values(partyList()).reduce((sum, p) => !isPokemonHiddenStatsTable(p, searchVal, filterVal) ? sum + 1 : sum, 0);
 });
 
 const isEventDiscordClientPokemon = (pokemonName) => {
@@ -292,12 +244,12 @@ const exportPartyPokemon = () => {
 
 const getDungeonData = ko.pureComputed(() => {
     const dungeonData = [];
-    const dungeonOverrides = Companion.data.DungeonListOverride.map(d => d.dungeons).flat();
+    const dungeonOverrides = new Set(Companion.data.DungeonListOverride.flatMap(d => d.dungeons));
 
     GameConstants.RegionDungeons.forEach((rd, idx) => {
         dungeonData.push({
             region: idx,
-            dungeons: rd.filter(d => !dungeonOverrides.includes(d))
+            dungeons: rd.filter(d => !dungeonOverrides.has(d))
         });
     });
 
@@ -323,6 +275,8 @@ const getDungeonData = ko.pureComputed(() => {
         return true;
     };
 
+    const currentParty = partyList();
+
     dungeonData.forEach(d => {
         d.dungeons = d.dungeons.map(dungeon => {
             const clears = getDungeonClearCount(dungeon);
@@ -338,9 +292,9 @@ const getDungeonData = ko.pureComputed(() => {
                 pokemonList: pokemonList,
                 pokemonCount: pokemonList.length,
                 shadowPokemonCount: pokemonList.filter(p => p.shadow).length,
-                shinyCount: getShinyCount(pokemonNames),
-                shadowCount: getShadowCount(pokemonNames),
-                resistCount: getResistCount(pokemonNames),
+                shinyCount: getShinyCount(pokemonNames, currentParty),
+                shadowCount: getShadowCount(pokemonNames, currentParty),
+                resistCount: getResistCount(pokemonNames, currentParty),
             };
             data.isComplete = isDungeonComplete(data);
             return data;
@@ -458,6 +412,8 @@ const getRouteData = ko.pureComputed(() => {
         return true;
     };
 
+    const currentParty = partyList();
+
     routeList.forEach(r => {
         const regionName = GameConstants.camelCaseToString(GameConstants.Region[r.region]);
         r.routes.forEach(route => {
@@ -465,8 +421,8 @@ const getRouteData = ko.pureComputed(() => {
             route.displayName = route.routeName.replace(regionName, '').trim();
             route.defeats = getRouteDefeatCount(route.region, route.number);
             route.pokemonCount = route.pokemonList.length;
-            route.shinyCount = getShinyCount(route.pokemonList);
-            route.resistCount = getResistCount(route.pokemonList);
+            route.shinyCount = getShinyCount(route.pokemonList, currentParty);
+            route.resistCount = getResistCount(route.pokemonList, currentParty);
             route.isComplete = isRouteComplete(route);
         });
     });
@@ -571,31 +527,16 @@ const hasEventRequirement = (req) => {
     return req instanceof SpecialEventRequirement || req.requirements?.some(r => r instanceof SpecialEventRequirement);
 };
 
-const getShinyCount = (pokemon) => {
-    return pokemon.reduce((total, p) => {
-        if (Companion.partyList()[pokemonMap[p].id]?.shiny) {
-            total += 1;
-        }
-        return total;
-    }, 0);
-}
-
-const getShadowCount = (pokemon) => {
-    return pokemon.reduce((total, p) => {
-        if (Companion.partyList()[pokemonMap[p].id]?.shadow >= GameConstants.ShadowStatus.Shadow) {
-            total += 1;
-        }
-        return total;
-    }, 0);
+const getShinyCount = (pokemon, party) => {
+    return pokemon.reduce((total, p) => party[pokemonMap[p].id]?.shiny ? total + 1 : total, 0);
 };
 
-const getResistCount = (pokemon) => {
-    return pokemon.reduce((total, p) => {
-        if (Companion.partyList()[pokemonMap[p].id]?.pokerus === GameConstants.Pokerus.Resistant) {
-            total += 1;
-        }
-        return total;
-    }, 0);
+const getShadowCount = (pokemon, party) => {
+    return pokemon.reduce((total, p) => party[pokemonMap[p].id]?.shadow >= GameConstants.ShadowStatus.Shadow ? total + 1 : total, 0);
+};
+
+const getResistCount = (pokemon, party) => {
+    return pokemon.reduce((total, p) => party[pokemonMap[p].id]?.pokerus === GameConstants.Pokerus.Resistant ? total + 1 : total, 0);
 };
 
 const hideOtherStatSection = (data) => {
