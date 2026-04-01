@@ -214,10 +214,10 @@ const calcBattleData = async () => {
             gym.formattedSecondsToWin(totalSeconds.toLocaleString());
         }
 
-        const newTimeClass = totalSeconds <= gymTime ? 'text-success' : 'text-danger';
+        /*const newTimeClass = totalSeconds <= gymTime ? 'text-success' : 'text-danger';
         if (gym.timeClass.peek() !== newTimeClass) {
             gym.timeClass(newTimeClass);
-        }
+        }*/
     }
 
     const tbTime = getTempBattleTime.peek();
@@ -274,10 +274,10 @@ const calcBattleData = async () => {
             tb.formattedSecondsToWin(totalSeconds.toLocaleString());
         }
 
-        const newTbTimeClass = totalSeconds <= tbTime ? 'text-success' : 'text-danger';
+        /*const newTbTimeClass = totalSeconds <= tbTime ? 'text-success' : 'text-danger';
         if (tb.timeClass.peek() !== newTbTimeClass) {
             tb.timeClass(newTbTimeClass);
-        }
+        }*/
     }
 
     player.effectList['xAttack'](0);
@@ -424,7 +424,8 @@ const loadGymList = () => {
         gym.isCompleted = ko.observable(gymsDefeated[GameConstants.getGymIndex(gym.town)] > 0).extend({ deferred: true });
         gym.secondsToWin = ko.observable(0).extend({ deferred: true });
         gym.formattedSecondsToWin = ko.observable('0').extend({ deferred: true });
-        gym.timeClass = ko.observable('text-success').extend({ deferred: true });
+        //gym.timeClass = ko.observable('text-success').extend({ deferred: true });
+        gym.timeClass = ko.pureComputed(() => gym.secondsToWin() <= getGymBattleTime() ? 'text-success' : 'text-danger').extend({ deferred: true });
         gym.clickDamage = ko.observable(0).extend({ deferred: true });
         gym.formattedClickDamage = ko.observable('').extend({ deferred: true });
 
@@ -490,7 +491,8 @@ const loadTempBattleList = () => {
         tb.isCompleted = ko.observable(temporaryBattleDefeated[GameConstants.getTemporaryBattlesIndex(tb.name)] > 0).extend({ deferred: true });
         tb.secondsToWin = ko.observable(0).extend({ deferred: true });
         tb.formattedSecondsToWin = ko.observable('0').extend({ deferred: true });
-        tb.timeClass = ko.observable('text-success').extend({ deferred: true });
+        //tb.timeClass = ko.observable('text-success').extend({ deferred: true });
+        tb.timeClass = ko.pureComputed(() => tb.secondsToWin() <= getTempBattleTime() ? 'text-success' : 'text-danger').extend({ deferred: true });
         tb.clickDamage = ko.observable(0).extend({ deferred: true });
         tb.formattedClickDamage = ko.observable('').extend({ deferred: true });
 
