@@ -151,10 +151,12 @@ const calcBattleData = async () => {
         return Math.round(attack * bonus);
     };
 
-    const calcMkjAttack = (eType1, eType2, region, weather) => {
-        const magikarp = App.game.party.caughtPokemon.find(p => Math.floor(p.id) === 129);
-        if (!magikarp) return 0;
-        const attack = App.game.party.calculateOnePokemonAttack(magikarp, eType1, eType2, region, true, true, false, weather, false, true);
+    const calcMkjAttack = (eType1, eType2, weather) => {
+        const magikarp = App.game.party.caughtPokemon.filter(p => Math.floor(p.id) === 129);
+        let attack = 0;
+        for (const karp of magikarp) {
+            attack += App.game.party.calculateOnePokemonAttack(karp, eType1, eType2, GameConstants.Region.none, true, true, false, weather, false, true);
+        }
         const bonus = App.game.party.multiplier.getBonus('pokemonAttack');
         return Math.round(attack * bonus);
     };
@@ -180,7 +182,7 @@ const calcBattleData = async () => {
             let damage = damageCache.get(pokemon.damageKey1) || damageCache.get(pokemon.damageKey2);
             if (damage === undefined) {
                 if (isMkj) {
-                    damage = calcMkjAttack(pokemon.type1, pokemon.type2, gym.townObj.region, weatherLookup[gym.townObj.region]);
+                    damage = calcMkjAttack(pokemon.type1, pokemon.type2, weatherLookup[gym.townObj.region]);
                 } else {
                     damage = calcAggregatedPartyAttack(pokemon.type1, pokemon.type2, gym.townObj.region, weatherLookup[gym.townObj.region]);
                 }
@@ -240,7 +242,7 @@ const calcBattleData = async () => {
             let damage = damageCache.get(pokemon.damageKey1) || damageCache.get(pokemon.damageKey2);
             if (damage === undefined) {
                 if (isMkj) {
-                    damage = calcMkjAttack(pokemon.type1, pokemon.type2, town.region, weatherLookup[town.region]);
+                    damage = calcMkjAttack(pokemon.type1, pokemon.type2, weatherLookup[town.region]);
                 } else {
                     damage = calcAggregatedPartyAttack(pokemon.type1, pokemon.type2, town.region, weatherLookup[town.region]);
                 }
