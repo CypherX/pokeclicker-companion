@@ -37,12 +37,12 @@ const loadSaveData = (saveString, fileName = null) => {
     App.game.challenges.list.slowEVs.active(saveFile.save.challenges.list.slowEVs);
     Settings.setSettingByName('breedingEfficiencyAllModifiers', false);
 
-    Enigma.revealHintsCounter(0);
     VitaminTracker.highestRegion(player.highestRegion());
+    /*Enigma.revealHintsCounter(0);
     Companion.typeDamageDistribution(undefined);
-    //BattleCalculator.showData(false);
+    BattleCalculator.showData(false);
     BattleFrontierSim.simulationResult(null);
-    isDamageLoaded(false);
+    isDamageLoaded(false);*/
 
     file(saveFile);
 
@@ -208,10 +208,12 @@ const loadAttackData = () => {
     EffectEngineRunner.initialize(App.game.multiplier, battleItems);
     FluteEffectRunner.initialize(App.game.multiplier);
 
+    const excludedKeys = new Set([ 'PurifyChamber' ]);
+
     // Load remaining data from save file to calculate true damage
     for (const key in App.game) {
         const saveKey = App.game[key]?.saveKey;
-        if (saveKey && currentSave[saveKey]) {
+        if (saveKey && currentSave[saveKey] && !excludedKeys.has(saveKey)) {
             let data = currentSave[saveKey];
 
             if (saveKey === 'statistics') {
