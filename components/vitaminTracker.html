@@ -77,6 +77,8 @@
                             <th class="sortable" data-sort="name"
                                 data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Pokémon</th>
                             <th class="text-center" style="width: 10%;"
+                                data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Type</th>
+                            <th class="text-center" style="width: 10%;"
                                 data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Native Region</th>
                             <th class="text-center sortable" data-sort="base-attack" style="width: 5%;"
                                 data-bind="attr: { rowspan: SaveData.isLoaded() ? 2 : 1 }">Base Attack</th>
@@ -130,6 +132,7 @@
                                 <knockout data-bind="text: $data.name"></knockout>
                                 <knockout data-bind="if: Companion.isEventDiscordClientPokemon($data.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
                             </td>
+                            <td class="text-center" data-bind="text: $data.type.map(t => PokemonType[t]).join(' / ')"></td>
                             <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[$data.nativeRegion])"></td>
                             <td class="text-center" data-bind="text: $data.attack"></td>
                             <td class="text-center" data-bind="text: $data.baseAttackBonus.toFixed(2).toLocaleString()"></td>
