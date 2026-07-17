@@ -54,7 +54,7 @@
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: Companion.getSortedPartyList">
-                        <tr data-bind="hidden: Companion.hideFromPokemonStatsTable($data)">
+                        <tr class="align-middle" data-bind="hidden: Companion.hideFromPokemonStatsTable($data)">
                             <td class="text-center" data-bind="text: $data.id"></td>
                             <td class="border-end-0">
                                 <span data-bind="text: $data.name"></span>
