@@ -284,7 +284,7 @@ const calcBerryMasterDealAfford = (berries) => {
         return 0;
     }
 
-    const berryList = SaveData.file().save.farming.berryList;
+    const berryList = SaveData.file().save.farming.berryInventory;
     const affordAmount = berries.map(b => Math.floor(berryList[b.berryType] / b.amount));
     return Math.min(...affordAmount);
 };
