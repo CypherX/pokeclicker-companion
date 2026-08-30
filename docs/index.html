@@ -9,7 +9,7 @@
         <meta http-equiv="Expires" content="0">-->
         <title>PokéClicker Companion</title>
         <link id="theme-stylesheet" href="./styles/bootstrap.min.css" rel="stylesheet">
-        <link href="./styles/styles-1786672752115.css" rel="stylesheet">
+        <link href="./styles/styles-1788116839994.css" rel="stylesheet">
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
@@ -1218,7 +1218,7 @@
                                                             <span data-bind="text: amount"></span>
                                                             <span data-bind="text: BerryType[berryType]"></span>
                                                             <!-- ko if: SaveData.isLoaded -->
-                                                            <span class="small text-muted" style="margin-top: 2px;" data-bind="text: `(${SaveData.file().save.farming.berryList[berryType].toLocaleString()})`"></span>
+                                                            <span class="small text-muted" style="margin-top: 2px;" data-bind="text: `(${SaveData.file().save.farming.berryInventory[berryType].toLocaleString()})`"></span>
                                                             <!-- /ko -->
                                                         </div>
                                                     </div>
@@ -2362,7 +2362,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1786672752115.js"></script>
+        <script src="./bundle-1788116839994.js"></script>
     </body>
 </html>
 
