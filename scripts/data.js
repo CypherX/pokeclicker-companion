@@ -72,6 +72,19 @@ const EventDiscordClientPokemon = [
     'Spooky Togekiss',
     'Rotom (Discord)',
     'Vivillon (Fancy)',
+    'Captain Charizard',
+    'Magikarp (Pirate)',
+    'Gyarados (Captain)',
+    'Captain Lucario',
+    'Zorua (Pirate)',
+    'Captain Hoopa',
+    'Bounsweet (Pirate)',
+    'Steenee (Pirate)',
+    'Tsareena (Captain)',
+    'Scorbunny (Pirate)',
+    'Raboot (Pirate)',
+    'Cinderace (Captain)',
+    'Captain Zacian',
 ];
 
 const pokemonRegionOverride = {
