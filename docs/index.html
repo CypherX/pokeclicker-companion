@@ -9,7 +9,7 @@
         <meta http-equiv="Expires" content="0">-->
         <title>PokéClicker Companion</title>
         <link id="theme-stylesheet" href="./styles/bootstrap.min.css" rel="stylesheet">
-        <link href="./styles/styles-1788271116186.css" rel="stylesheet">
+        <link href="./styles/styles-1788273072268.css" rel="stylesheet">
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
@@ -465,39 +465,58 @@
             <div class="tab-pane container-xxl" id="dungeon-clears" role="tabpanel" aria-labelledby="dungeon-clears-tab">
                 <div class="card border-0 mb-3">
                     <div class="card-header bg-dark text-white rounded-0 px-2">Totals</div>
-                    <div class="card-body p-0 collapse show" style="transition: none;">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped table-hover table-sm mb-0" style="font-size: 0.9rem;">
-                                <tbody>
-                                    <tr>
-                                        <td class="align-middle" style="width: 40%;">Dungeon Clears</td>
-                                        <td class="text-center align-middle" data-bind="text: Companion.totalDungeonClears().toLocaleString()"></td>
-                                        <td class="align-middle" style="width: 40%; border-left-width: 3px;">DT For All Dungeon Achievements</td>
-                                        <td class="text-center align-middle" data-bind="text: Companion.totalDungeonCost500Clears().toLocaleString()"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="align-middle" style="width: 40%;">Dungeon Tokens Spent</td>
-                                        <td class="text-center align-middle" data-bind="text: Companion.totalDungeonTokensSpent().toLocaleString()"></td>
-                                        <td class="align-middle" style="width: 40%; border-left-width: 3px;">Remaining DT For All Dungeon Achievements</td>
-                                        <td class="text-center align-middle" data-bind="text: Companion.remainingDungeonCost500Clears().toLocaleString()"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="align-middle" style="width: 40%;">Most Cleared Dungeons</td>
-                                        <td class="text-center align-middle" colspan="3">
-                                            <table class="table table-sm">
-                                                <tbody>
-                                                    <tr data-bind="foreach: Companion.getMostClearedDungeons">
-                                                        <td class="border-bottom-0 p-0 px-1" data-bind="text: $data.name"></td>
-                                                    </tr>
-                                                    <tr data-bind="foreach: Companion.getMostClearedDungeons">
-                                                        <td class="small border-bottom-0 p-0 pt-1 px-1" data-bind="text: $data.clears.toLocaleString()"></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="card-body collapse show p-3 pb-0" style="transition: none; background-color: var(--bs-body-bg);">
+                        <div class="row g-2 mb-3">
+                            <div class="col-12 col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center py-2 px-3">
+                                        <div class="small text-muted text-uppercase">Total Dungeon Clears</div>
+                                        <div class="fs-4" data-bind="text: Companion.totalDungeonClears().toLocaleString()"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center py-2 px-3">
+                                        <div class="small text-muted text-uppercase">DT For All Dungeon Achievements</div>
+                                        <div class="fs-4" data-bind="text: Companion.totalDungeonCost500Clears().toLocaleString()"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center py-2 px-3">
+                                        <div class="small text-muted text-uppercase">Remaining DT</div>
+                                        <div class="fs-4" data-bind="text: Companion.remainingDungeonCost500Clears().toLocaleString(),
+                                            class: Companion.remainingDungeonCost500Clears() ? '' : 'text-success'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex small mb-1">
+                                <div>Dungeon Achievement Progress</div>
+                                <div class="ms-auto" data-bind="text: Companion.dungeonAchievementProgress().toLocaleString('en-US', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 })"></div>
+                            </div>
+                            <div class="progress" style="height: 0.75rem;">
+                                <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                                    data-bind="style: { width: `${Companion.dungeonAchievementProgress() * 100}%` },
+                                        class: Companion.dungeonAchievementProgress() >= 1 ? 'bg-success' : 'bg-primary',
+                                        attr: { 'aria-valuenow': (Companion.dungeonAchievementProgress() * 100).toFixed(2) }"></div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header small text-muted py-1 px-2">Most Cleared Dungeons</div>
+                            <div class="card-body p-2">
+                                <div class="row row-cols-3 row-cols-md-5 g-2 text-center" data-bind="foreach: Companion.getMostClearedDungeons">
+                                    <div class="col">
+                                        <div class="small text-truncate" data-bind="text: $data.name, attr: { title: $data.name }"></div>
+                                        <div data-bind="text: $data.clears.toLocaleString()"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -513,7 +532,7 @@
                     </div>
                     <div class="card-body small px-0 pt-2 pb-0" style="background-color: var(--bs-body-bg);">
                         <div class="d-flex text-muted gap-4 mb-2">
-                            <div>Total Cost (500 clears): <span data-bind="text: ($data.dungeons.reduce((sum, dungeon) => sum + dungeon.cost, 0) * 500).toLocaleString()"></span></div>
+                            <div>Total Cost (500 clears): <span data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.cost500, 0).toLocaleString()"></span></div>
                             <div>Remaining Cost: <span data-bind="text: $data.dungeons.reduce((sum, dungeon) => sum + dungeon.remaining, 0).toLocaleString()"></span></div>
                         </div>
                         <div class="row" data-bind="foreach: $data.dungeons">
@@ -2307,15 +2326,11 @@
                         </tr>
                         <tr>
                             <td>500 Clears Cost:</td>
-                            <td data-bind="text: ($data.cost * 500).toLocaleString()"></td>
+                            <td data-bind="text: $data.cost500.toLocaleString()"></td>
                         </tr>
                         <tr>
                             <td>Remaining Cost:</td>
                             <td data-bind="text: $data.remaining.toLocaleString()"></td>
-                        </tr>
-                        <tr>
-                            <td>Total Spent:</td>
-                            <td data-bind="text: ($data.clears * $data.cost).toLocaleString()"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -2362,7 +2377,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1788271116186.js"></script>
+        <script src="./bundle-1788273072268.js"></script>
     </body>
 </html>
 
