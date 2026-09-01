@@ -280,7 +280,7 @@ const getDungeonData = ko.pureComputed(() => {
     dungeonData.forEach(d => {
         d.dungeons = d.dungeons.map(dungeon => {
             const clears = getDungeonClearCount(dungeon);
-            const cost = dungeonList[dungeon].tokenCost;
+            const cost = getDungeonTokenCost(dungeon, clears);
             const pokemonList = getDungeonPokemon(dungeon);
             const pokemonNames = pokemonList.map(p => p.pokemon);
             const data = {
@@ -313,6 +313,17 @@ const getDungeonClearCount = (dungeon) => {
 
     const dungeonIndex = GameConstants.getDungeonIndex(dungeon);
     return SaveData.file().save.statistics.dungeonsCleared[dungeonIndex] || 0;
+};
+
+// Mirrors Dungeon.tokenCost, but using the clear count from the save data.
+// The game's getter reads the live dungeonsCleared observables, which would subscribe
+// getDungeonData to all of them and re-render the whole list on every write while loading a save.
+const getDungeonTokenCost = (dungeon, clears) => {
+    const { baseTokenCost, difficulty } = dungeonList[dungeon];
+    const baseSize = GameConstants.BASE_DUNGEON_SIZE + difficulty;
+    const fullSize = Math.max(GameConstants.MIN_DUNGEON_SIZE, baseSize);
+    const reducedSize = Math.max(GameConstants.MIN_DUNGEON_SIZE, baseSize - Math.max(0, clears.toString().length - 1));
+    return Math.ceil(baseTokenCost * reducedSize / fullSize);
 };
 
 const totalDungeonClears = ko.pureComputed(() => {
