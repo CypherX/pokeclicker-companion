@@ -78,15 +78,11 @@
                         </tr>
                         <tr>
                             <td>500 Clears Cost:</td>
-                            <td data-bind="text: ($data.cost * 500).toLocaleString()"></td>
+                            <td data-bind="text: $data.cost500.toLocaleString()"></td>
                         </tr>
                         <tr>
                             <td>Remaining Cost:</td>
                             <td data-bind="text: $data.remaining.toLocaleString()"></td>
-                        </tr>
-                        <tr>
-                            <td>Total Spent:</td>
-                            <td data-bind="text: ($data.clears * $data.cost).toLocaleString()"></td>
                         </tr>
                     </tbody>
                 </table>

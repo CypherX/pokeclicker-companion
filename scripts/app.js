@@ -287,7 +287,8 @@ const getDungeonData = ko.pureComputed(() => {
                 name: dungeon,
                 clears: clears,
                 cost: cost,
-                remaining: Math.max((cost * 500) - (cost * clears), 0),
+                cost500: getDungeonTokenCostRange(dungeon, 0, 500),
+                remaining: getDungeonTokenCostRange(dungeon, Math.min(clears, 500), 500),
                 hide: TownList[dungeon].requirements.some(req => req instanceof DevelopmentRequirement),
                 pokemonList: pokemonList,
                 pokemonCount: pokemonList.length,
@@ -326,20 +327,38 @@ const getDungeonTokenCost = (dungeon, clears) => {
     return Math.ceil(baseTokenCost * reducedSize / fullSize);
 };
 
+// Total tokens spent clearing a dungeon from fromClears to toClears.
+const getDungeonTokenCostRange = (dungeon, fromClears, toClears) => {
+    let total = 0;
+    for (let clears = Math.max(0, fromClears); clears < toClears;) {
+        const next = Math.min(toClears, Math.pow(10, clears.toString().length));
+        total += (next - clears) * getDungeonTokenCost(dungeon, clears);
+        clears = next;
+    }
+    return total;
+};
+
 const totalDungeonClears = ko.pureComputed(() => {
     return getDungeonDataFlat().reduce((sum, dungeon) => sum + dungeon.clears, 0);
 });
 
-const totalDungeonTokensSpent = ko.pureComputed(() => {
-    return getDungeonDataFlat().reduce((sum, dungeon) => sum + dungeon.clears * dungeon.cost, 0);
-});
-
 const totalDungeonCost500Clears = ko.pureComputed(() => {
-    return getDungeonDataFlat().reduce((sum, dungeon) => sum + (dungeon.cost * 500), 0);
+    return getDungeonDataFlat().reduce((sum, dungeon) => sum + dungeon.cost500, 0);
 });
 
 const remainingDungeonCost500Clears = ko.pureComputed(() => {
     return getDungeonDataFlat().reduce((sum, dungeon) => sum + dungeon.remaining, 0);
+});
+
+// Share of the 500 clears needed for each dungeon achievement
+const dungeonAchievementProgress = ko.pureComputed(() => {
+    const dungeons = getDungeonDataFlat();
+    if (!dungeons.length) {
+        return 0;
+    }
+
+    const cleared = dungeons.reduce((sum, dungeon) => sum + Math.min(dungeon.clears, 500), 0);
+    return cleared / (dungeons.length * 500);
 });
 
 const getMostClearedDungeons = ko.pureComputed(() => {
@@ -907,9 +926,9 @@ module.exports = {
 
     getDungeonData,
     totalDungeonClears,
-    totalDungeonTokensSpent,
     totalDungeonCost500Clears,
     remainingDungeonCost500Clears,
+    dungeonAchievementProgress,
     getMostClearedDungeons,
 
     getGymData,
