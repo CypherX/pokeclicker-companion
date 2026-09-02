@@ -9,7 +9,7 @@
         <meta http-equiv="Expires" content="0">-->
         <title>PokéClicker Companion</title>
         <link id="theme-stylesheet" href="./styles/bootstrap.min.css" rel="stylesheet">
-        <link href="./styles/styles-1788277031813.css" rel="stylesheet">
+        <link href="./styles/styles-1788364990895.css" rel="stylesheet">
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
@@ -158,6 +158,11 @@
             <li class="nav-item mx-1">
                 <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecastBerryMaster" data-path="Berry" type="button" role="tab">
                     Berry Masters
+                </button>
+            </li>
+            <li class="nav-item mx-1">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#forecastOther" data-path="Other" type="button" role="tab">
+                    Other
                 </button>
             </li>
             <!--<li class="nav-item mx-1">
@@ -1338,6 +1343,56 @@
     </div>
 </div>
 <!-- import end -->
+
+        <!-- import "forecastOther.html" -->
+<div class="tab-pane h-100" id="forecastOther">
+    <div class="d-flex flex-column h-100">
+        <ul class="nav nav-tabs mb-4" role="tablist" data-bind="foreach: Forecast.genericDealList">
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
+                    data-bind="text: Companion.data.genericDealLabels[$data] ?? $data, css: { active: $index() == 0 },
+                        attr: { id: `genericdeal-${$index()}-tab`, 'data-bs-target': `#genericdeal-${$index()}`, 'data-path': $data.replace(/\s+/g, '') }"></button>
+            </li>
+        </ul>
+        <div class="tab-content flex-grow-1" style="overflow: auto;" data-bind="foreach: Forecast.genericDealList">
+            <div class="tab-pane" role="tabpanel" data-bind="css: { active: $index() == 0 }, attr: { id: `genericdeal-${$index()}` }">
+                <div class="container-xxl">
+
+                    <table class="table table-sm small">
+                        <thead>
+                            <tr class="text-center">
+                                <th>Cost</th>
+                                <th></th>
+                                <th>Receieve</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: Forecast.getGenericDealsByShop($data, 31)">
+                            <tr class="table-primary">
+                                <td class="fw-bold ps-3" colspan="3" data-bind="text: Util.formatDate($data.date)"></td>
+                            </tr>
+                            <!-- ko foreach: $data.deals -->
+                            <tr class="align-middle text-center">
+                                <td>
+                                    <!-- ko foreach: $data.costs -->
+                                    <div data-bind="text: `${amount.toLocaleString()} × ${ItemList[name].displayName}`"></div>
+                                    <!-- /ko -->
+                                </td>
+                                <td>→</td>
+                                <td>
+                                    <!-- ko foreach: $data.profits -->
+                                    <div data-bind="text: `${amount.toLocaleString()} × ${ItemList[name].displayName}`"></div>
+                                    <!-- /ko -->
+                                </td>
+                            </tr>
+                            <!-- /ko -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- import end -->
     </div>
 </div>
 <!-- import end -->
@@ -2377,7 +2432,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1788277031813.js"></script>
+        <script src="./bundle-1788364990895.js"></script>
     </body>
 </html>
 
