@@ -155,11 +155,37 @@ const fs = require('fs');
             });
         };
 
-        // previous day to the end of the following year
+        const serializeDealCostOrProfit = (costOrProfit) => {
+            const { type, amount } = costOrProfit;
+            switch (type) {
+                case DealCostOrProfitType.Gem:
+                    return { type, amount, name: PokemonType[costOrProfit.gemType] };
+                case DealCostOrProfitType.Shard:
+                    return { type, amount, name: costOrProfit.shardItem.name };
+                case DealCostOrProfitType.Berry:
+                    return { type, amount, name: BerryType[costOrProfit.berryType] };
+                case DealCostOrProfitType.Item:
+                    return { type, amount, name: costOrProfit.item.name };
+                case DealCostOrProfitType.Amount:
+                    return { type, amount: amount * costOrProfit.currency.amount, name: GameConstants.Currency[costOrProfit.currency.currency] };
+                default:
+                    return { type, amount };
+            }
+        };
+
+        const getPirateDealsByDate = (date = new Date()) => {
+            SeededRand.seedWithDate(date);
+            const pirateDeals = GenericDeal.generatePirateDeals(date);
+            return pirateDeals.map((deal) => ({
+                costs: deal.costs.map(serializeDealCostOrProfit),
+                profits: deal.profits.map(serializeDealCostOrProfit),
+            }));
+        };
+
         const now = new Date();
         const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         startDate.setDate(startDate.getDate() - 1);
-        const endDate = new Date(now.getFullYear() + 5, 0, 1);
+        const endDate = new Date(now.getFullYear() + 3, 0, 1);
 
         /*const startDate = new Date(2025, 0, 1);
         const endDate = new Date(2030, 0, 1);*/
@@ -173,10 +199,37 @@ const fs = require('fs');
                 berryDeal: getBerryDealsByDate(currentDate),
                 weather: getRegionalWeatherByDate(currentDate),
                 boostedRoute: getBoostedRoutesByDate(currentDate),
+                genericDeals: {
+                    'PirateFence': getPirateDealsByDate(currentDate),
+                },
             };
             forecasts[formatDate(currentDate)] = data;
             currentDate.setDate(currentDate.getDate() + 1);
         }
+
+        // Filter out static generic deals
+        const shopDayCounts = {};
+        const dealDayCounts = {};
+        Object.values(forecasts).forEach(forecast => {
+            Object.entries(forecast.genericDeals).forEach(([shopId, deals]) => {
+                shopDayCounts[shopId] = (shopDayCounts[shopId] || 0) + 1;
+                dealDayCounts[shopId] = dealDayCounts[shopId] || {};
+                new Set(deals.map(deal => JSON.stringify(deal))).forEach(deal => {
+                    dealDayCounts[shopId][deal] = (dealDayCounts[shopId][deal] || 0) + 1;
+                });
+            });
+        });
+        Object.values(forecasts).forEach(forecast => {
+            Object.entries(forecast.genericDeals).forEach(([shopId, deals]) => {
+                const rotating = deals.filter(deal => dealDayCounts[shopId][JSON.stringify(deal)] !== shopDayCounts[shopId]);
+                if (rotating.length) {
+                    forecast.genericDeals[shopId] = rotating;
+                } else {
+                    // Every deal in this shop is static, so it has nothing to forecast
+                    delete forecast.genericDeals[shopId];
+                }
+            });
+        });
 
         return forecasts;
     });

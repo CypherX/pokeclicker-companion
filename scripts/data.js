@@ -324,6 +324,10 @@ const berryMasterPokemonCosts = {
     ]
 };
 
+const genericDealLabels = {
+    'PirateFence': 'Shady Fence (Pirate Event)',
+};
+
 const changeLogData = [
     {
         timestamp: 1774917973018,
@@ -410,6 +414,7 @@ module.exports = {
     unownList,
     berryMasterPokemonLocations,
     berryMasterPokemonCosts,
+    genericDealLabels,
 
     changeLogData,
 }

@@ -2,8 +2,13 @@ const unownForecast = ko.observableArray();
 const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
+const genericDealForecast = ko.observableArray();
 
 const berryMasterList = GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None');
+const genericDealList = ko.pureComputed(() => {
+    const unique = new Set(Object.values(Forecast.genericDealForecast()).flatMap(a => Object.keys(a.deals)));
+    return [...unique];
+});
 
 const summaryDate = ko.observable(new Date());
 const summary = ko.observable({
@@ -63,6 +68,7 @@ const generateForecasts = (data) => {
     const weatherData = [];
     const boostedRouteData = [];
     const berryMasterData = [];
+    const genericDealData = [];
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -90,6 +96,7 @@ const generateForecasts = (data) => {
             traderDeals: forecast.berryDeal
         });
 
+        // Weather
         for (const weather of forecast.weather) {
             const hourDate = new Date(date);
             hourDate.setHours(weather.hour);
@@ -108,6 +115,12 @@ const generateForecasts = (data) => {
                 regionalRoutes: boosted.routes.flatMap(r => r),
             });
         }
+    
+        // Generic Deals
+        genericDealData.push({
+            date: date,
+            deals: forecast.genericDeals,
+        });
     }
 
     // Remove past data
@@ -119,6 +132,7 @@ const generateForecasts = (data) => {
     weatherForecast(weatherData);
     boostedRoutes(boostedRouteData.slice(0, 6));
     berryMasters(berryMasterData);
+    genericDealForecast(genericDealData);
 };
 
 const generateDailySummary = (date = new Date()) => {
@@ -373,6 +387,10 @@ const getIslandScanPokemonByDate = (date = new Date()) => {
     return data;
 };
 
+const getGenericDealsByShop = (shop, days = 7) => {
+    return genericDealForecast().slice(0, days).flatMap(d => ({ date: d.date, deals: d.deals[shop] }));
+};
+
 const dataLoaded = ko.observable(false);
 
 $(document).ready(() => {
@@ -391,6 +409,7 @@ module.exports = {
     weatherForecast,
     boostedRoutes,
     berryMasters,
+    genericDealForecast,
     summary,
     summaryDate,
 
@@ -410,6 +429,9 @@ module.exports = {
     berryMasterList,
     berryMasterSearchSetting,
     berryMasterDisplaySetting,
+
+    genericDealList,
+    getGenericDealsByShop,
 
     dataLoaded,
 };
