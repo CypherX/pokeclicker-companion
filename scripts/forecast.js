@@ -3,6 +3,7 @@ const weatherForecast = ko.observableArray();
 const boostedRoutes = ko.observableArray();
 const berryMasters = ko.observableArray();
 const genericDealForecast = ko.observableArray();
+const trophyGardenForecast = ko.observableArray();
 
 const berryMasterList = GameHelper.enumStrings(GameConstants.BerryTraderLocations).filter(s => s != 'None');
 const genericDealList = ko.pureComputed(() => {
@@ -19,61 +20,16 @@ const summary = ko.observable({
     islandScan: {},
 });
 
-/*const generateForecasts = (date = new Date()) => {
-    const currentHour = date.getHours();
-    const unownData = [];
-    const weatherData = [];
-    const boostedRouteData = [];
-    const berryMasterData = [];
-
-    for (let day = 0; day < 365; day++) {
-        const saveDate = new Date(date);
-
-        // Unown
-        unownData.push({
-            startDate: saveDate,
-            unowns: getUnownByDate(date),
-        });
-
-        // Berry Masters
-        berryMasterData.push({
-            date: saveDate,
-            traderDeals: getBerryDealsByDate(date),
-        });
-
-        // Weather
-        weatherData.push(...getRegionalWeatherByDate(date));
-
-        // Boosted Routes
-        // only generate a few days worth
-        if (boostedRouteData.length < 9) {
-            boostedRouteData.push(...getBoostedRoutesByDate(date));
-        }
-
-        date.setDate(date.getDate() + 1);
-    }
-
-    // Remove past data
-    weatherData.splice(0, Math.floor(currentHour / Weather.period));
-    boostedRouteData.splice(0, Math.floor(currentHour / RoamingPokemonList.period));
-
-    unownForecast(unownData);
-    weatherForecast(weatherData);
-    boostedRoutes(boostedRouteData.slice(0, 6));
-    berryMasters(berryMasterData);
-};*/
-
 const generateForecasts = (data) => {
     const unownData = [];
     const weatherData = [];
     const boostedRouteData = [];
     const berryMasterData = [];
     const genericDealData = [];
+    const trophyGardenData = [];
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    //const nextYear = new Date(today);
-    //nextYear.setFullYear(today.getFullYear() + 1);
 
     for (const [strDate, forecast] of Object.entries(data)) {
         const [y, m, d] = strDate.split('-').map(Number);
@@ -121,6 +77,12 @@ const generateForecasts = (data) => {
             date: date,
             deals: forecast.genericDeals,
         });
+
+        // Trophy Garden
+        trophyGardenData.push({
+            date: date,
+            encounters: forecast.trophyGarden,
+        });
     }
 
     // Remove past data
@@ -133,6 +95,7 @@ const generateForecasts = (data) => {
     boostedRoutes(boostedRouteData.slice(0, 6));
     berryMasters(berryMasterData);
     genericDealForecast(genericDealData);
+    trophyGardenForecast(trophyGardenData);
 };
 
 const generateDailySummary = (date = new Date()) => {
@@ -391,6 +354,24 @@ const getGenericDealsByShop = (shop, days = 7) => {
     return genericDealForecast().slice(0, days).flatMap(d => ({ date: d.date, deals: d.deals[shop] }));
 };
 
+const getTrophyGardenNextPokemonDate = (includeToday = true) => {
+    const today = new Date().setHours(0, 0, 0, 0);
+    const forecast = includeToday
+        ? trophyGardenForecast()
+        : trophyGardenForecast().filter(t => t.date.getTime() > today);
+
+    const nextDates = {};
+    forecast.forEach((t) => t.encounters.forEach((name) => {
+        if (!nextDates[name]) {
+            nextDates[name] = t.date;
+        }
+    }));
+
+    return Object.entries(nextDates)
+        .map(([pokemon, date]) => ({ pokemon, date }))
+        .sort((a, b) => a.pokemon.localeCompare(b.pokemon));
+};
+
 const dataLoaded = ko.observable(false);
 
 $(document).ready(() => {
@@ -410,6 +391,8 @@ module.exports = {
     boostedRoutes,
     berryMasters,
     genericDealForecast,
+    trophyGardenForecast,
+
     summary,
     summaryDate,
 
@@ -432,6 +415,8 @@ module.exports = {
 
     genericDealList,
     getGenericDealsByShop,
+
+    getTrophyGardenNextPokemonDate,
 
     dataLoaded,
 };

@@ -717,13 +717,28 @@ $(document).ready(() => {
     });
 
     if (window.location.hash.includes('#!')) {
+        // Read up front, as selecting the tabs below rewrites the hash via updateNavigationHash()
         const page = window.location.hash.replace(/.*#!/, '');
-        page.split('/').forEach(s => {
-            const tab = $(`button[data-bs-toggle="pill"][data-path="${decodeURIComponent(s)}"]`);
-            if (tab.length) {
-                tab.tab('show');
-            }
-        });
+        const showTabsForPath = () => {
+            page.split('/').forEach(s => {
+                const tab = $(`button[data-bs-toggle="pill"][data-path="${decodeURIComponent(s)}"]`);
+                if (tab.length) {
+                    tab.tab('show');
+                }
+            });
+        };
+
+        showTabsForPath();
+
+        // Some tabs are rendered from forecast data that loads asynchronously, so their buttons don't exist yet. Re-apply the path once they do.
+        if (!Forecast.dataLoaded()) {
+            const subscription = Forecast.dataLoaded.subscribe((loaded) => {
+                if (loaded) {
+                    subscription.dispose();
+                    showTabsForPath();
+                }
+            });
+        }
     }
 
     $(document).on('shown.bs.tab', 'button[data-bs-toggle="pill"]', () => {

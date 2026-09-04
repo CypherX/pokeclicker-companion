@@ -182,6 +182,41 @@ const fs = require('fs');
             }));
         };
 
+        const findDateSelectRequirement = (requirement) => {
+            if (!requirement) {
+                return null;
+            }
+
+            if (requirement instanceof SeededDateSelectNRequirement) {
+                return requirement;
+            }
+
+            for (const subRequirement of requirement.requirements ?? []) {
+                const found = findDateSelectRequirement(subRequirement);
+                if (found) {
+                    return found;
+                }
+            }
+
+            return null;
+        };
+
+        const trophyGardenRoute = Routes.regionRoutes.find(route => route.routeName === 'Trophy Garden');
+        const trophyGardenSpecials = trophyGardenRoute.pokemon.special
+            .map(special => ({ name: special.pokemon[0], requirement: findDateSelectRequirement(special.req) }))
+            .filter(special => special.requirement);
+        const { total: trophyGardenTotal, select: trophyGardenSelect } = trophyGardenSpecials[0].requirement;
+        const trophyGardenPool = [];
+        trophyGardenSpecials.forEach(special => {
+            trophyGardenPool[special.requirement.index] = special.name;
+        });
+
+        const getTrophyGardenByDate = (date = new Date()) => {
+            SeededRand.seedWithDate(date);
+            const shuffled = SeededRand.shuffleArray([...Array(trophyGardenTotal).keys()]);
+            return shuffled.slice(0, trophyGardenSelect).map(index => trophyGardenPool[index]);
+        };
+
         const now = new Date();
         const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         startDate.setDate(startDate.getDate() - 1);
@@ -202,6 +237,7 @@ const fs = require('fs');
                 genericDeals: {
                     'PirateFence': getPirateDealsByDate(currentDate),
                 },
+                trophyGarden: getTrophyGardenByDate(currentDate),
             };
             forecasts[formatDate(currentDate)] = data;
             currentDate.setDate(currentDate.getDate() + 1);

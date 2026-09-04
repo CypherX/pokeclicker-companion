@@ -330,6 +330,12 @@ const genericDealLabels = {
 
 const changeLogData = [
     {
+        timestamp: 1788538483660,
+        changes: [
+            'Forecasts for Trophy Garden and the Shady Fence (Pirate Event trader) are available at [Forecasts] → [Other]',
+        ],
+    },
+    {
         timestamp: 1774917973018,
         changes: [
             'Battle Calculator - major performance improvements & optimizations',
