@@ -9,7 +9,7 @@
         <meta http-equiv="Expires" content="0">-->
         <title>PokéClicker Companion</title>
         <link id="theme-stylesheet" href="./styles/bootstrap.min.css" rel="stylesheet">
-        <link href="./styles/styles-1788378302924.css" rel="stylesheet">
+        <link href="./styles/styles-1788538558498.css" rel="stylesheet">
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
@@ -1347,17 +1347,68 @@
         <!-- import "forecastOther.html" -->
 <div class="tab-pane h-100" id="forecastOther">
     <div class="d-flex flex-column h-100">
-        <ul class="nav nav-tabs mb-4" role="tablist" data-bind="foreach: Forecast.genericDealList">
+        <ul class="nav nav-tabs mb-4" role="tablist">
             <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
-                    data-bind="text: Companion.data.genericDealLabels[$data] ?? $data, css: { active: $index() == 0 },
-                        attr: { id: `genericdeal-${$index()}-tab`, 'data-bs-target': `#genericdeal-${$index()}`, 'data-path': $data.replace(/\s+/g, '') }"></button>
+                <button class="nav-link active" data-bs-toggle="pill" type="button" role="tab" id="trophygarden-tab" data-bs-target="#trophygarden" data-path="TrophyGarden">
+                    Trophy Garden
+                </button>
             </li>
+            <!-- ko foreach: Forecast.genericDealList -->
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" type="button" role="tab" data-bind="text: Companion.data.genericDealLabels[$data] ?? $data,
+                    attr: { id: `genericdeal-${$index()}-tab`, 'data-bs-target': `#genericdeal-${$index()}`, 'data-path': $data.replace(/\s+/g, '') }"></button>
+            </li>
+            <!-- /ko -->
         </ul>
-        <div class="tab-content flex-grow-1" style="overflow: auto;" data-bind="foreach: Forecast.genericDealList">
-            <div class="tab-pane" role="tabpanel" data-bind="css: { active: $index() == 0 }, attr: { id: `genericdeal-${$index()}` }">
+        <div class="tab-content flex-grow-1" style="overflow: auto;">
+            <div class="tab-pane active" role="tabpanel" id="trophygarden">
                 <div class="container-xxl">
-
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <h4 class="mb-2">Current & Upcoming</h4>
+                            <div class="table-responsive">
+                                <table class="table table-sm small">
+                                    <thead>
+                                        <tr class="table-dark">
+                                            <th>Date</th>
+                                            <th>Pokemon</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-bind="foreach: Forecast.trophyGardenForecast().slice(0, 31)">
+                                        <tr>
+                                            <td data-bind="text: Util.formatDate(date)"></td>
+                                            <td data-bind="text: encounters.join(' / ')"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <h4 class="mb-2">Next Appearance</h4>
+                            <div class="table-responsive">
+                                <table class="table table-sm small">
+                                    <thead>
+                                        <tr class="table-dark">
+                                            <th>Pokemon</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-bind="foreach: Forecast.getTrophyGardenNextPokemonDate(false)">
+                                        <tr>
+                                            <td data-bind="text: pokemon"></td>
+                                            <td data-bind="text: Util.formatDate(date)"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- ko foreach: Forecast.genericDealList -->
+            <div class="tab-pane" role="tabpanel" data-bind="attr: { id: `genericdeal-${$index()}` }">
+                <div class="container-xxl">
                     <table class="table table-sm small">
                         <thead>
                             <tr class="text-center">
@@ -1389,6 +1440,7 @@
                     </table>
                 </div>
             </div>
+            <!-- /ko -->
         </div>
     </div>
 </div>
@@ -2432,7 +2484,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1788378302924.js"></script>
+        <script src="./bundle-1788538558498.js"></script>
     </body>
 </html>
 
