@@ -30,7 +30,7 @@
                                     <tbody data-bind="foreach: Forecast.trophyGardenForecast().slice(0, 31)">
                                         <tr>
                                             <td data-bind="text: Util.formatDate(date)"></td>
-                                            <td data-bind="text: encounters.join(' / ')"></td>
+                                            <td data-bind="text: encounters?.join(' / ') ?? ''"></td>
                                         </tr>
                                     </tbody>
                                 </table>
