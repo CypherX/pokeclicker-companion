@@ -67,8 +67,23 @@ const runSimulation = async () => {
         toggleFlute(flute, settings.activeFlutes().includes(flute));
     });
 
+    // this shit sucks; find a better way to handle it
+    ItemList.Power_Herb.applyCondition = () => true;
+    App.game.party.caughtPokemon.forEach(p => {
+        if (p.heldItem() === ItemList.Power_Herb) {
+            p.heldItem.valueHasMutated();
+        }
+    });
+
     const highestStage = SaveData.file()?.save?.statistics?.battleFrontierHighestStageCompleted ?? 1;
     const result = await runShit(+settings.simulationAttempts(), highestStage, +settings.targetStage());
+
+    ItemList.Power_Herb.applyCondition = () => false;
+    App.game.party.caughtPokemon.forEach(p => {
+        if (p.heldItem() === ItemList.Power_Herb) {
+            p.heldItem.valueHasMutated();
+        }
+    });
 
     console.log(result);
     simulationResult(result);

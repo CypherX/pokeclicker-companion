@@ -330,6 +330,12 @@ const genericDealLabels = {
 
 const changeLogData = [
     {
+        timestamp: 1789784531216,
+        changes: [
+            'Battle Frontier Simulator - the Power Herb held item should now apply correctly during calculations.',
+        ],
+    },
+    {
         timestamp: 1788538483660,
         changes: [
             'Forecasts for Trophy Garden and the Shady Fence (Pirate Event trader) are available at [Forecasts] → [Other]',
