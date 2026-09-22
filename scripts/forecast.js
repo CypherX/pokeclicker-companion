@@ -18,6 +18,7 @@ const summary = ko.observable({
     boostedRoutes: [],
     berryTrades: [],
     islandScan: {},
+    trophyGarden: [],
 });
 
 const generateForecasts = (data) => {
@@ -106,6 +107,7 @@ const generateDailySummary = (date = new Date()) => {
         boostedRoutes: getBoostedRoutesByDate(date),
         berryTrades: getBerryDealsByDate(date),
         islandScan: getIslandScanPokemonByDate(date),
+        trophyGarden: getTrophyGardenByDate(date),
     });
 };
 
@@ -370,6 +372,41 @@ const getTrophyGardenNextPokemonDate = (includeToday = true) => {
     return Object.entries(nextDates)
         .map(([pokemon, date]) => ({ pokemon, date }))
         .sort((a, b) => a.pokemon.localeCompare(b.pokemon));
+};
+
+const findDateSelectRequirement = (requirement) => {
+    if (!requirement) {
+        return null;
+    }
+
+    if (requirement instanceof SeededDateSelectNRequirement) {
+        return requirement;
+    }
+
+    for (const subRequirement of requirement.requirements ?? []) {
+        const found = findDateSelectRequirement(subRequirement);
+        if (found) {
+            return found;
+        }
+    }
+
+    return null;
+};
+
+const getTrophyGardenByDate = (date = new Date()) => {
+    const trophyGardenRoute = Routes.regionRoutes.find(route => route.routeName === 'Trophy Garden');
+    const trophyGardenSpecials = trophyGardenRoute.pokemon.special
+        .map(special => ({ name: special.pokemon[0], requirement: findDateSelectRequirement(special.req) }))
+        .filter(special => special.requirement);
+    const { total: trophyGardenTotal, select: trophyGardenSelect } = trophyGardenSpecials[0].requirement;
+    const trophyGardenPool = [];
+    trophyGardenSpecials.forEach(special => {
+        trophyGardenPool[special.requirement.index] = special.name;
+    });
+
+    SeededRand.seedWithDate(date);
+    const shuffled = SeededRand.shuffleArray([...Array(trophyGardenTotal).keys()]);
+    return shuffled.slice(0, trophyGardenSelect).map(index => trophyGardenPool[index]);
 };
 
 const dataLoaded = ko.observable(false);
