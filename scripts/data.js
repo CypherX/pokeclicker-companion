@@ -94,6 +94,7 @@ const pokemonRegionOverride = {
         pokemonList.filter(p => Math.floor(p.id) == 129 && p.id > 129).map(p => [p.name, GameConstants.Region.alola])
     ),
     'Magikarp (Feebas)': GameConstants.Region.hoenn,
+    'Magikarp (Pirate)': GameConstants.Region.kanto,
 
     // Pikachu
     ...Object.fromEntries(
