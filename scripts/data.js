@@ -101,7 +101,7 @@ const pokemonRegionOverride = {
         pokemonList.filter(p => Math.floor(p.id) == 25 && p.id > 25).map(p => [p.name, GameConstants.Region.alola])
     ),
     'Pikachu (Palaeontologist)': GameConstants.Region.kanto,
-    'Detective Pikachu': GameConstants.Region.kalos,
+    'Detective Pikachu': GameConstants.Region.kanto,
     'Detective Raichu': GameConstants.Region.kalos,
     'Pikachu (World Cap)': GameConstants.Region.galar,
 
