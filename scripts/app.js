@@ -673,6 +673,16 @@ const calculateTypeDamageDistribution = () => {
     });
 };
 
+const getPlayerBerryCount = (berryType) => {
+    if (!SaveData.isLoaded()) {
+        return 0;
+    }
+
+    // Fall back to old `berryList` if older save file
+    const berryInventory = SaveData.file().save.farming.berryInventory ?? SaveData.file().save.farming.berryList;
+    return berryInventory[berryType] ?? 0;
+};
+
 const tabVisited = ko.observable({});
 const activeTab = ko.observable('#mySaveContent');
 
@@ -959,6 +969,8 @@ module.exports = {
     includeGems,
     typeDamageWeather,
     typeDamageRegion,
+
+    getPlayerBerryCount,
 
     tabVisited,
     activeTab,
