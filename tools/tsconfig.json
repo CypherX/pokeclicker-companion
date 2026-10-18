@@ -1,0 +1,17 @@
+{
+    // Node scripts, run directly with Node's native TypeScript support.
+    // The in-page generator (./page) runs in the browser and is checked by the root tsconfig.
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "lib": ["ES2022"],
+        "types": ["node"],
+        "strict": true,
+        "erasableSyntaxOnly": true,
+        "verbatimModuleSyntax": true,
+        "skipLibCheck": true,
+        "noEmit": true
+    },
+    "include": ["*.mts"]
+}
