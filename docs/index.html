@@ -9,7 +9,7 @@
         <meta http-equiv="Expires" content="0">-->
         <title>PokéClicker Companion</title>
         <link id="theme-stylesheet" href="./styles/bootstrap.min.css" rel="stylesheet">
-        <link href="./styles/styles-1791409519356.css" rel="stylesheet">
+        <link href="./styles/styles-1792360344066.css" rel="stylesheet">
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
@@ -1582,17 +1582,16 @@
                         </tr>
                     </tbody>
                     <!-- /ko -->
-                    <!-- ko with: VitaminTracker.getSortedVitaminList -->
-                    <tbody data-bind="foreach: $data">
+                    <tbody data-bind="foreach: VitaminTracker.getSortedVitaminList">
                         <tr>
-                            <td class="text-center" data-bind="text: $data.id"></td>
+                            <td class="text-center" data-bind="text: pokemon.id"></td>
                             <td>
-                                <knockout data-bind="text: $data.name"></knockout>
-                                <knockout data-bind="if: Companion.isEventDiscordClientPokemon($data.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
+                                <knockout data-bind="text: pokemon.name"></knockout>
+                                <knockout data-bind="if: Companion.isEventDiscordClientPokemon(pokemon.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
                             </td>
-                            <td class="text-center" data-bind="text: $data.type.map(t => PokemonType[t]).join(' / ')"></td>
-                            <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[$data.nativeRegion])"></td>
-                            <td class="text-center" data-bind="text: $data.attack"></td>
+                            <td class="text-center" data-bind="text: pokemon.type.map(t => PokemonType[t]).join(' / ')"></td>
+                            <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[pokemon.nativeRegion])"></td>
+                            <td class="text-center" data-bind="text: pokemon.attack"></td>
                             <td class="text-center" data-bind="text: $data.baseAttackBonus.toFixed(2).toLocaleString()"></td>
                             <td class="text-center" data-bind="text: $data.baseEggSteps.toLocaleString()"></td>
                             <td class="text-center bg-vitamin-0" data-bind="html: $data.vitaminText[0]"></td>
@@ -1603,7 +1602,6 @@
                             <td class="text-center" data-bind="text: $data.breedingEfficiency.toFixed(2).toLocaleString()"></td>
                         </tr>
                     </tbody>
-                    <!-- /ko -->
                 </table>
             </div>
         </div>
@@ -1828,15 +1826,16 @@
                             <td class="text-center" data-bind="text: $data.isCompleted() ? 'Yes' : 'No',
                                 class: $data.isCompleted() ? 'text-success' : 'text-danger'"></td>
                             <td class="text-center">
-                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bind="attr: { 'data-bs-target': `#gym-collapse${$index()}` }"></button>
+                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0" type="button"
+                                    data-bind="click: () => expanded(!expanded()), css: { collapsed: !expanded() }, attr: { 'aria-expanded': String(expanded()) }"></button>
                             </td>
                         </tr>
-                        <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }, css: {
+                        <!-- ko if: expanded -->
+                        <tr class="details-row" data-bind="css: {
                             'state-locked': !isUnlocked(),
                             'state-completed': isCompleted(),
                             'state-future': parent.region > player.highestRegion()
-                        }" style="transition: none !important;">
+                        }">
                             <td data-bind="attr: { colspan: BattleCalculator.settings.weather() === -1 ? 10 : 9 }">
                                 <table class="table table-sm mb-0">
                                     <thead>
@@ -1866,6 +1865,7 @@
                                 </table>
                             </td>
                         </tr>
+                        <!-- /ko -->
                     </tbody>
                     <tbody data-bind="visible: !BattleCalculator.hasVisibleGyms()">
                         <tr>
@@ -1921,15 +1921,16 @@
                             <td class="text-center" data-bind="text: $data.optionalArgs.resetDaily ? 'Resets Daily' : $data.isCompleted() ? 'Yes' : 'No',
                                 class: $data.optionalArgs.resetDaily ? 'text-body small' : $data.isCompleted() ? 'text-success' : 'text-danger'"></td>
                             <td class="text-center">
-                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bind="attr: { 'data-bs-target': `#tb-collapse${$index()}` }"></button>
+                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0" type="button"
+                                    data-bind="click: () => expanded(!expanded()), css: { collapsed: !expanded() }, attr: { 'aria-expanded': String(expanded()) }"></button>
                             </td>
                         </tr>
-                        <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }, css: {
+                        <!-- ko if: expanded -->
+                        <tr class="details-row" data-bind="css: {
                             'state-locked': !isUnlocked(),
                             'state-completed': isCompleted(),
                             'state-future': getTown().region > player.highestRegion()
-                        }" style="transition: none !important;">
+                        }">
                             <td data-bind="attr: { colspan: BattleCalculator.settings.weather() === -1 ? 9 : 8 }">
                                 <table class="table table-sm mb-0">
                                     <thead>
@@ -1959,6 +1960,7 @@
                                 </table>
                             </td>
                         </tr>
+                        <!-- /ko -->
                     </tbody>
                     <tbody data-bind="visible: !BattleCalculator.hasVisibleTempBattles()">
                         <tr>
@@ -2490,7 +2492,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1791409519356.js"></script>
+        <script src="./bundle-1792360344066.js"></script>
     </body>
 </html>
 

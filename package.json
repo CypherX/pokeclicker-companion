@@ -2,13 +2,11 @@
   "name": "pokeclicker-companion",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "start": "gulp",
-    "build": "browserify scripts/main.js -o bundle.js",
-    "watch": "watchify scripts/main.js -o bundle.js",
-    "update": "git submodule update --init && git submodule update --remote && node updateData.js",
-    "update-pokeclicker": "git submodule update --init && git submodule update --remote && node update.js",
+    "build": "gulp build",
+    "typecheck": "tsc -p . && tsc -p tools",
+    "update": "git submodule update --init && git submodule update --remote && node tools/updateData.mts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "website": "gulp website",
     "publish": "node publish.js"
@@ -25,26 +23,20 @@
   },
   "homepage": "https://github.com/CypherX/pokeclicker-companion#readme",
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-register": "^6.26.0",
+    "@types/bootstrap": "^5.2.11",
+    "@types/jquery": "^3.5.34",
+    "@types/knockout": "^3.4.79",
+    "@types/node": "^24.19.2",
     "browser-sync": "^2.29.3",
-    "browserify": "^17.0.0",
     "del": "^5.1.0",
-    "five-server": "^0.1.9",
+    "esbuild": "^0.28.2",
     "gh-pages": "^6.1.0",
     "gulp": "^4.0.2",
-    "gulp-concat": "^2.6.1",
     "gulp-html-imports": "^1.0.6",
     "gulp-if": "^3.0.0",
     "gulp-rename": "^2.1.0",
     "gulp-replace": "^1.1.4",
-    "gulp-terser": "^2.1.0",
     "puppeteer": "^24.16.2",
-    "vinyl-buffer": "^1.0.1",
-    "vinyl-source-stream": "^2.0.0",
-    "watchify": "^4.0.0"
-  },
-  "dependencies": {
-    "lzutf8": "^0.6.3"
+    "typescript": "^7.0.2"
   }
 }
