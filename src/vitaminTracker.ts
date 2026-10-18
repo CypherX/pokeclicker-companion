@@ -1,9 +1,10 @@
 import { obtainablePokemonList, type CompanionPokemon } from './data';
 import { partyList, type CompanionPartyPokemon } from './party';
 import * as SaveData from './save';
+import * as Settings from './settings';
 import { calcEggSteps, getBreedingAttackBonus, type VitaminCounts } from './shared/breeding';
 import type { OptimalVitaminsData, RegionVitamins } from './types/dataFiles';
-import { bindSortableTable, compareBy, exportToCsv, getStoredFlag, persistFlag } from './util';
+import { bindSortableTable, compareBy, exportToCsv } from './util';
 import { dataUrl } from './version';
 
 /** A pokémon's vitamin data that's the same in every region */
@@ -31,13 +32,7 @@ const { VitaminType } = GameConstants;
 export const loadVitaminTrackerTable = ko.observable(false);
 export const highestRegion = ko.observable<GameConstants.Region>(GameConstants.Region.kanto);
 export const searchValue = ko.observable('');
-export const hidePokemonOptimalVitamins = ko.observable(false);
-export const hideUncaughtPokemon = ko.observable(false);
-export const hideShinyPokemon = ko.observable(false);
-
-persistFlag(hidePokemonOptimalVitamins, 'hidePokemonOptimalVitamins');
-persistFlag(hideUncaughtPokemon, 'hideUncaughtPokemon');
-persistFlag(hideShinyPokemon, 'hideShinyPokemon');
+export const { hidePokemonOptimalVitamins, hideUncaughtPokemon, hideShinyPokemon } = Settings.vitaminTracker;
 
 const tableSort = ko.observable('id');
 const tableSortDescending = ko.observable(false);
@@ -221,18 +216,6 @@ const buildPokemonVitaminList = (optimalVitamins: OptimalVitaminsData) => {
 };
 
 export const initialize = (): void => {
-    if (getStoredFlag('hidePokemonOptimalVitamins')) {
-        hidePokemonOptimalVitamins(true);
-    }
-
-    if (getStoredFlag('hideUncaughtPokemon')) {
-        hideUncaughtPokemon(true);
-    }
-
-    if (getStoredFlag('hideShinyPokemon')) {
-        hideShinyPokemon(true);
-    }
-
     bindSortableTable('#vitaminTrackerTable', tableSort, tableSortDescending);
 
     fetch(dataUrl('optimalVitamins.json'))

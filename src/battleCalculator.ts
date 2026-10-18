@@ -2,7 +2,7 @@ import { bindAllFlutesToggle, deactivateAllFlutes, setActiveFlutes } from './flu
 import * as SaveData from './save';
 import * as Settings from './settings';
 import { getRegionGymNames } from './statistics';
-import { getStoredFlag, persistFlag } from './util';
+import { clampNumberInput } from './util';
 
 const { Region, AlolaSubRegions } = GameConstants;
 
@@ -59,8 +59,8 @@ export const settings = {
     clicksPerSecond: ko.observable<number | string>(0),
     xClickEnabled: ko.observable(false),
     rockyHelmetEnabled: ko.observable(false),
-    autoCollapseConfig: ko.observable(true),
-    runCalcImmediately: ko.observable(true),
+    // Stored in the browser: autoCollapseConfig, runCalcImmediately
+    ...Settings.battleCalculator,
 };
 
 /** Region used by the patched Party.getRegionAttackMultiplier during calculations; -1 when not calculating */
@@ -418,27 +418,15 @@ export const hasVisibleTempBattles = ko.pureComputed(() => {
 /* Settings                                                           */
 /* ------------------------------------------------------------------ */
 
-settings.autoCollapseConfig(getStoredFlag('autoCollapseBattleCalcConfig', true));
-persistFlag(settings.autoCollapseConfig, 'autoCollapseBattleCalcConfig');
-
-settings.runCalcImmediately(getStoredFlag('runBattleCalcImmediately', true));
-persistFlag(settings.runCalcImmediately, 'runBattleCalcImmediately');
-
 // Applied immediately so the click attack shown in the settings reflects the selected flutes
 settings.activeFlutes.subscribe(() => setActiveFlutes(settings.activeFlutes()));
 
 bindAllFlutesToggle(settings.allFlutesToggle, settings.activeFlutes);
 
-settings.clicksPerSecond.subscribe((value) => {
-    if (value === '' || isNaN(+value) || +value < 0) {
-        settings.clicksPerSecond(0);
-    } else if (+value > 20) {
-        settings.clicksPerSecond(20);
-    }
-});
+clampNumberInput(settings.clicksPerSecond, { min: 0, max: 20 });
 
 // Recalculate when any setting that affects the results changes
-const displayOnlySettings = new Set(['hideCompleted', 'hideLocked', 'allFlutesToggle', 'autoCollapseConfig']);
+const displayOnlySettings = new Set(['hideCompleted', 'hideLocked', 'allFlutesToggle', 'autoCollapseConfig', 'runCalcImmediately']);
 Object.entries(settings).forEach(([name, setting]) => {
     if (displayOnlySettings.has(name)) return;
     (setting as KnockoutObservable<unknown>).subscribe(() => {

@@ -112,15 +112,23 @@ export const getRegionNameText = (region: GameConstants.Region, subRegion = 0): 
 
 export const sleep = (ms: number): Promise<void> => new Promise(r => setTimeout(r, ms));
 
-/** Reads a boolean flag persisted as "0"/"1" */
-export const getStoredFlag = (key: string, defaultValue = false): boolean => {
-    const value = localStorage.getItem(key);
-    return value === null ? defaultValue : !!+value;
-};
-
-/** Persists a boolean observable to localStorage as "0"/"1" whenever it changes */
-export const persistFlag = (observable: KnockoutObservable<boolean>, key: string): void => {
-    observable.subscribe((value) => localStorage.setItem(key, `${+value}`));
+/**
+ * Keeps a number bound to a text input in range. An empty, non-numeric, or too low value resets to the
+ * fallback, and a too high one is lowered to the maximum. The maximum can change, e.g. with a result's size.
+ */
+export const clampNumberInput = (
+    input: KnockoutObservable<number | string>,
+    { min, max, fallback = min }: { min: number; max?: number | (() => number); fallback?: number },
+): void => {
+    input.subscribe((value) => {
+        const number = +value;
+        const maxValue = typeof max === 'function' ? max() : max;
+        if (`${value}`.trim() === '' || isNaN(number) || number < min) {
+            input(fallback);
+        } else if (maxValue !== undefined && maxValue >= min && number > maxValue) {
+            input(maxValue);
+        }
+    });
 };
 
 /** Builds a comparator for table sorting. Ties fall back to ascending id. */

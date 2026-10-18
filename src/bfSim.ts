@@ -1,6 +1,6 @@
 import { bindAllFlutesToggle, deactivateAllFlutes, setActiveFlutes } from './flutes';
 import * as SaveData from './save';
-import { sleep } from './util';
+import { clampNumberInput, sleep } from './util';
 
 interface AttemptResult {
     /** Gems earned, indexed by PokemonType */
@@ -54,26 +54,13 @@ export const selectedAttempt = ko.pureComputed(() => {
     return result.attempts?.[selected - 1];
 });
 
-selectedAttemptValue.subscribe((value) => {
-    const totalAttempts = simulationResult()?.attempts.length ?? 0;
-    if (isNaN(+value) || +value < 1 || +value > totalAttempts) {
-        selectedAttemptValue(1);
-    }
-});
+clampNumberInput(selectedAttemptValue, { min: 1, max: () => simulationResult()?.attempts.length ?? 0 });
 
 bindAllFlutesToggle(settings.allFlutesToggle, settings.activeFlutes);
 
-settings.simulationAttempts.subscribe((value) => {
-    if (isNaN(+value) || +value < 1 || !(value as string)?.length) {
-        settings.simulationAttempts(1);
-    }
-});
-
-settings.targetStage.subscribe((value) => {
-    if (isNaN(+value) || +value < 1 || !(value as string)?.length) {
-        settings.targetStage(0);
-    }
-});
+clampNumberInput(settings.simulationAttempts, { min: 1 });
+// 0 for no target
+clampNumberInput(settings.targetStage, { min: 1, fallback: 0 });
 
 /** The game's Power Herb only applies in the Battle Frontier, so force it on while simulating */
 const setPowerHerbActive = (active: boolean) => {
