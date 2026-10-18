@@ -4,8 +4,7 @@ import * as SaveData from './save';
 import * as Settings from './settings';
 import { calcEggSteps, getBreedingAttackBonus, type VitaminCounts } from './shared/breeding';
 import type { OptimalVitaminsData, RegionVitamins } from './types/dataFiles';
-import { bindSortableTable, compareBy, exportToCsv } from './util';
-import { dataUrl } from './version';
+import { bindSortableTable, compareBy, exportToCsv, loadDataFile } from './util';
 
 /** A pokémon's vitamin data that's the same in every region */
 interface VitaminPokemon {
@@ -177,7 +176,7 @@ export const exportData = (): void => {
 
     const data = getSortedVitaminList().map(({ pokemon, baseAttackBonus, baseEggSteps, partyPokemon, currentVitamins, ...vitamins }) => {
         const types = pokemonMap[pokemon.id].type;
-        const row: unknown[] = [pokemon.id, `"${pokemon.name}"`, PokemonType[types[0]], PokemonType[types[1] ?? -1]];
+        const row: unknown[] = [pokemon.id, pokemon.name, PokemonType[types[0]], PokemonType[types[1] ?? -1]];
 
         if (isSaveLoaded) {
             row.push(partyPokemon ? 1 : 0, partyPokemon?.shiny ? 1 : 0);
@@ -218,10 +217,8 @@ const buildPokemonVitaminList = (optimalVitamins: OptimalVitaminsData) => {
 export const initialize = (): void => {
     bindSortableTable('#vitaminTrackerTable', tableSort, tableSortDescending);
 
-    fetch(dataUrl('optimalVitamins.json'))
-        .then(resp => resp.json())
-        .then((json: OptimalVitaminsData) => {
-            buildPokemonVitaminList(json);
-            loadVitaminTrackerTable(true);
-        });
+    loadDataFile<OptimalVitaminsData>('optimalVitamins.json', (data) => {
+        buildPokemonVitaminList(data);
+        loadVitaminTrackerTable(true);
+    });
 };

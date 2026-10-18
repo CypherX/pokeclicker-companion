@@ -159,7 +159,7 @@ export const exportPartyPokemon = (): void => {
 
     const data = getSortedPartyList().map((p) => [
         p.id,
-        `"${p.name}"`,
+        p.name,
         PokemonType[pokemonMap[p.id].type[0]],
         PokemonType[pokemonMap[p.id].type[1] ?? -1],
         p.shiny ? 1 : 0,
@@ -209,6 +209,8 @@ interface MissingRegion {
     region: GameConstants.Region;
     regionName: string;
     pokemon: CompanionPokemon[];
+    /** The number missing: all forms, or with only required pokémon shown, each species once */
+    count: number;
 }
 
 export const getMissingPokemon = ko.pureComputed((): MissingRegion[] => {
@@ -225,6 +227,7 @@ export const getMissingPokemon = ko.pureComputed((): MissingRegion[] => {
                 region: r,
                 regionName: GameConstants.camelCaseToString(GameConstants.Region[r]),
                 pokemon: [],
+                count: 0,
             };
         });
 
@@ -249,22 +252,15 @@ export const getMissingPokemon = ko.pureComputed((): MissingRegion[] => {
         missingPokemon[obtainRegion].pokemon.push(p);
     });
 
-    return Object.values(missingPokemon).filter(r => r.pokemon.length);
+    const regions = Object.values(missingPokemon).filter(r => r.pokemon.length);
+    regions.forEach((r) => {
+        r.count = showRequiredOnly ? new Set(r.pokemon.map(p => Math.floor(p.id))).size : r.pokemon.length;
+    });
+    return regions;
 });
 
-export const getMissingRegionPokemonCount = (region: GameConstants.Region) => {
-    return ko.pureComputed(() => {
-        const data = getMissingPokemon().find(r => r.region == region);
-        if (!data) {
-            return 0;
-        }
-
-        return Settings.showRequiredOnly() ? new Set(data.pokemon.map(p => Math.floor(p.id))).size : data.pokemon.length;
-    });
-};
-
 export const getTotalMissingPokemonCount = ko.pureComputed(() => {
-    return getMissingPokemon().reduce((count, r) => count + getMissingRegionPokemonCount(r.region)(), 0);
+    return getMissingPokemon().reduce((count, r) => count + r.count, 0);
 });
 
 /* ------------------------------------------------------------------ */

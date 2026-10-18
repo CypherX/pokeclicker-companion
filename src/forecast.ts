@@ -2,8 +2,7 @@ import { berryMasterPokemonCosts, roamerGroups, type BerryMasterPokemonCost } fr
 import * as SaveData from './save';
 import { getTrophyGardenByDate, getUnownByDate } from './shared/dailyForecasts';
 import type { BerryCost, ForecastBerryDeal, ForecastData, ForecastGenericDeal } from './types/dataFiles';
-import { formatDate } from './util';
-import { dataUrl } from './version';
+import { formatDate, loadDataFile } from './util';
 
 /* ------------------------------------------------------------------ */
 /* Forecasts                                                          */
@@ -315,11 +314,9 @@ export const getTrophyGardenNextPokemonDate = (includeToday = true): { pokemon: 
 };
 
 export const initialize = (): void => {
-    fetch(dataUrl('forecastData.json'))
-        .then(resp => resp.json())
-        .then((json: ForecastData) => {
-            generateForecasts(json);
-            generateDailySummary();
-            dataLoaded(true);
-        });
+    loadDataFile<ForecastData>('forecastData.json', (data) => {
+        generateForecasts(data);
+        generateDailySummary();
+        dataLoaded(true);
+    });
 };

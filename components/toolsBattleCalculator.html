@@ -104,31 +104,7 @@
                             </div>
                         </div>
                         <hr class="my-2" />
-                        <div class="row justify-content-center mt-1">
-                            <!-- ko foreach: Object.values(GameConstants.FluteItemType) -->
-                            <div class="col-auto" data-bind="tooltip: {
-                                html: true,
-                                title: `${ItemList[$data].description}<br />${ItemList[$data].gemTypes.join(', ')}`,
-                                placement: 'bottom',
-                                trigger: 'hover',
-                            }">
-                                <div class="form-check form-check-inline form-switch me-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" data-bind="checkedValue: $data, checked: BattleCalculator.settings.activeFlutes,
-                                        attr: { id: `BattleCalculator_${$data}` }">
-                                    <label class="form-check-label" data-bind="text: GameConstants.humanifyString($data), attr: { for: `BattleCalculator_${$data}` }"></label>
-                                </div>
-                            </div>
-                            <!-- /ko -->
-                                <div class="col-auto">
-                                <div class="form-check form-check-inline form-switch me-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculator_AllFlutes" data-bind="checked: BattleCalculator.settings.allFlutesToggle">
-                                    <label class="form-check-label" for="BattleCalculator_AllFlutes">All</label>
-                                </div>
-                                </div>
-                        </div>
-                        <div class="text-muted small text-center mt-1">Active flutes provide a +0.5% typed damage bonus for the Gem types they consume.</div>
-                        <hr class="my-1" />
-                        <div class="text-muted small text-center">Damage calculations include all Pokémon in your party at the current max level. Being in the hatchery or not max level will not affect these calculations.</div>
+                        <!-- ko template: { name: 'flute-toggles-template', data: { settings: BattleCalculator.settings, idPrefix: 'BattleCalculator' } } --><!-- /ko -->
                         <div data-bind="visible: BattleCalculator.settings.clicksPerSecond() >= 15">
                             <hr class="my-1" />
                             <div class="text-center text-danger small"><strong>Clicks/second Warning</strong> - Due to game calculations and lag, and depending on your progress and device hardware, you will likely not reach the full amount of clicks/second, even with an autoclicker.</div>
