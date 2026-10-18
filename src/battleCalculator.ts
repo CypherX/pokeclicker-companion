@@ -13,9 +13,8 @@ const CURRENT_REGIONAL_WEATHER = -1;
 interface CalcPokemon extends GymPokemon {
     type1: PokemonType;
     type2: PokemonType;
-    /** Damage cache keys for both type orders, since damage is symmetric in type order */
-    damageKey1: string;
-    damageKey2: string;
+    /** The packed type combination, used as its damage cache key */
+    typeKey: number;
     typeString: string;
     formattedMaxHealth: string;
     partyDamage: KnockoutObservable<number>;
@@ -32,6 +31,8 @@ interface CalcBattleFields {
     totalHealth: number;
     formattedTotalHealth: string;
     isCompleted: KnockoutObservable<boolean>;
+    /** Whether the pokémon details are shown. They're only rendered while shown, since rendering every battle's is slow. */
+    expanded: KnockoutObservable<boolean>;
     secondsToWin: KnockoutObservable<number>;
     formattedSecondsToWin: KnockoutObservable<string>;
     timeClass: KnockoutComputed<string>;
@@ -80,28 +81,30 @@ const isMagikarpJump = (town: Town): boolean =>
 /* Damage calculation                                                 */
 /* ------------------------------------------------------------------ */
 
+/** Packs a type combination into one integer, since types range from -1 (None) to 17 */
+const packTypes = (type1: number, type2: number): number => (type1 + 1) * 19 + type2 + 1;
+const unpackTypes = (types: number): [PokemonType, PokemonType] => [Math.floor(types / 19) - 1, (types % 19) - 1];
+
 /**
- * Type effectiveness of a party type combination against an enemy type combination, measured
- * on a representative pokémon. Region and weather scale both sides equally, so they aren't keys.
+ * Type effectiveness of a party type combination against an enemy type combination (both packed), as applied
+ * by Party.calculateOnePokemonAttack. It only depends on gem upgrades, which are fixed for a save.
  */
-const typeMultCache = new Map<number, number>();
-const getTypeMult = (
-    pType1: number, pType2: number, eType1: PokemonType, eType2: PokemonType,
-    repPokemon: PartyPokemon, region: GameConstants.Region, weather: WeatherType,
-): number => {
-    // Types range from -1 (None) to 17, so pack the four into one integer key
-    const key = (((pType1 + 1) * 19 + pType2 + 1) * 19 + eType1 + 1) * 19 + eType2 + 1;
-    let mult = typeMultCache.get(key);
-    if (mult === undefined) {
-        const party = App.game.party;
-        const dummyBase = party.calculateOnePokemonAttack(repPokemon, PokemonType.None, PokemonType.None, region, true, true, false, weather, false, false);
-        mult = dummyBase === 0
-            ? 1
-            : party.calculateOnePokemonAttack(repPokemon, eType1, eType2, region, true, true, false, weather, false, false) / dummyBase;
-        typeMultCache.set(key, mult);
+const typeModifierCache = new Map<number, number>();
+const getTypeModifier = (partyTypes: number, enemyTypes: number): number => {
+    const key = partyTypes * 361 + enemyTypes;
+    let modifier = typeModifierCache.get(key);
+    if (modifier === undefined) {
+        modifier = TypeHelper.getAttackModifier(...unpackTypes(partyTypes), ...unpackTypes(enemyTypes));
+        typeModifierCache.set(key, modifier);
     }
-    return mult;
+    return modifier;
 };
+
+/** Total party attack (before type effectiveness) of a party type combination */
+interface TypeBucket {
+    types: number;
+    attack: number;
+}
 
 export const calcClickAttack = (region = 0, subRegion = 0): number => {
     const clicksPerSecond = +settings.clicksPerSecond();
@@ -144,72 +147,87 @@ export const calcBattleData = (): void => {
 
     applyBattleSettings();
 
-    // Total party attack (before type effectiveness) per region, bucketed by the party pokémon's
-    // types, plus one representative pokémon per type combination to measure type effectiveness.
-    // Plain objects are used deliberately: their key order determines the floating point summation order.
-    const regionBuckets: Record<number, Record<number, Record<number, number>>> = {};
-    const reps: Record<number, Record<number, PartyPokemon>> = {};
+    const party = App.game.party;
+    const attackBonus = party.multiplier.getBonus('pokemonAttack');
 
+    // Without the regional attack debuff, a region only affects attack through its weather,
+    // so regions with the same weather share their results.
+    const regionalDebuff = App.game.challenges.list.regionalAttackDebuff.active();
+    const regionGroup: number[] = [];
+    const groupKeys: number[] = [];
+    /** The first region of each group, used to calculate the group's attack */
+    const groupRegions: GameConstants.Region[] = [];
     for (let region = 0; region <= GameConstants.MAX_AVAILABLE_REGION; region++) {
-        regionBuckets[region] = {};
+        const key = regionalDebuff ? region : weatherLookup[region];
+        let group = groupKeys.indexOf(key);
+        if (group === -1) {
+            group = groupKeys.push(key) - 1;
+            groupRegions.push(region);
+        }
+        regionGroup[region] = group;
     }
 
-    for (const pokemon of App.game.party.caughtPokemon) {
+    // Total party attack (before type effectiveness) per region group, bucketed by the party pokémon's types.
+    // Plain objects are used deliberately: their key order determines the floating point summation order.
+    const groupBucketObjects: Record<number, Record<number, number>>[] = groupRegions.map(() => ({}));
+
+    for (const pokemon of party.caughtPokemon) {
         const pMap = pokemonMap[pokemon.name];
         const pType1 = pMap.type[0];
         const pType2 = pMap.type[1] ?? PokemonType.None;
 
-        reps[pType1] ??= {};
-        reps[pType1][pType2] ??= pokemon;
-
-        for (let region = 0; region <= GameConstants.MAX_AVAILABLE_REGION; region++) {
-            const typeBuckets = (regionBuckets[region][pType1] ??= {});
+        groupRegions.forEach((region, group) => {
+            const typeBuckets = (groupBucketObjects[group][pType1] ??= {});
             regionMultiplierOverride = region;
-            const baseRegAttack = App.game.party.calculateOnePokemonAttack(
+            const baseRegAttack = party.calculateOnePokemonAttack(
                 pokemon, PokemonType.None, PokemonType.None, region, false, true, false, weatherLookup[region], false, true,
             );
 
             typeBuckets[pType2] = (typeBuckets[pType2] || 0) + baseRegAttack;
-        }
+        });
     }
 
-    const calcAggregatedPartyAttack = (eType1: PokemonType, eType2: PokemonType, region: GameConstants.Region, weather: WeatherType) => {
-        let attack = 0;
-        const buckets = regionBuckets[region];
-
+    const groupBuckets = groupBucketObjects.map((buckets) => {
+        const flat: TypeBucket[] = [];
         for (const pType1 in buckets) {
             for (const pType2 in buckets[pType1]) {
-                const baseRegAttack = buckets[pType1][pType2];
-                if (baseRegAttack === 0) continue;
-
-                const repPokemon = reps[pType1][pType2];
-                attack += baseRegAttack * getTypeMult(+pType1, +pType2, eType1, eType2, repPokemon, region, weather);
+                const attack = buckets[pType1][pType2];
+                if (attack !== 0) flat.push({ types: packTypes(+pType1, +pType2), attack });
             }
         }
+        return flat;
+    });
 
-        return Math.round(attack * App.game.party.multiplier.getBonus('pokemonAttack'));
+    const calcAggregatedPartyAttack = (enemyTypes: number, buckets: TypeBucket[]) => {
+        let attack = 0;
+        for (const bucket of buckets) {
+            attack += bucket.attack * getTypeModifier(bucket.types, enemyTypes);
+        }
+        return Math.round(attack * attackBonus);
     };
 
     // Only Magikarp can battle in Magikarp Jump, so calculate them individually
+    const magikarp = party.caughtPokemon.filter(p => Math.floor(p.id) === 129);
     const calcMkjAttack = (eType1: PokemonType, eType2: PokemonType, weather: WeatherType) => {
-        const magikarp = App.game.party.caughtPokemon.filter(p => Math.floor(p.id) === 129);
         let attack = 0;
         for (const karp of magikarp) {
-            attack += App.game.party.calculateOnePokemonAttack(karp, eType1, eType2, Region.none, true, true, false, weather, false, true);
+            attack += party.calculateOnePokemonAttack(karp, eType1, eType2, Region.none, true, true, false, weather, false, true);
         }
-        return Math.round(attack * App.game.party.multiplier.getBonus('pokemonAttack'));
+        return Math.round(attack * attackBonus);
     };
 
     const clickDamage = calcClickAttack();
     const mkjClickDamage = calcClickAttack(Region.alola, AlolaSubRegions.MagikarpJump);
-    const damageCache = new Map<string, number>();
+    // Party damage per type combination, for each region group, and for Magikarp Jump
+    const damageCaches = groupRegions.map(() => new Map<number, number>());
+    const mkjDamageCache = new Map<number, number>();
 
     const battles: CalcBattle[] = [...gymList.peek(), ...tempBattleList.peek()];
     for (const battle of battles) {
         const town = battle.townObj;
-        regionMultiplierOverride = town.region;
-
+        const group = regionGroup[town.region];
         const isMkj = isMagikarpJump(town);
+        const damageCache = isMkj ? mkjDamageCache : damageCaches[group];
         const currentClickDamage = isMkj ? mkjClickDamage : clickDamage;
 
         if (battle.clickDamage.peek() !== currentClickDamage) {
@@ -220,13 +238,12 @@ export const calcBattleData = (): void => {
         let totalSeconds = 0;
 
         for (const pokemon of battle.pokemonList) {
-            let damage = damageCache.get(pokemon.damageKey1) ?? damageCache.get(pokemon.damageKey2);
+            let damage = damageCache.get(pokemon.typeKey);
             if (damage === undefined) {
-                const weather = weatherLookup[town.region];
                 damage = isMkj
-                    ? calcMkjAttack(pokemon.type1, pokemon.type2, weather)
-                    : calcAggregatedPartyAttack(pokemon.type1, pokemon.type2, town.region, weather);
-                damageCache.set(pokemon.damageKey1, damage);
+                    ? calcMkjAttack(pokemon.type1, pokemon.type2, weatherLookup[town.region])
+                    : calcAggregatedPartyAttack(pokemon.typeKey, groupBuckets[group]);
+                damageCache.set(pokemon.typeKey, damage);
             }
 
             const totalDmg = damage + currentClickDamage;
@@ -295,19 +312,16 @@ export const getTempBattleTime = battleTimeLimit(GameConstants.TEMP_BATTLE_TIME)
 /* Battle lists                                                       */
 /* ------------------------------------------------------------------ */
 
-const toCalcPokemon = (p: GymPokemon, town: Town): CalcPokemon => {
+const toCalcPokemon = (p: GymPokemon): CalcPokemon => {
     const pMap = pokemonMap[p.name];
     const type1 = pMap.type[0];
     const type2 = pMap.type[1] ?? PokemonType.None;
-
-    const suffix = isMagikarpJump(town) ? '|mkj' : '';
 
     return {
         ...p,
         type1,
         type2,
-        damageKey1: `${town.region}|${type1}|${type2}${suffix}`,
-        damageKey2: `${town.region}|${type2}|${type1}${suffix}`,
+        typeKey: packTypes(type1, type2),
         typeString: pMap.type.map(t => PokemonType[t]).join(' / '),
         formattedMaxHealth: p.maxHealth.toLocaleString(),
         partyDamage: ko.observable(0).extend({ deferred: true }),
@@ -324,10 +338,11 @@ const initCalcBattle = <T extends Gym | TemporaryBattle>(
 ): T & CalcBattleFields => {
     const calcBattle = battle as T & CalcBattleFields;
     calcBattle.townObj = town;
-    calcBattle.pokemonList = battle.getPokemonList().map((p) => toCalcPokemon(p, town));
+    calcBattle.pokemonList = battle.getPokemonList().map(toCalcPokemon);
     calcBattle.totalHealth = calcBattle.pokemonList.reduce((hp, p) => hp + p.maxHealth, 0);
     calcBattle.formattedTotalHealth = calcBattle.totalHealth.toLocaleString();
     calcBattle.isCompleted = ko.observable(completed).extend({ deferred: true });
+    calcBattle.expanded = ko.observable(false);
     calcBattle.secondsToWin = ko.observable(0).extend({ deferred: true });
     calcBattle.formattedSecondsToWin = ko.observable('0').extend({ deferred: true });
     calcBattle.timeClass = ko.pureComputed<string>(() => calcBattle.secondsToWin() <= battleTime() ? 'text-success' : 'text-danger').extend({ deferred: true });
@@ -415,10 +430,9 @@ settings.activeFlutes.subscribe(() => setActiveFlutes(settings.activeFlutes()));
 bindAllFlutesToggle(settings.allFlutesToggle, settings.activeFlutes);
 
 settings.clicksPerSecond.subscribe((value) => {
-    if (isNaN(+value) || +value < 0 || !(value as string)?.length) {
+    if (value === '' || isNaN(+value) || +value < 0) {
         settings.clicksPerSecond(0);
-    }
-    if (+value > 20) {
+    } else if (+value > 20) {
         settings.clicksPerSecond(20);
     }
 });

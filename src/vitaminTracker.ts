@@ -1,21 +1,28 @@
 import { obtainablePokemonList, type CompanionPokemon } from './data';
-import { partyList } from './party';
+import { partyList, type CompanionPartyPokemon } from './party';
 import * as SaveData from './save';
 import { calcEggSteps, getBreedingAttackBonus, type VitaminCounts } from './shared/breeding';
 import type { OptimalVitaminsData, RegionVitamins } from './types/dataFiles';
 import { bindSortableTable, compareBy, exportToCsv, getStoredFlag, persistFlag } from './util';
 import { dataUrl } from './version';
 
-interface VitaminPokemon extends CompanionPokemon {
+/** A pokémon's vitamin data that's the same in every region */
+interface VitaminPokemon {
+    pokemon: CompanionPokemon;
     baseAttackBonus: number;
     baseEggSteps: number;
+    /** Optimal vitamins, indexed by region */
     regionVitamins: RegionVitamins[];
+}
 
-    // Values for the currently selected region
-    bestVitamins: VitaminCounts;
-    breedingEfficiency: number;
-    vitaminEggSteps: number;
-    attackBonus: number;
+/** A row of the table: a pokémon with its optimal vitamins for the selected region */
+interface VitaminRow extends RegionVitamins, Omit<VitaminPokemon, 'regionVitamins'> {
+    /** The pokémon's id, which sorting breaks ties with */
+    id: number;
+    partyPokemon?: CompanionPartyPokemon;
+    /** The vitamins the pokémon currently has, when a save is loaded */
+    currentVitamins?: VitaminCounts;
+    hasOptimalVitamins: boolean;
     vitaminText: (number | string)[];
 }
 
@@ -37,93 +44,86 @@ const tableSortDescending = ko.observable(false);
 
 let pokemonVitaminList: VitaminPokemon[] = [];
 
-const getFilteredVitaminList = (): VitaminPokemon[] => {
-    const region = highestRegion();
-    const searchVal = searchValue()?.toLowerCase();
-
-    return pokemonVitaminList.filter((pokemon) => {
-        if (pokemon.obtainRegion > region) {
-            return false;
-        }
-
-        if (searchVal) {
-            if (!pokemon.id.toString().includes(searchVal)
-                && !pokemon.name.toLowerCase().includes(searchVal)) {
-                return false;
-            }
-        }
-
-        const partyPokemon = partyList()[pokemon.id];
-        if (SaveData.isLoaded() && hideUncaughtPokemon() && !partyPokemon) {
-            return false;
-        }
-
-        if (partyPokemon?.shiny && hideShinyPokemon()) {
-            return false;
-        }
-
-        if (hidePokemonOptimalVitamins()) {
-            const bestVitamins = pokemon.regionVitamins[region].bestVitamins;
-            if (partyPokemon && GameHelper.enumNumbers(VitaminType).every((v) => bestVitamins[v] == partyPokemon.vitaminsUsed[v as GameConstants.VitaminType]())) {
-                return false;
-            }
-        }
-
-        return true;
-    });
-};
-
-const getVitaminPokemonList = ko.pureComputed((): VitaminPokemon[] => {
+/**
+ * The rows for the selected region, which only change with the region or the save. Searching, filtering, and
+ * sorting select from these same rows, so the table only adds, removes, and moves rows for them.
+ */
+const regionRows = ko.pureComputed((): VitaminRow[] => {
     if (!loadVitaminTrackerTable()) { // wait until the optimal vitamin data has loaded
         return [];
     }
 
     const region = highestRegion();
     const saveLoaded = SaveData.isLoaded();
-    const pokemon = getFilteredVitaminList();
-    pokemon.forEach((p) => {
-        const regionVitamins = p.regionVitamins[region];
-        p.bestVitamins = regionVitamins.bestVitamins;
-        p.breedingEfficiency = regionVitamins.breedingEfficiency;
-        p.vitaminEggSteps = regionVitamins.vitaminEggSteps;
-        p.attackBonus = regionVitamins.attackBonus;
-        p.vitaminText = p.bestVitamins.map((v, i) => {
-            if (!saveLoaded) {
-                return v;
-            }
+    const party = partyList();
 
-            const current = partyList()[p.id]?.vitaminsUsed[i as GameConstants.VitaminType]() ?? 0;
-            return current === v ? v : `${current} <span class="text-warning">(${v})</span>`;
-        });
+    return pokemonVitaminList.filter(p => p.pokemon.obtainRegion <= region).map(({ pokemon, baseAttackBonus, baseEggSteps, regionVitamins }): VitaminRow => {
+        const vitamins = regionVitamins[region];
+        const partyPokemon = party[pokemon.id];
+        const currentVitamins = saveLoaded
+            ? vitamins.bestVitamins.map((_, i) => partyPokemon?.vitaminsUsed[i as GameConstants.VitaminType].peek() ?? 0) as VitaminCounts
+            : undefined;
+
+        return {
+            ...vitamins,
+            id: pokemon.id,
+            pokemon,
+            baseAttackBonus,
+            baseEggSteps,
+            partyPokemon,
+            currentVitamins,
+            hasOptimalVitamins: !!partyPokemon && vitamins.bestVitamins.every((v, i) => v === currentVitamins![i]),
+            vitaminText: vitamins.bestVitamins.map((v, i) => {
+                const current = currentVitamins?.[i] ?? v;
+                return current === v ? v : `${current} <span class="text-warning">(${v})</span>`;
+            }),
+        };
     });
-
-    return pokemon;
 });
 
-const getSortValue = (sortOption: string) => (pokemon: VitaminPokemon): number | string => {
+const getSortValue = (sortOption: string) => (row: VitaminRow): number | string => {
     switch (sortOption) {
         case 'name':
-            return pokemon.name;
+            return row.pokemon.name;
         case 'base-attack':
-            return pokemon.attack;
+            return row.pokemon.attack;
         case 'base-bonus':
-            return pokemon.baseAttackBonus;
+            return row.baseAttackBonus;
         case 'base-steps':
-            return pokemon.baseEggSteps;
+            return row.baseEggSteps;
         case 'vitamin-bonus':
-            return pokemon.attackBonus;
+            return row.attackBonus;
         case 'vitamin-steps':
-            return pokemon.vitaminEggSteps;
+            return row.vitaminEggSteps;
         case 'breeding-efficiency':
-            return pokemon.breedingEfficiency;
+            return row.breedingEfficiency;
         case 'id':
         default:
-            return pokemon.id;
+            return row.pokemon.id;
     }
 };
 
-export const getSortedVitaminList = ko.pureComputed(() => {
-    return [...getVitaminPokemonList()].sort(compareBy(getSortValue(tableSort()), tableSortDescending()));
+export const getSortedVitaminList = ko.pureComputed((): VitaminRow[] => {
+    const searchVal = searchValue()?.toLowerCase();
+    const hideUncaught = SaveData.isLoaded() && hideUncaughtPokemon();
+    const hideShiny = hideShinyPokemon();
+    const hideOptimal = hidePokemonOptimalVitamins();
+
+    return regionRows().filter((row) => {
+        if (searchVal && !row.pokemon.id.toString().includes(searchVal) && !row.pokemon.name.toLowerCase().includes(searchVal)) {
+            return false;
+        }
+        if (hideUncaught && !row.partyPokemon) {
+            return false;
+        }
+        if (hideShiny && row.partyPokemon?.shiny) {
+            return false;
+        }
+        if (hideOptimal && row.hasOptimalVitamins) {
+            return false;
+        }
+        return true;
+    }).sort(compareBy(getSortValue(tableSort()), tableSortDescending()));
 });
 
 export const getTotalVitaminsNeeded = ko.pureComputed(() => {
@@ -133,7 +133,7 @@ export const getTotalVitaminsNeeded = ko.pureComputed(() => {
 
     const region = highestRegion();
     const amountNeeded = pokemonVitaminList.reduce((sum, p) => {
-        if (p.obtainRegion <= region) {
+        if (p.pokemon.obtainRegion <= region) {
             p.regionVitamins[region].bestVitamins.forEach((count, i) => sum[i] += count);
         }
         return sum;
@@ -180,30 +180,29 @@ export const exportData = (): void => {
     });
     headers.push('Vitamin Attack Bonus', 'Vitamin Egg Steps', 'Breeding Efficiency');
 
-    const data = getSortedVitaminList().map((p) => {
-        const types = pokemonMap[p.id].type;
-        const partyPokemon = partyList()[p.id];
-        const row: unknown[] = [p.id, `"${p.name}"`, PokemonType[types[0]], PokemonType[types[1] ?? -1]];
+    const data = getSortedVitaminList().map(({ pokemon, baseAttackBonus, baseEggSteps, partyPokemon, currentVitamins, ...vitamins }) => {
+        const types = pokemonMap[pokemon.id].type;
+        const row: unknown[] = [pokemon.id, `"${pokemon.name}"`, PokemonType[types[0]], PokemonType[types[1] ?? -1]];
 
         if (isSaveLoaded) {
             row.push(partyPokemon ? 1 : 0, partyPokemon?.shiny ? 1 : 0);
         }
 
         row.push(
-            GameConstants.camelCaseToString(GameConstants.Region[p.nativeRegion]),
-            p.attack,
-            p.baseAttackBonus,
-            p.baseEggSteps,
+            GameConstants.camelCaseToString(GameConstants.Region[pokemon.nativeRegion]),
+            pokemon.attack,
+            baseAttackBonus,
+            baseEggSteps,
         );
 
-        p.bestVitamins.forEach((v, i) => {
-            if (isSaveLoaded) {
-                row.push(partyPokemon?.vitaminsUsed[i as GameConstants.VitaminType]() ?? 0);
+        vitamins.bestVitamins.forEach((v, i) => {
+            if (currentVitamins) {
+                row.push(currentVitamins[i]);
             }
             row.push(v);
         });
 
-        row.push(p.attackBonus, p.vitaminEggSteps, p.breedingEfficiency);
+        row.push(vitamins.attackBonus, vitamins.vitaminEggSteps, vitamins.breedingEfficiency);
         return row;
     });
 
@@ -213,14 +212,12 @@ export const exportData = (): void => {
 const buildPokemonVitaminList = (optimalVitamins: OptimalVitaminsData) => {
     const noVitamins: VitaminCounts = [0, 0, 0];
 
-    // Augments the shared pokemon data objects in place
-    pokemonVitaminList = obtainablePokemonList.map((p) => {
-        const pokemon = p as VitaminPokemon;
-        pokemon.baseAttackBonus = getBreedingAttackBonus(noVitamins, p.attack);
-        pokemon.baseEggSteps = calcEggSteps(noVitamins, p.eggCycles);
-        pokemon.regionVitamins = optimalVitamins[p.id];
-        return pokemon;
-    });
+    pokemonVitaminList = obtainablePokemonList.map((pokemon) => ({
+        pokemon,
+        baseAttackBonus: getBreedingAttackBonus(noVitamins, pokemon.attack),
+        baseEggSteps: calcEggSteps(noVitamins, pokemon.eggCycles),
+        regionVitamins: optimalVitamins[pokemon.id],
+    }));
 };
 
 export const initialize = (): void => {

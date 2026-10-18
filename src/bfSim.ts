@@ -132,6 +132,50 @@ const calcHealth = (stage: number): number => {
 
 const calcGemReward = (stage: number): number => Math.ceil(stage / 80);
 
+/**
+ * Party damage against every enemy type pair, indexed by typeKey. Gives the same values as the
+ * game's Battle Frontier, which calls App.game.party.calculatePokemonAttack for each enemy.
+ *
+ * Calling that for all 342 type pairs runs the game's per-pokémon attack formula for the whole
+ * party each time. Enemy types only affect that formula through TypeHelper.getAttackModifier, so
+ * instead each pokémon's attack is calculated once, against a typeless enemy, and summed by the
+ * pokémon's types. Each type pair's damage is then those sums times their type modifiers.
+ */
+const calcPartyDamageByType = (): Float64Array => {
+    const party = App.game.party;
+
+    const attackByPartyTypes = new Map<number, { type1: PokemonType; type2: PokemonType; attack: number }>();
+    for (const pokemon of party.caughtPokemon) {
+        const attack = party.calculateOnePokemonAttack(pokemon, PokemonType.None, PokemonType.None, GameConstants.Region.none, true, false, false, WeatherType.Clear);
+        if (attack === 0) {
+            continue;
+        }
+
+        const { type1, type2 } = PokemonHelper.getPokemonByName(pokemon.name);
+        const key = typeKey(type1, type2);
+        const group = attackByPartyTypes.get(key);
+        if (group) {
+            group.attack += attack;
+        } else {
+            attackByPartyTypes.set(key, { type1, type2, attack });
+        }
+    }
+
+    const groups = [...attackByPartyTypes.values()];
+    const bonus = party.multiplier.getBonus('pokemonAttack');
+    const damage = new Float64Array(1 << 10);
+    for (let enemyType1 = 0; enemyType1 <= 17; enemyType1++) {
+        for (let enemyType2 = -1; enemyType2 <= 17; enemyType2++) {
+            let attack = 0;
+            for (const group of groups) {
+                attack += group.attack * TypeHelper.getAttackModifier(group.type1, group.type2, enemyType1, enemyType2);
+            }
+            damage[typeKey(enemyType1, enemyType2)] = Math.round(attack * bonus);
+        }
+    }
+    return damage;
+};
+
 /** Battle Frontier enemies by highest region: base pokémon ids, and their forms by base id */
 const pokemonRegionPool: Record<number, { baseIds: number[]; byBaseId: Map<number, PokemonListData[]> }> = {};
 const buildPokemonPool = () => {
@@ -157,15 +201,10 @@ const simulate = async (attempts = 1, highestStage = 1, targetStage = 0): Promis
     const highestRegion = player.highestRegion();
     const gemTypes = GameHelper.enumNumbers(PokemonType).filter(type => type !== PokemonType.None);
 
-    // Party damage against every type pair
-    const damageCache = new Float64Array(1 << 10);
-    for (let a = 0; a <= 17; a++) {
-        for (let b = -1; b <= 17; b++) {
-            damageCache[typeKey(a, b)] = App.game.party.calculatePokemonAttack(a, b, true, GameConstants.Region.none, false, false, WeatherType.Clear);
-        }
-    }
+    const damageCache = calcPartyDamageByType();
 
-    // Precalculate stage values, indexed by stage. Stages past the cache are calculated as needed.
+    // Precalculate stage values, indexed by stage. Stages past the cache are calculated as needed,
+    // inline in the loop: helper functions there make Firefox ~30% slower.
     const maxPrecalcStage = targetStage || highestStage + 10000;
 
     const healthCache = new Float64Array(maxPrecalcStage + 1);
@@ -174,8 +213,6 @@ const simulate = async (attempts = 1, highestStage = 1, targetStage = 0): Promis
         healthCache[i] = calcHealth(i);
         gemRewardCache[i] = calcGemReward(i);
     }
-    const stageHealth = (stage: number) => stage <= maxPrecalcStage ? healthCache[stage] : calcHealth(stage);
-    const stageGemReward = (stage: number) => stage <= maxPrecalcStage ? gemRewardCache[stage] : calcGemReward(stage);
 
     buildPokemonPool();
 
@@ -231,8 +268,8 @@ const simulate = async (attempts = 1, highestStage = 1, targetStage = 0): Promis
         let runOver = false;
 
         for (let currentStage = 1; ; currentStage++) {
-            const health = stageHealth(currentStage);
-            const gemReward = stageGemReward(currentStage);
+            const health = currentStage <= maxPrecalcStage ? healthCache[currentStage] : calcHealth(currentStage);
+            const gemReward = currentStage <= maxPrecalcStage ? gemRewardCache[currentStage] : calcGemReward(currentStage);
             let stageSeconds = 0;
 
             for (let i = 0; i < 3; i++) {

@@ -209,15 +209,16 @@
                             <td class="text-center" data-bind="text: $data.isCompleted() ? 'Yes' : 'No',
                                 class: $data.isCompleted() ? 'text-success' : 'text-danger'"></td>
                             <td class="text-center">
-                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bind="attr: { 'data-bs-target': `#gym-collapse${$index()}` }"></button>
+                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0" type="button"
+                                    data-bind="click: () => expanded(!expanded()), css: { collapsed: !expanded() }, attr: { 'aria-expanded': String(expanded()) }"></button>
                             </td>
                         </tr>
-                        <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }, css: {
+                        <!-- ko if: expanded -->
+                        <tr class="details-row" data-bind="css: {
                             'state-locked': !isUnlocked(),
                             'state-completed': isCompleted(),
                             'state-future': parent.region > player.highestRegion()
-                        }" style="transition: none !important;">
+                        }">
                             <td data-bind="attr: { colspan: BattleCalculator.settings.weather() === -1 ? 10 : 9 }">
                                 <table class="table table-sm mb-0">
                                     <thead>
@@ -247,6 +248,7 @@
                                 </table>
                             </td>
                         </tr>
+                        <!-- /ko -->
                     </tbody>
                     <tbody data-bind="visible: !BattleCalculator.hasVisibleGyms()">
                         <tr>
@@ -302,15 +304,16 @@
                             <td class="text-center" data-bind="text: $data.optionalArgs.resetDaily ? 'Resets Daily' : $data.isCompleted() ? 'Yes' : 'No',
                                 class: $data.optionalArgs.resetDaily ? 'text-body small' : $data.isCompleted() ? 'text-success' : 'text-danger'"></td>
                             <td class="text-center">
-                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bind="attr: { 'data-bs-target': `#tb-collapse${$index()}` }"></button>
+                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0" type="button"
+                                    data-bind="click: () => expanded(!expanded()), css: { collapsed: !expanded() }, attr: { 'aria-expanded': String(expanded()) }"></button>
                             </td>
                         </tr>
-                        <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }, css: {
+                        <!-- ko if: expanded -->
+                        <tr class="details-row" data-bind="css: {
                             'state-locked': !isUnlocked(),
                             'state-completed': isCompleted(),
                             'state-future': getTown().region > player.highestRegion()
-                        }" style="transition: none !important;">
+                        }">
                             <td data-bind="attr: { colspan: BattleCalculator.settings.weather() === -1 ? 9 : 8 }">
                                 <table class="table table-sm mb-0">
                                     <thead>
@@ -340,6 +343,7 @@
                                 </table>
                             </td>
                         </tr>
+                        <!-- /ko -->
                     </tbody>
                     <tbody data-bind="visible: !BattleCalculator.hasVisibleTempBattles()">
                         <tr>

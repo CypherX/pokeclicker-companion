@@ -178,6 +178,11 @@ declare class PokemonHelper {
     static getPokemonByName(name: PokemonNameType): { id: number; name: PokemonNameType; type1: PokemonType; type2: PokemonType };
 }
 
+declare class TypeHelper {
+    /** Type effectiveness of an attacker with types a1/a2 against a defender with types d1/d2 */
+    static getAttackModifier(a1: PokemonType, a2: PokemonType, d1: PokemonType, d2: PokemonType): number;
+}
+
 declare class PokemonLocations {
     static isObtainableAndNotEvable(pokemonName: PokemonNameType): boolean;
 }

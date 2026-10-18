@@ -3,6 +3,7 @@ import * as FriendSafari from './friendSafari';
 import * as SaveData from './save';
 import * as Settings from './settings';
 import { bindSortableTable, compareBy, exportToCsv } from './util';
+import type { SaveFile } from './types/saveFile';
 
 const { Pokerus, ShadowStatus } = GameConstants;
 
@@ -22,6 +23,10 @@ export interface CompanionPartyPokemon extends PartyPokemon {
 /** The player's caught pokémon by id, as game PartyPokemon instances built from the save */
 export const partyList = ko.pureComputed((): Record<number, CompanionPartyPokemon> => {
     const saveData = SaveData.file();
+    return ko.ignoreDependencies(() => buildPartyList(saveData));
+});
+
+const buildPartyList = (saveData: SaveFile | undefined): Record<number, CompanionPartyPokemon> => {
     const party = saveData?.save.party.caughtPokemon ?? [];
     const statistics = saveData?.save.statistics;
 
@@ -54,7 +59,7 @@ export const partyList = ko.pureComputed((): Record<number, CompanionPartyPokemo
         map[p.id] = partyPokemon;
     }
     return map;
-});
+};
 
 const getPartyPokemonByName = (pokemonName: PokemonNameType): CompanionPartyPokemon | undefined =>
     partyList()[PokemonHelper.getPokemonByName(pokemonName).id];

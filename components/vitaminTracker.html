@@ -124,17 +124,16 @@
                         </tr>
                     </tbody>
                     <!-- /ko -->
-                    <!-- ko with: VitaminTracker.getSortedVitaminList -->
-                    <tbody data-bind="foreach: $data">
+                    <tbody data-bind="foreach: VitaminTracker.getSortedVitaminList">
                         <tr>
-                            <td class="text-center" data-bind="text: $data.id"></td>
+                            <td class="text-center" data-bind="text: pokemon.id"></td>
                             <td>
-                                <knockout data-bind="text: $data.name"></knockout>
-                                <knockout data-bind="if: Companion.isEventDiscordClientPokemon($data.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
+                                <knockout data-bind="text: pokemon.name"></knockout>
+                                <knockout data-bind="if: Companion.isEventDiscordClientPokemon(pokemon.name)"><sup class="text-muted" title="Event/Discord/Client">E</sup></knockout>
                             </td>
-                            <td class="text-center" data-bind="text: $data.type.map(t => PokemonType[t]).join(' / ')"></td>
-                            <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[$data.nativeRegion])"></td>
-                            <td class="text-center" data-bind="text: $data.attack"></td>
+                            <td class="text-center" data-bind="text: pokemon.type.map(t => PokemonType[t]).join(' / ')"></td>
+                            <td class="text-center" data-bind="text: GameConstants.camelCaseToString(GameConstants.Region[pokemon.nativeRegion])"></td>
+                            <td class="text-center" data-bind="text: pokemon.attack"></td>
                             <td class="text-center" data-bind="text: $data.baseAttackBonus.toFixed(2).toLocaleString()"></td>
                             <td class="text-center" data-bind="text: $data.baseEggSteps.toLocaleString()"></td>
                             <td class="text-center bg-vitamin-0" data-bind="html: $data.vitaminText[0]"></td>
@@ -145,7 +144,6 @@
                             <td class="text-center" data-bind="text: $data.breedingEfficiency.toFixed(2).toLocaleString()"></td>
                         </tr>
                     </tbody>
-                    <!-- /ko -->
                 </table>
             </div>
         </div>
