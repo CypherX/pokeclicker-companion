@@ -9,7 +9,7 @@
         <meta http-equiv="Expires" content="0">-->
         <title>PokéClicker Companion</title>
         <link id="theme-stylesheet" href="./styles/bootstrap.min.css" rel="stylesheet">
-        <link href="./styles/styles-1792360344066.css" rel="stylesheet">
+        <link href="./styles/styles-1792375917634.css" rel="stylesheet">
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
@@ -256,7 +256,7 @@
         <div class="flex-grow-1" style="overflow: auto;" data-bind="foreach: $data">
             <div class="card mb-3">
                 <div class="card-header bg-dark text-white rounded-0 sticky-top"
-                    data-bind="text: `${$data.regionName} (${Companion.getMissingRegionPokemonCount($data.region)().toLocaleString()})`"></div>
+                    data-bind="text: `${$data.regionName} (${$data.count.toLocaleString()})`"></div>
                 <div class="card-body p-0">
                     <table class="table table-bordered table-striped table-hover mb-0" style="font-size: 0.9rem;">
                         <thead>
@@ -1716,36 +1716,12 @@
                             <div class="col-auto">
                                 <div class="input-group">
                                     <div class="input-group-text">Click Damage/second</div>
-                                    <label class="input-group-text" data-bind="text: BattleCalculator.calcClickAttack().toLocaleString()">0</label>
+                                    <label class="input-group-text" data-bind="text: BattleCalculator.configClickAttack().toLocaleString()">0</label>
                                 </div>
                             </div>
                         </div>
                         <hr class="my-2" />
-                        <div class="row justify-content-center mt-1">
-                            <!-- ko foreach: Object.values(GameConstants.FluteItemType) -->
-                            <div class="col-auto" data-bind="tooltip: {
-                                html: true,
-                                title: `${ItemList[$data].description}<br />${ItemList[$data].gemTypes.join(', ')}`,
-                                placement: 'bottom',
-                                trigger: 'hover',
-                            }">
-                                <div class="form-check form-check-inline form-switch me-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" data-bind="checkedValue: $data, checked: BattleCalculator.settings.activeFlutes,
-                                        attr: { id: `BattleCalculator_${$data}` }">
-                                    <label class="form-check-label" data-bind="text: GameConstants.humanifyString($data), attr: { for: `BattleCalculator_${$data}` }"></label>
-                                </div>
-                            </div>
-                            <!-- /ko -->
-                                <div class="col-auto">
-                                <div class="form-check form-check-inline form-switch me-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculator_AllFlutes" data-bind="checked: BattleCalculator.settings.allFlutesToggle">
-                                    <label class="form-check-label" for="BattleCalculator_AllFlutes">All</label>
-                                </div>
-                                </div>
-                        </div>
-                        <div class="text-muted small text-center mt-1">Active flutes provide a +0.5% typed damage bonus for the Gem types they consume.</div>
-                        <hr class="my-1" />
-                        <div class="text-muted small text-center">Damage calculations include all Pokémon in your party at the current max level. Being in the hatchery or not max level will not affect these calculations.</div>
+                        <!-- ko template: { name: 'flute-toggles-template', data: { settings: BattleCalculator.settings, idPrefix: 'BattleCalculator' } } --><!-- /ko -->
                         <div data-bind="visible: BattleCalculator.settings.clicksPerSecond() >= 15">
                             <hr class="my-1" />
                             <div class="text-center text-danger small"><strong>Clicks/second Warning</strong> - Due to game calculations and lag, and depending on your progress and device hardware, you will likely not reach the full amount of clicks/second, even with an autoclicker.</div>
@@ -2017,31 +1993,7 @@
                         </div>
                     </div>
                     <hr class="my-2" />
-                    <div class="row justify-content-center mt-1">
-                        <!-- ko foreach: Object.values(GameConstants.FluteItemType) -->
-                        <div class="col-auto" data-bind="tooltip: {
-                            html: true,
-                            title: `${ItemList[$data].description}<br />${ItemList[$data].gemTypes.join(', ')}`,
-                            placement: 'bottom',
-                            trigger: 'hover',
-                        }">
-                            <div class="form-check form-check-inline form-switch me-3">
-                                <input class="form-check-input" type="checkbox" role="switch" data-bind="checkedValue: $data, checked: BattleFrontierSim.settings.activeFlutes,
-                                    attr: { id: `BattleFrontierSim${$data}` }">
-                                <label class="form-check-label" data-bind="text: GameConstants.humanifyString($data), attr: { for: `BattleFrontierSim${$data}` }"></label>
-                            </div>
-                        </div>
-                        <!-- /ko -->
-                        <div class="col-auto">
-                            <div class="form-check form-check-inline form-switch me-3">
-                                <input class="form-check-input" type="checkbox" role="switch" id="BattleFrontierSim_AllFlutes" data-bind="checked: BattleFrontierSim.settings.allFlutesToggle">
-                                <label class="form-check-label" for="BattleFrontierSim_AllFlutes">All</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-muted small text-center mt-1">Active flutes provide a +0.5% typed damage bonus for the Gem types they consume.</div>
-                    <hr class="my-1" />
-                    <div class="text-muted small text-center">Damage calculations include all Pokémon in your party at the current max level. Being in the hatchery or not max level will not affect these calculations.</div>
+                    <!-- ko template: { name: 'flute-toggles-template', data: { settings: BattleFrontierSim.settings, idPrefix: 'BattleFrontierSim' } } --><!-- /ko -->
                     <hr class="my-1" />
                     <div class="text-center mt-3">
                         <button type="button" class="btn btn-primary" data-bind="click: () => BattleFrontierSim.runSimulation(),
@@ -2229,6 +2181,38 @@
         </div>
     </div>
 </div>
+<!-- import end -->
+
+        <!-- import "fluteToggles.html" -->
+<!-- Flute switches for the damage calculation tools. Data: { settings: { activeFlutes, allFlutesToggle }, idPrefix } -->
+<script type="text/html" id="flute-toggles-template">
+    <div class="row justify-content-center mt-1">
+        <!-- ko foreach: Object.values(GameConstants.FluteItemType) -->
+        <div class="col-auto" data-bind="tooltip: {
+            html: true,
+            title: `${ItemList[$data].description}<br />${ItemList[$data].gemTypes.join(', ')}`,
+            placement: 'bottom',
+            trigger: 'hover',
+        }">
+            <div class="form-check form-check-inline form-switch me-3">
+                <input class="form-check-input" type="checkbox" role="switch" data-bind="checkedValue: $data, checked: $parent.settings.activeFlutes,
+                    attr: { id: `${$parent.idPrefix}_${$data}` }">
+                <label class="form-check-label" data-bind="text: GameConstants.humanifyString($data), attr: { for: `${$parent.idPrefix}_${$data}` }"></label>
+            </div>
+        </div>
+        <!-- /ko -->
+        <div class="col-auto">
+            <div class="form-check form-check-inline form-switch me-3">
+                <input class="form-check-input" type="checkbox" role="switch" data-bind="checked: settings.allFlutesToggle, attr: { id: `${idPrefix}_AllFlutes` }">
+                <label class="form-check-label" data-bind="attr: { for: `${idPrefix}_AllFlutes` }">All</label>
+            </div>
+        </div>
+    </div>
+    <div class="text-muted small text-center mt-1">Active flutes provide a +0.5% typed damage bonus for the Gem types they consume.</div>
+    <hr class="my-1" />
+    <div class="text-muted small text-center">Damage calculations include all Pokémon in your party at the current max level. Being in the hatchery or not max level will not affect these calculations.</div>
+</script>
+
 <!-- import end -->
 
     </div>
@@ -2492,7 +2476,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1792360344066.js"></script>
+        <script src="./bundle-1792375917634.js"></script>
     </body>
 </html>
 
