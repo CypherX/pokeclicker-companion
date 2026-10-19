@@ -106,7 +106,7 @@ interface TypeBucket {
     attack: number;
 }
 
-export const calcClickAttack = (region = 0, subRegion = 0): number => {
+const calcClickAttack = (region = 0, subRegion = 0): number => {
     const clicksPerSecond = +settings.clicksPerSecond();
     if (clicksPerSecond <= 0) return 0;
 
@@ -130,6 +130,25 @@ const resetBattleSettings = () => {
     App.game.oakItems.itemList[OakItemType.Rocky_Helmet].isActiveKO(false);
     deactivateAllFlutes();
 };
+
+/**
+ * Click damage per second shown in the configuration. The settings are only applied to the game while
+ * calculating, so this applies them itself, and depends on the settings rather than the game's state.
+ */
+export const configClickAttack = ko.pureComputed(() => {
+    SaveData.isDamageLoaded();
+    settings.clicksPerSecond();
+    settings.xClickEnabled();
+    settings.rockyHelmetEnabled();
+    settings.activeFlutes();
+
+    return ko.ignoreDependencies(() => {
+        applyBattleSettings();
+        const clickAttack = calcClickAttack();
+        resetBattleSettings();
+        return clickAttack;
+    });
+});
 
 export const calcBattleData = (): void => {
     const start = performance.now();
@@ -417,9 +436,6 @@ export const hasVisibleTempBattles = ko.pureComputed(() => {
 /* ------------------------------------------------------------------ */
 /* Settings                                                           */
 /* ------------------------------------------------------------------ */
-
-// Applied immediately so the click attack shown in the settings reflects the selected flutes
-settings.activeFlutes.subscribe(() => setActiveFlutes(settings.activeFlutes()));
 
 bindAllFlutesToggle(settings.allFlutesToggle, settings.activeFlutes);
 
