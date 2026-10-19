@@ -1,23 +1,18 @@
 const gulp = require('gulp');
 const replace = require('gulp-replace');
-const browserify = require('browserify');
+const esbuild = require('esbuild');
 const browserSync = require('browser-sync');
 const htmlImport = require('gulp-html-imports');
 const del = require('del');
-const source = require('vinyl-source-stream');
 const fs = require('fs');
-const buffer = require("vinyl-buffer");
-const terser = require("gulp-terser");
+const { spawn } = require('child_process');
 const gulpIf = require('gulp-if');
 const rename = require('gulp-rename');
 
 const srcs = {
     buildArtefacts: 'build/**/*',
-    //scripts: ['src/scripts/**/*.ts', 'src/modules/**/*.ts'],
-    //html: ['src/*.html', 'src/templates/*.html', 'src/components/*.html'],
-    //ejsTemplates: ['src/templates/*.ejs'],
     html: ['*.html', 'components/*.html'],
-    scripts: 'scripts/**/*.js',
+    scripts: 'src/**/*.ts',
     styles: 'styles/**/*.css',
     assets: 'assets/**/*',
     libs: 'libs/*.js',
@@ -34,21 +29,21 @@ const dests = {
 
 const timestamp = new Date().getTime();
 
-gulp.task('copy', (done) => {
-    gulp.src('./package.json').pipe(gulp.dest(`${dests.base}/`));
+// Source maps are only emitted for local development builds, not the published website
+let sourcemap = true;
 
-    gulp.src(srcs.libs)
-        .pipe(gulp.dest(dests.libs));
-
-    done();
-});
+// Tasks return their streams so gulp waits for files to be written before the next task runs
+gulp.task('copy-package', () => gulp.src('./package.json').pipe(gulp.dest(`${dests.base}/`)));
+gulp.task('copy-libs', () => gulp.src(srcs.libs).pipe(gulp.dest(dests.libs)));
+// In series: creating build/ from two streams at once can fail on Windows
+gulp.task('copy', gulp.series('copy-package', 'copy-libs'));
 
 gulp.task('assets', () => gulp.src(srcs.assets)
         .pipe(gulp.dest(dests.assets))
         .pipe(browserSync.reload({stream: true})));
 
-gulp.task('html_imports', (done) => {
-    gulp.src('./index.html')
+gulp.task('html_imports', () => {
+    return gulp.src('./index.html')
       .pipe(htmlImport({
         componentsPath: './components/',
         nestedIncludes: true,
@@ -56,33 +51,27 @@ gulp.task('html_imports', (done) => {
       .pipe(replace('{timestamp}', timestamp))
       .pipe(gulp.dest(dests.base))
       .pipe(browserSync.reload({stream: true}));
-    done();
 });
 
-gulp.task('scripts', () =>  
-    browserify('scripts/main.js')
-        .bundle()
-        .pipe(source(`bundle-${timestamp}.js`))
-        .pipe(buffer())
-        .pipe(terser())
-        .pipe(gulp.dest(dests.base))
-        .pipe(browserSync.reload({stream: true})));
+gulp.task('scripts', async () => {
+    await esbuild.build({
+        entryPoints: ['src/main.ts'],
+        outfile: `${dests.base}/bundle-${timestamp}.js`,
+        bundle: true,
+        format: 'iife',
+        target: 'es2020',
+        minify: true,
+        sourcemap,
+        logLevel: 'warning',
+    });
+    browserSync.reload();
+});
 
-/*gulp.task('pokeclicker', (done) => {
-    gulp.src([
-        'pokeclicker/docs/scripts/modules.min.js',
-        'pokeclicker/docs/scripts/script.min.js',
-    ])
-    .pipe(gulp.dest('build/pokeclicker/scripts'));
-
-    gulp.src([
-        'pokeclicker/docs/libs/jquery.min.js',
-        'pokeclicker/docs/libs/knockout-latest.js',
-    ])
-    .pipe(gulp.dest('build/pokeclicker/libs'));
-
-    done();
-});*/
+// esbuild strips types without checking them, so type checking is a separate step
+gulp.task('typecheck', (done) => {
+    spawn('npm', ['run', 'typecheck'], { stdio: 'inherit', shell: true })
+        .on('close', (code) => done(code ? new Error('Type check failed') : undefined));
+});
 
 gulp.task('pokeclicker-scripts', () => {
     return gulp.src([
@@ -147,8 +136,13 @@ gulp.task('cname', (done) => {
     fs.writeFile(`${dests.githubPages}CNAME`, 'companion.pokeclicker.com', done);
 });
 
+gulp.task('noSourcemaps', (done) => {
+    sourcemap = false;
+    done();
+});
+
 gulp.task('website', done => {
-    gulp.series('clean', 'build', 'cleanWebsite', 'copyWebsite', 'cname')(done);
+    gulp.series('typecheck', 'noSourcemaps', 'clean', 'build', 'cleanWebsite', 'copyWebsite', 'cname')(done);
 });
 
 gulp.task('default', done => {

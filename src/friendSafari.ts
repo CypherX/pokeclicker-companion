@@ -1,4 +1,6 @@
-const allSafariPokemon = ko.pureComputed(() => {
+import * as SaveData from './save';
+
+const allSafariPokemon = ko.pureComputed((): PokemonNameType[] => {
     // List isn't needed until a save is loaded
     if (!SaveData.isLoaded()) {
         return [];
@@ -10,25 +12,32 @@ const allSafariPokemon = ko.pureComputed(() => {
         .map((p) => p.name);
 });
 
-const getRotation = ko.pureComputed(() => {
+interface SafariDay {
+    date: Date;
+    pokemon: PokemonNameType[];
+}
+
+/** Mirrors the game's Friend Safari rotation, which is seeded by the player's trainer id */
+export const getRotation = ko.pureComputed((): SafariDay[] => {
     if (!SaveData.isLoaded()) {
         return [];
     }
 
     const rotationSize = GameConstants.FRIEND_SAFARI_POKEMON;
-    const trainerId = SaveData.file().player.trainerId || '000000';
+    const trainerId = SaveData.current().player.trainerId || '000000';
     SeededRand.seed(+trainerId);
     const shuffledPokemon = new Array(rotationSize).fill(SeededRand.shuffleArray(allSafariPokemon())).flat();
 
     const batchCount = Math.ceil(shuffledPokemon.length / rotationSize);
     const date = new Date();
-    let startIndex = (Math.floor((date.getTime() - date.getTimezoneOffset() * 60 * 1000) / (24 * 60 * 60 * 1000)) % batchCount) * rotationSize;
+    const dayNumber = Math.floor((date.getTime() - date.getTimezoneOffset() * 60 * 1000) / (24 * 60 * 60 * 1000));
+    let startIndex = (dayNumber % batchCount) * rotationSize;
 
-    const data = [];
+    const data: SafariDay[] = [];
     for (let i = 0; i < Math.ceil(allSafariPokemon().length / rotationSize); i++) {
         data.push({
             date: new Date(date),
-            pokemon: shuffledPokemon.slice(startIndex, startIndex + rotationSize)
+            pokemon: shuffledPokemon.slice(startIndex, startIndex + rotationSize),
         });
         startIndex += rotationSize;
         if (startIndex >= shuffledPokemon.length) {
@@ -40,14 +49,6 @@ const getRotation = ko.pureComputed(() => {
     return data;
 });
 
-const isInRotation = (pokemonName) => {
-    return allSafariPokemon().includes(pokemonName);
-};
+export const isInRotation = (pokemonName: PokemonNameType): boolean => allSafariPokemon().includes(pokemonName);
 
-const pokemonCount = () => allSafariPokemon().length;
-
-module.exports = {
-    getRotation,
-    isInRotation,
-    pokemonCount,
-};
+export const pokemonCount = (): number => allSafariPokemon().length;

@@ -99,36 +99,12 @@
                             <div class="col-auto">
                                 <div class="input-group">
                                     <div class="input-group-text">Click Damage/second</div>
-                                    <label class="input-group-text" data-bind="text: BattleCalculator.calcClickAttack().toLocaleString()">0</label>
+                                    <label class="input-group-text" data-bind="text: BattleCalculator.configClickAttack().toLocaleString()">0</label>
                                 </div>
                             </div>
                         </div>
                         <hr class="my-2" />
-                        <div class="row justify-content-center mt-1">
-                            <!-- ko foreach: Object.values(GameConstants.FluteItemType) -->
-                            <div class="col-auto" data-bind="tooltip: {
-                                html: true,
-                                title: `${ItemList[$data].description}<br />${ItemList[$data].gemTypes.join(', ')}`,
-                                placement: 'bottom',
-                                trigger: 'hover',
-                            }">
-                                <div class="form-check form-check-inline form-switch me-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" data-bind="checkedValue: $data, checked: BattleCalculator.settings.activeFlutes,
-                                        attr: { id: `BattleCalculator_${$data}` }">
-                                    <label class="form-check-label" data-bind="text: GameConstants.humanifyString($data), attr: { for: `BattleCalculator_${$data}` }"></label>
-                                </div>
-                            </div>
-                            <!-- /ko -->
-                                <div class="col-auto">
-                                <div class="form-check form-check-inline form-switch me-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="BattleCalculator_AllFlutes" data-bind="checked: BattleCalculator.settings.allFlutesToggle">
-                                    <label class="form-check-label" for="BattleCalculator_AllFlutes">All</label>
-                                </div>
-                                </div>
-                        </div>
-                        <div class="text-muted small text-center mt-1">Active flutes provide a +0.5% typed damage bonus for the Gem types they consume.</div>
-                        <hr class="my-1" />
-                        <div class="text-muted small text-center">Damage calculations include all Pokémon in your party at the current max level. Being in the hatchery or not max level will not affect these calculations.</div>
+                        <!-- ko template: { name: 'flute-toggles-template', data: { settings: BattleCalculator.settings, idPrefix: 'BattleCalculator' } } --><!-- /ko -->
                         <div data-bind="visible: BattleCalculator.settings.clicksPerSecond() >= 15">
                             <hr class="my-1" />
                             <div class="text-center text-danger small"><strong>Clicks/second Warning</strong> - Due to game calculations and lag, and depending on your progress and device hardware, you will likely not reach the full amount of clicks/second, even with an autoclicker.</div>
@@ -209,15 +185,16 @@
                             <td class="text-center" data-bind="text: $data.isCompleted() ? 'Yes' : 'No',
                                 class: $data.isCompleted() ? 'text-success' : 'text-danger'"></td>
                             <td class="text-center">
-                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bind="attr: { 'data-bs-target': `#gym-collapse${$index()}` }"></button>
+                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0" type="button"
+                                    data-bind="click: () => expanded(!expanded()), css: { collapsed: !expanded() }, attr: { 'aria-expanded': String(expanded()) }"></button>
                             </td>
                         </tr>
-                        <tr class="collapse" data-bind="attr: { id: `gym-collapse${$index()}` }, css: {
+                        <!-- ko if: expanded -->
+                        <tr class="details-row" data-bind="css: {
                             'state-locked': !isUnlocked(),
                             'state-completed': isCompleted(),
                             'state-future': parent.region > player.highestRegion()
-                        }" style="transition: none !important;">
+                        }">
                             <td data-bind="attr: { colspan: BattleCalculator.settings.weather() === -1 ? 10 : 9 }">
                                 <table class="table table-sm mb-0">
                                     <thead>
@@ -247,6 +224,7 @@
                                 </table>
                             </td>
                         </tr>
+                        <!-- /ko -->
                     </tbody>
                     <tbody data-bind="visible: !BattleCalculator.hasVisibleGyms()">
                         <tr>
@@ -302,15 +280,16 @@
                             <td class="text-center" data-bind="text: $data.optionalArgs.resetDaily ? 'Resets Daily' : $data.isCompleted() ? 'Yes' : 'No',
                                 class: $data.optionalArgs.resetDaily ? 'text-body small' : $data.isCompleted() ? 'text-success' : 'text-danger'"></td>
                             <td class="text-center">
-                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0 collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bind="attr: { 'data-bs-target': `#tb-collapse${$index()}` }"></button>
+                                <button class="btn btn-secondary btn-sm custom-collapse dropdown-toggle px-1 py-0" type="button"
+                                    data-bind="click: () => expanded(!expanded()), css: { collapsed: !expanded() }, attr: { 'aria-expanded': String(expanded()) }"></button>
                             </td>
                         </tr>
-                        <tr class="collapse" data-bind="attr: { id: `tb-collapse${$index()}` }, css: {
+                        <!-- ko if: expanded -->
+                        <tr class="details-row" data-bind="css: {
                             'state-locked': !isUnlocked(),
                             'state-completed': isCompleted(),
                             'state-future': getTown().region > player.highestRegion()
-                        }" style="transition: none !important;">
+                        }">
                             <td data-bind="attr: { colspan: BattleCalculator.settings.weather() === -1 ? 9 : 8 }">
                                 <table class="table table-sm mb-0">
                                     <thead>
@@ -340,6 +319,7 @@
                                 </table>
                             </td>
                         </tr>
+                        <!-- /ko -->
                     </tbody>
                     <tbody data-bind="visible: !BattleCalculator.hasVisibleTempBattles()">
                         <tr>
