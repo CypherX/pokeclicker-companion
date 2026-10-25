@@ -421,8 +421,8 @@ export const getGMaxOrder = ko.pureComputed(() => {
 
 interface TypeDamageCell {
     damage: number;
-    /** Heatmap hue: 0 (red, lowest damage) to 120 (green, highest damage) */
-    hue?: number;
+    /** Position on the heatmap: 0 (lowest damage) to 1 (highest damage) */
+    percent?: number;
 }
 
 interface TypeDamageDistribution {
@@ -465,16 +465,75 @@ export const calculateTypeDamageDistribution = (): void => {
         }
     }
 
-    // Map each value onto a hue between red (min) and green (max)
+    // Place each value between min and max, the theme picks the color when rendering
     for (const row of Object.values(distribution)) {
         for (const cell of Object.values(row)) {
-            const percent = (cell.damage - min) / (max - min);
-            cell.hue = percent * 120;
+            cell.percent = max > min ? (cell.damage - min) / (max - min) : 1;
         }
     }
 
     typeDamageDistribution({ distribution, max, min });
 };
+
+interface TypeDamageTheme {
+    label: string;
+    /** Colors from lowest to highest damage, omitted for the red to green hue ramp */
+    stops?: string[];
+    /** Opacity over the black table, kept low enough for 4.5:1 text contrast on the brightest stop */
+    alpha?: number;
+}
+
+/** Heatmap colors, the palettes stay readable with color blindness */
+const typeDamageThemes: Record<string, TypeDamageTheme> = {
+    viridis: {
+        label: 'Viridis',
+        stops: ['#440154', '#472d7b', '#3b528b', '#2c728e', '#21918c', '#28ae80', '#5ec962', '#addc30', '#fde725'],
+        alpha: 0.4,
+    },
+    cividis: {
+        label: 'Cividis',
+        stops: ['#00224e', '#123570', '#3b496c', '#575d6d', '#707173', '#8a8779', '#a69d75', '#c4b56c', '#e4cf5b', '#fee838'],
+        alpha: 0.4,
+    },
+    redGreen: { label: 'Red–Green' },
+    redBlue: {
+        label: 'Red–Blue',
+        stops: ['#b2182b', '#d6604d', '#f4a582', '#fddbc7', '#f7f7f7', '#d1e5f0', '#92c5de', '#4393c3', '#2166ac'],
+        alpha: 0.4,
+    },
+    grayscale: {
+        label: 'Grayscale',
+        stops: ['#000000', '#ffffff'],
+        alpha: 0.35,
+    },
+};
+
+export const typeDamageThemeOptions = Object.entries(typeDamageThemes).map(([value, { label }]) => ({ value, label }));
+
+const hexToRgb = (hex: string): number[] => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+/** The heatmap color for a cell, in the selected theme */
+export const typeDamageColor = (percent: number): string => {
+    const theme = typeDamageThemes[Settings.typeDamage.colorTheme()] ?? typeDamageThemes.viridis;
+    if (!theme.stops) {
+        return `hsla(${percent * 120}, 70%, 40%, 0.4)`;
+    }
+
+    // Blend the two stops either side of the value
+    const position = percent * (theme.stops.length - 1);
+    const index = Math.min(Math.floor(position), theme.stops.length - 2);
+    const from = hexToRgb(theme.stops[index]);
+    const to = hexToRgb(theme.stops[index + 1]);
+    const [r, g, b] = from.map((c, i) => Math.round(c + (to[i] - c) * (position - index)));
+    return `rgba(${r}, ${g}, ${b}, ${theme.alpha})`;
+};
+
+/** Gradient for the legend, lowest damage on the left */
+export const typeDamageLegendGradient = ko.pureComputed(() => {
+    const steps = 10;
+    const colors = Array.from({ length: steps + 1 }, (_, i) => typeDamageColor(i / steps));
+    return `linear-gradient(to right, ${colors.join(', ')})`;
+});
 
 export const getPlayerBerryCount = (berryType: BerryType): number => {
     if (!SaveData.isLoaded()) {

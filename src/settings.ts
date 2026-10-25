@@ -40,6 +40,11 @@ export const battleCalculator = {
     runCalcImmediately: storedFlag('runBattleCalcImmediately', true),
 };
 
+export const typeDamage = {
+    /** A key of the type damage heatmap color themes */
+    colorTheme: storedString('typeDamageColorTheme', 'viridis'),
+};
+
 /** Opens the default tab, unless the URL links to a tab */
 export const initialize = (): void => {
     const tabElement = document.getElementById(defaultTab());
