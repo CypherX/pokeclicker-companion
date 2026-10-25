@@ -1,5 +1,6 @@
 import { bindAllFlutesToggle, deactivateAllFlutes, setActiveFlutes } from './flutes';
 import * as SaveData from './save';
+import { calcDamageByType, groupAttackByType, TYPE_KEY_COUNT, unpackTypeKey } from './shared/typeDamage';
 import { clampNumberInput, sleep } from './util';
 
 interface AttemptResult {
@@ -108,9 +109,6 @@ export const runSimulation = async (): Promise<void> => {
 /* Simulation                                                         */
 /* ------------------------------------------------------------------ */
 
-/** Packs a type pair into a small integer key: (type1 + 1) << 5 | (type2 + 1) */
-const typeKey = (type1: PokemonType, type2: PokemonType) => ((type1 + 1) << 5) | (type2 + 1);
-
 // ref: PokemonFactory.routeHealth
 const calcHealth = (stage: number): number => {
     const routeNum = MapHelper.normalizeRoute(stage + 10, GameConstants.Region.none);
@@ -120,47 +118,21 @@ const calcHealth = (stage: number): number => {
 const calcGemReward = (stage: number): number => Math.ceil(stage / 80);
 
 /**
+ * Packs an enemy's type pair into a small integer key: (type1 + 1) << 5 | (type2 + 1). The simulation
+ * reads the types back with bit operations, which is faster there than the shared typeKey's division.
+ */
+const enemyTypeKey = (type1: PokemonType, type2: PokemonType) => ((type1 + 1) << 5) | (type2 + 1);
+
+/**
  * Party damage against every enemy type pair, indexed by typeKey. Gives the same values as the
  * game's Battle Frontier, which calls App.game.party.calculatePokemonAttack for each enemy.
- *
- * Calling that for all 342 type pairs runs the game's per-pokémon attack formula for the whole
- * party each time. Enemy types only affect that formula through TypeHelper.getAttackModifier, so
- * instead each pokémon's attack is calculated once, against a typeless enemy, and summed by the
- * pokémon's types. Each type pair's damage is then those sums times their type modifiers.
  */
 const calcPartyDamageByType = (): Float64Array => {
     const party = App.game.party;
-
-    const attackByPartyTypes = new Map<number, { type1: PokemonType; type2: PokemonType; attack: number }>();
-    for (const pokemon of party.caughtPokemon) {
-        const attack = party.calculateOnePokemonAttack(pokemon, PokemonType.None, PokemonType.None, GameConstants.Region.none, true, false, false, WeatherType.Clear);
-        if (attack === 0) {
-            continue;
-        }
-
-        const { type1, type2 } = PokemonHelper.getPokemonByName(pokemon.name);
-        const key = typeKey(type1, type2);
-        const group = attackByPartyTypes.get(key);
-        if (group) {
-            group.attack += attack;
-        } else {
-            attackByPartyTypes.set(key, { type1, type2, attack });
-        }
-    }
-
-    const groups = [...attackByPartyTypes.values()];
-    const bonus = party.multiplier.getBonus('pokemonAttack');
-    const damage = new Float64Array(1 << 10);
-    for (let enemyType1 = 0; enemyType1 <= 17; enemyType1++) {
-        for (let enemyType2 = -1; enemyType2 <= 17; enemyType2++) {
-            let attack = 0;
-            for (const group of groups) {
-                attack += group.attack * TypeHelper.getAttackModifier(group.type1, group.type2, enemyType1, enemyType2);
-            }
-            damage[typeKey(enemyType1, enemyType2)] = Math.round(attack * bonus);
-        }
-    }
-    return damage;
+    const groups = groupAttackByType(party.caughtPokemon, (pokemon) => party.calculateOnePokemonAttack(
+        pokemon, PokemonType.None, PokemonType.None, GameConstants.Region.none, true, false, false, WeatherType.Clear,
+    ));
+    return calcDamageByType(groups);
 };
 
 /** Battle Frontier enemies by highest region: base pokémon ids, and their forms by base id */
@@ -188,7 +160,12 @@ const simulate = async (attempts = 1, highestStage = 1, targetStage = 0): Promis
     const highestRegion = player.highestRegion();
     const gemTypes = GameHelper.enumNumbers(PokemonType).filter(type => type !== PokemonType.None);
 
-    const damageCache = calcPartyDamageByType();
+    // Party damage, indexed by enemyTypeKey
+    const damageByType = calcPartyDamageByType();
+    const damageCache = new Float64Array(1 << 10);
+    for (let key = 0; key < TYPE_KEY_COUNT; key++) {
+        damageCache[enemyTypeKey(...unpackTypeKey(key))] = damageByType[key];
+    }
 
     // Precalculate stage values, indexed by stage. Stages past the cache are calculated as needed,
     // inline in the loop: helper functions there make Firefox ~30% slower.
@@ -216,7 +193,7 @@ const simulate = async (attempts = 1, highestStage = 1, targetStage = 0): Promis
     const formCount = new Uint32Array(speciesCount);
     const typeKeys: number[] = [];
     pool.baseIds.forEach((id, species) => {
-        const keys = pool.byBaseId.get(id)!.map(p => typeKey(p.type[0], p.type[1] ?? PokemonType.None));
+        const keys = pool.byBaseId.get(id)!.map(p => enemyTypeKey(p.type[0], p.type[1] ?? PokemonType.None));
         speciesTypeKey[species] = keys.every(key => key === keys[0]) ? keys[0] : MIXED_TYPES;
         formStart[species] = typeKeys.length;
         formCount[species] = keys.length;

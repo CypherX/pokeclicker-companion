@@ -1,7 +1,9 @@
 import { DungeonListOverride, GymListOverride, RouteListOverride } from './data';
+import { deactivateAllFlutes, setActiveFlutes } from './flutes';
 import { partyList, type CompanionPartyPokemon } from './party';
 import * as SaveData from './save';
 import * as Settings from './settings';
+import { calcDamageByType, groupAttackByType, inRegion, typeKey } from './shared/typeDamage';
 
 const { Region, ShadowStatus, Pokerus } = GameConstants;
 
@@ -432,25 +434,43 @@ interface TypeDamageDistribution {
 }
 
 export const typeDamageDistribution = ko.observable<TypeDamageDistribution>();
-export const includeXAttack = ko.observable(true);
-export const includeYellowFlute = ko.observable(true);
-export const includeGems = ko.observable(true);
-export const typeDamageWeather = ko.observable<WeatherType>(WeatherType.Clear);
-export const typeDamageRegion = ko.observable<GameConstants.Region>(Region.none);
+export const typeDamageSettings = {
+    xAttackEnabled: ko.observable(true),
+    yellowFluteEnabled: ko.observable(true),
+    gemsEnabled: ko.observable(true),
+    weather: ko.observable<WeatherType>(WeatherType.Clear),
+    region: ko.observable<GameConstants.Region>(Region.none),
+    // Stored in the browser: colorTheme
+    ...Settings.typeDamage,
+};
 
 /** Party damage against every type combination */
 export const calculateTypeDamageDistribution = (): void => {
     SaveData.loadAttackData();
 
-    player.effectList['xAttack'](includeXAttack() ? 1 : 0);
-    App.game.challenges.list.disableGems.active(!includeGems());
-    if (includeYellowFlute() != FluteEffectRunner.isActive('Yellow_Flute')()) {
-        FluteEffectRunner.toggleEffect('Yellow_Flute');
-    }
+    const settings = typeDamageSettings;
+    const disableGems = App.game.challenges.list.disableGems;
+    player.effectList['xAttack'](settings.xAttackEnabled() ? 1 : 0);
+    setActiveFlutes(settings.yellowFluteEnabled() ? [GameConstants.FluteItemType.Yellow_Flute] : []);
+    disableGems.active(!settings.gemsEnabled());
 
-    const ignoreRegionMultiplier = typeDamageRegion() == Region.none;
+    // Only the selected region matters, not where the player is in their save
+    const party = App.game.party;
+    const region = settings.region();
+    const weather = settings.weather();
+    const ignoreRegionMultiplier = region == Region.none;
+    const typeGroups = inRegion(region, () => groupAttackByType(party.caughtPokemon, (pokemon) => party.calculateOnePokemonAttack(
+        pokemon, PokemonType.None, PokemonType.None, region, ignoreRegionMultiplier, true, false, weather, true, true,
+    )));
+    const damageByType = calcDamageByType(typeGroups);
+
+    // Reset the game's state, which the other calculators share: battle items and flutes are off
+    // between calculations (see SaveData.loadAttackData), and gems are as the save has them
+    player.effectList['xAttack'](0);
+    deactivateAllFlutes();
+    disableGems.active(!!SaveData.current().save.challenges.list.disableGems);
+
     const types = GameHelper.enumNumbers(PokemonType).filter(t => t != PokemonType.None);
-
     const distribution: TypeDamageDistribution['distribution'] = {};
     let max = 0;
     let min = Number.MAX_SAFE_INTEGER;
@@ -458,7 +478,7 @@ export const calculateTypeDamageDistribution = (): void => {
     for (const type1 of types) {
         distribution[PokemonType[type1]] = {};
         for (const type2 of types) {
-            const damage = App.game.party.calculatePokemonAttack(type1, type2, ignoreRegionMultiplier, typeDamageRegion(), true, false, typeDamageWeather(), true, true);
+            const damage = damageByType[typeKey(type1, type2)];
             distribution[PokemonType[type1]][PokemonType[type2]] = { damage };
             max = Math.max(max, damage);
             min = Math.min(min, damage);
@@ -514,7 +534,7 @@ const hexToRgb = (hex: string): number[] => [1, 3, 5].map((i) => parseInt(hex.sl
 
 /** The heatmap color for a cell, in the selected theme */
 export const typeDamageColor = (percent: number): string => {
-    const theme = typeDamageThemes[Settings.typeDamage.colorTheme()] ?? typeDamageThemes.viridis;
+    const theme = typeDamageThemes[typeDamageSettings.colorTheme()] ?? typeDamageThemes.viridis;
     if (!theme.stops) {
         return `hsla(${percent * 120}, 70%, 40%, 0.4)`;
     }
@@ -533,6 +553,24 @@ export const typeDamageLegendGradient = ko.pureComputed(() => {
     const steps = 10;
     const colors = Array.from({ length: steps + 1 }, (_, i) => typeDamageColor(i / steps));
     return `linear-gradient(to right, ${colors.join(', ')})`;
+});
+
+// Start with gems as the save has them, off for the disable gems challenge
+SaveData.file.subscribe((saveFile) => {
+    if (saveFile) {
+        typeDamageSettings.gemsEnabled(!saveFile.save.challenges.list.disableGems);
+    }
+});
+
+// Recalculate when any setting that affects the results changes
+const typeDamageDisplayOnlySettings = new Set(['colorTheme']);
+Object.entries(typeDamageSettings).forEach(([name, setting]) => {
+    if (typeDamageDisplayOnlySettings.has(name)) return;
+    (setting as KnockoutObservable<unknown>).subscribe(() => {
+        if (typeDamageDistribution()) {
+            calculateTypeDamageDistribution();
+        }
+    });
 });
 
 export const getPlayerBerryCount = (berryType: BerryType): number => {
