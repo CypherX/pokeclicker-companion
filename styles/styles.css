@@ -98,7 +98,7 @@ table.custom-borders > tbody > tr > td {
     border-bottom: 0 !important;
 }
 
-table.custom-borders > tbody > tr:not(:first-child):not(.collapse) > td {
+table.custom-borders > tbody > tr:not(:first-child):not(.details-row) > td {
     border-top: 1px solid #444;
 }
 
