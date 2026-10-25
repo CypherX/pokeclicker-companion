@@ -9,7 +9,7 @@
         <meta http-equiv="Expires" content="0">-->
         <title>PokéClicker Companion</title>
         <link id="theme-stylesheet" href="./styles/bootstrap.min.css" rel="stylesheet">
-        <link href="./styles/styles-1792375917634.css" rel="stylesheet">
+        <link href="./styles/styles-1792887879916.css" rel="stylesheet">
 
         <script src="./pokeclicker/libs/jquery.min.js"></script>
         <script src="./pokeclicker/libs/knockout-latest.js"></script>
@@ -704,11 +704,26 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-auto">
+                                <div class="input-group">
+                                    <div class="input-group-text">Heatmap</div>
+                                    <select class="form-select form-select-sm"
+                                        data-bind="options: Companion.typeDamageThemeOptions, optionsText: 'label', optionsValue: 'value', value: Companion.settings.typeDamage.colorTheme">
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <p class="mt-2 small">First calculate will be slower. You must re-calculate after adjusting the above settings.</p>
+                        <p class="mt-2 small">First calculate will be slower. You must re-calculate after adjusting the above settings (colors update instantly).</p>
                     </div>
                     <div class="table-responsive mt-1" data-bind="if: Companion.typeDamageDistribution">
                         <!-- ko let: { types: Object.keys(Companion.typeDamageDistribution().distribution) } -->
+                        <div class="d-flex align-items-center gap-2 small font-monospace mb-1">
+                            <span data-bind="text: Companion.typeDamageDistribution().min.toLocaleString()"></span>
+                            <div style="width: 200px; height: 12px; background-color: #000; border: 1px solid #444;">
+                                <div class="h-100" data-bind="style: { 'background-image': Companion.typeDamageLegendGradient() }"></div>
+                            </div>
+                            <span data-bind="text: Companion.typeDamageDistribution().max.toLocaleString()"></span>
+                        </div>
                         <table id="typeDamageTable" class="table table-column-row-hover table-black-bg table-sticky-header table-sm mb-0" style="font-size: 0.9rem;">
                             <thead>
                                 <tr class="table-dark text-center">
@@ -728,7 +743,7 @@
                                     <th class="table-dark small px-2" style="position: sticky; left: 0; z-index: 99;" data-bind="text: types[$index()]"></th>
                                     <!-- ko foreach: Object.values($data) -->
                                     <td class="font-monospace small px-2" data-bind="text: $data.damage.toLocaleString(), attr: { 'data-raw-damage': $data.damage },
-                                        style: { 'background-color': `hsla(${$data.hue}, 70%, 40%, 0.4)` }"></td>
+                                        style: { 'background-color': Companion.typeDamageColor($data.percent) }"></td>
                                     <!-- /ko -->
                                 </tr>
                             </tbody>
@@ -2476,7 +2491,7 @@
             <span id="pokedexModal"></span>
         </div>
 
-        <script src="./bundle-1792375917634.js"></script>
+        <script src="./bundle-1792887879916.js"></script>
     </body>
 </html>
 
